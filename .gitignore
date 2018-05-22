@@ -1,0 +1,6 @@
+.pkpassrc
+*pyc*
+.pkpassrc
+test/pki/ca
+test/pki/intermediate
+test/scratch/*
