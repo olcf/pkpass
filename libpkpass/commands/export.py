@@ -1,0 +1,45 @@
+import os
+import yaml
+from command import Command
+from libpkpass.identities import IdentityDB
+from libpkpass.passworddb import PasswordDB
+from libpkpass.errors import *
+
+class Export(Command):
+  name='export'
+  description='Export passwords that you have access to and encrypt with aes'
+  selected_args = ['stdin', 'identity', 'certpath', 'cabundle', 'noverify', 'dstpwstore']
+
+
+  def _run_command_execution(self):
+    ####################################################################
+    """ Run function for class.                                      """
+    ####################################################################
+
+    passworddb = PasswordDB()
+    for path, dirs, files in os.walk( self.args['pwstore'] ):
+      for passwordname in files:
+        passwordpath = os.path.join( path, passwordname )
+        passworddb.load_password_data( passwordpath )
+
+    for key, password in passworddb.pwdb.items():
+      myrecipiententry = password.recipients[ self.args['identity'] ]
+      password.recpients = [myrecipiententry]
+      # Decrypt password
+      plaintext_pw = password.decrypt_entry(
+              identity = myidentity,
+              passphrase = self.passphrase )
+      # Encrypt with passphrase
+      sk_encrypt_string( plaintext_pw, key )
+      # Replace derived key and encryption algorithm
+      print(plaintext_pw)
+      # Write out the password entry
+
+
+  def _validate_args(self):
+    ####################################################################
+    """ Ensure arguments are appropriate for this command           """
+    ####################################################################
+    for argument in ['certpath', 'keypath']:
+      if argument not in self.args or self.args[argument] is None:
+        raise CliArgumentError("'%s' is a required argument" % argument)
