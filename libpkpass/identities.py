@@ -1,5 +1,6 @@
 import os
 import libpkpass.crypto as crypto
+from libpkpass.errors import *
 
 class IdentityDB(object):
   ##############################################################################
@@ -25,16 +26,19 @@ class IdentityDB(object):
     ###########################################################################
     """ Helper function to read in (keys|certs) and store them correctly """
     ###########################################################################
-    for f in os.listdir(path):
-      if f.endswith(self.extensions[filetype]):
-        uid = f.split('.')[0]
-        filepath = os.path.join( path, f )
-        try:
-          self.iddb[ uid ]["%s_path" % filetype] = filepath
-        except KeyError as e:
-          identity = { 'uid': f.split('.')[0],
-                       "%s_path" % filetype: filepath }
-          self.iddb[ identity['uid'] ] = identity
+    try:
+      for f in os.listdir(path):
+        if f.endswith(self.extensions[filetype]):
+          uid = f.split('.')[0]
+          filepath = os.path.join( path, f )
+          try:
+            self.iddb[ uid ]["%s_path" % filetype] = filepath
+          except KeyError as e:
+            identity = { 'uid': f.split('.')[0],
+                         "%s_path" % filetype: filepath }
+            self.iddb[ identity['uid'] ] = identity
+    except OSError as e:
+      raise FileOpenError(path, str(e.strerror))
 
 
   def load_certs_from_directory(self, certpath, cabundle):

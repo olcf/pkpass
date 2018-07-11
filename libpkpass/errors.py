@@ -42,3 +42,11 @@ class PasswordIOError( PKPassError ):
 
 class CliArgumentError( PKPassError ):
   pass
+
+class FileOpenError( PKPassError ):
+  def __init__(self, value, reason):
+    self.msg = "File %s found in config, could not be opened due to %s" % (value, reason)
+
+class NullRecipientError( PKPassError ):
+  def __init__(self):
+    self.msg = "There is a blank Recipient in the list, please check for trailing commas"
