@@ -116,12 +116,14 @@ class PasswordEntry(object):
   def read_password_data(self, filename):
     """ Open a password file, load passwords and read metadata               """
   ##############################################################################
-    with open(filename, 'r') as f:
-      password_data = yaml.safe_load(f)
-      self.metadata = password_data['metadata']
-      self.recipients = password_data['recipients']
-    self.validate()
-
+    try:
+      with open(filename, 'r') as f:
+        password_data = yaml.safe_load(f)
+        self.metadata = password_data['metadata']
+        self.recipients = password_data['recipients']
+      self.validate()
+    except (OSError, IOError) as e:
+        raise PasswordIOError("Error Opening %s due to %s" % (filename , e.strerror))
 
   #############################################################################
   def write_password_data(self, filename, overwrite=False):
