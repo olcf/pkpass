@@ -21,29 +21,28 @@ function invalid(){
     exit 1
 }
 
-home=~
-eval home=$home/passdb
+home="$HOME"/passdb
 echo "If not using defaults for the following paths please use full filepath"
 echo "Or relative to home using ~"
 read -rp "Directory for certpath (defaults to ~/passdb/certs): " certpath
 
-certpath=$(default "$certpath" $home/certs)
+certpath=$(default "$certpath" "$home"/certs)
 makeDir "$certpath"
 
 read -rp "Directory for keypath (defaults to ~/passdb/keys): " keypath
 
-keypath=$(default "$keypath" $home/keys)
+keypath=$(default "$keypath" "$home"/keys)
 makeDir "$keypath"
 
 read -rp "Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): " cabundle
 
-cabundle=$(default "$cabundle" $home/cabundles/ca.bundle)
+cabundle=$(default "$cabundle" "$home"/cabundles/ca.bundle)
 makeDir "$(dirname "$cabundle")"
 touch "$cabundle"
 
 read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwstore
 
-pwstore=$(default "$pwstore" $home/passwords)
+pwstore=$(default "$pwstore" "$home"/passwords)
 makeDir "$pwstore"
 
 echo -e "certpath: $certpath 
