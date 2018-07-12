@@ -82,12 +82,12 @@ function pyinstall(){
         fi
         python -m virtualenv "$venv"
         source "$venv"/bin/activate
-        pip install $( echo "$package")
+        pip install $package
         
     elif [[ "$method" == "0" ]]; then
-        sudo python -m pip install $( echo "$package")
+        sudo python -m pip install $package
     elif [[ "$method" == "1" ]]; then
-        python -m pip install $(echo "$package") --user
+        python -m pip install $package --user
     else
         invalid
     fi
