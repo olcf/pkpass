@@ -41,12 +41,12 @@ read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwsto
 pwstore=$(default "$pwstore" $home/passwords)
 makeDir "$pwstore"
 
-/dev/null > pkrc
-#> .pkpassrc
+#/dev/null > pkrc
+/dev/null .pkpassrc
 echo -e "certpath: $certpath 
 keypath: $keypath
 cabundle: $cabundle
-pwstore: $pwstore" >> pkrc
+pwstore: $pwstore" >> .pkpassrc
 
 read -rp "Would you like to install the python requirements as root(0),user(1),or venv(2)?" pinstall
 
