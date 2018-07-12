@@ -103,7 +103,7 @@ class Command(object):
                 config_args = {}
             return config_args
         except IOError as e:
-            raise NoRCFile
+            raise NoRCFileError
 
     def _validate_args(self):
         raise NotImplementedError
