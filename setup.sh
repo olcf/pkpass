@@ -54,6 +54,45 @@ if [[ "$?" == "1" ]]; then
     exit 1
 fi
 
+function pyinstall(){
+    #method can be root(0), user(1), or virtualenv(2)
+    method=$1
+    package=$2
+
+    if [[ "$method" == "2" ]]; then
+        python -c "import virtualenv" 2>/dev/null
+        if [[ "$?" == "1" ]]; then
+            read -rp "virtualenv package not detected would you like to install it? (y/n): " installenv
+            installenv="$(echo "$installenv" | tr '[:upper:]' '[:lower:]')"
+
+            if [[ "$installenv" == "y" ]]; then
+                read -rp "Would you like to install virtualenv as root(0) or user(1)?" vinstall
+                pyinstall "$vinstall" "virtualenv"
+            elif [[ "$installenv" == "n" ]]; then
+                read -rp "how would you like to install the python requirements instead? root(0)/user(1): " preq
+                pyinstall "$preq" "$package"
+                return 0
+            else
+                invalid
+            fi
+        fi 
+        read -rp "What would you like to call the virtualenv? (Default pkpass): " venv
+        if [ -z "$venv" ]; then
+            venv="pkpass"
+        fi
+        python -m virtualenv "$venv"
+        source "$venv"/bin/activate
+        pip install -r requirements.txt
+        
+    elif [[ "$method" == "0" ]]; then
+        sudo python -m pip install $( echo "$package")
+    elif [[ "$method" == "1" ]]; then
+        python -m pip install $(echo "$package") --user
+    else
+        invalid
+    fi
+}
+
 home="$HOME"/passdb
 echo "If not using defaults for the following paths please use full filepath"
 echo "Or relative to home using ~"
