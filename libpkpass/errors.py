@@ -68,3 +68,7 @@ class FileOpenError(PKPassError):
 class NullRecipientError(PKPassError):
     def __init__(self):
         self.msg = "There is a blank Recipient in the list, please check for trailing commas"
+
+class NoRCFile(PKPassError):
+    def __init__(self):
+        self.msg = "No .pkpassrc file found, consider running ./setup.sh"
