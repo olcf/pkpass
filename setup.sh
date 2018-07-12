@@ -82,7 +82,7 @@ function pyinstall(){
         fi
         python -m virtualenv "$venv"
         source "$venv"/bin/activate
-        pip install -r requirements.txt
+        pip install $( echo "$package")
         
     elif [[ "$method" == "0" ]]; then
         sudo python -m pip install $( echo "$package")
