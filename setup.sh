@@ -53,6 +53,7 @@ if [[ "$?" == "1" ]]; then
     echo "python package pip not found, it is required for installation, please install and re-run setup.sh"
     exit 1
 fi
+
 home="$HOME"/passdb
 echo "If not using defaults for the following paths please use full filepath"
 echo "Or relative to home using ~"
@@ -85,6 +86,24 @@ pkcs11-tool -L
 read -rp "Available slots listed above, which would you like to use? (defaults to 0): " cardslot
 
 cardslot="${cardslot:-0}"
+certpath=$(default "$certpath" "$home"/certs)
+makeDir "$certpath"
+
+read -rp "Directory for keypath (defaults to ~/passdb/keys): " keypath
+
+keypath=$(default "$keypath" "$home"/keys)
+makeDir "$keypath"
+
+read -rp "Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): " cabundle
+
+cabundle=$(default "$cabundle" "$home"/cabundles/ca.bundle)
+makeDir "$(dirname "$cabundle")"
+touch "$cabundle"
+
+read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwstore
+
+pwstore=$(default "$pwstore" "$home"/passwords)
+makeDir "$pwstore"
 
 echo -e "certpath: $certpath 
 keypath: $keypath
