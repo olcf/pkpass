@@ -42,7 +42,9 @@ pwstore=$(default "$pwstore" $home/passwords)
 makeDir "$pwstore"
 
 #/dev/null > pkrc
-/dev/null .pkpassrc
+if [[ -f .pkpassrc ]]; then
+    echo "" > .pkpassrc
+fi
 echo -e "certpath: $certpath 
 keypath: $keypath
 cabundle: $cabundle
@@ -62,10 +64,25 @@ case "$pinstall" in
     if [ -z "$venv" ];then
         venv="pkpass"
     fi
+    python -c "import virtualenv"
+    if [ "$?" == "1" ]; then
+        read -rp "virtualenv package not detected would you like to install as root(0) or user(1)?" vinstall
+        if [[ "$vinstall" == "0" ]]; then
+            sudo python -m pip install virtualenv
+        elif [[ "$vinstall" == "1" ]]; then
+            python -m pip install virtualenv --user
+        else
+            echo "Invalid selection, exiting program"
+            exit 1
+        fi
+    fi
     python -m virtualenv "$venv"
     source "$venv"/bin/activate
     pip install -r requirements.txt
     ;;
+*)
+    echo "Invalid selection, exiting program"
+    exit 1
 esac
 
 echo "testing versions of openssl and pkcs15-tool"
