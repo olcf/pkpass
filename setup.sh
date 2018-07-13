@@ -1,11 +1,5 @@
 #!/bin/bash
 
-function makeDir(){
-    if [ ! -d "$1" ]; then
-       mkdir -p "$1"
-    fi
-} 
-
 function default(){
     if [ -z "$1" ]; then
         __resultvar=$2
@@ -24,7 +18,10 @@ function invalid(){
 function pyinstall(){
     #method can be root(0), user(1), or virtualenv(2)
     method=$1
-    package=$2
+    local package=$2
+
+    IFS=' ' 
+    read -r -a package <<< "${package[@]}"
 
     if [[ "$method" == "2" ]]; then
         python -c "import virtualenv" 2>/dev/null
@@ -37,24 +34,24 @@ function pyinstall(){
                 pyinstall "$vinstall" "virtualenv"
             elif [[ "$installenv" == "n" ]]; then
                 read -rp "how would you like to install the python requirements instead? root(0)/user(1): " preq
-                pyinstall "$preq" "$package"
+                pyinstall "$preq" "${package[@]}"
                 return 0
             else
                 invalid
             fi
         fi 
         read -rp "What would you like to call the virtualenv? (Default pkpass): " venv
-        if [ -z "$venv" ]; then
+        if [ -z "${venv}" ]; then
             venv="pkpass"
         fi
         python -m virtualenv "$venv"
         source "$venv"/bin/activate
-        pip install $package
+        pip install "${package[@]}"
         
     elif [[ "$method" == "0" ]]; then
-        sudo python -m pip install $package
+        sudo python -m pip install "${package[@]}"
     elif [[ "$method" == "1" ]]; then
-        python -m pip install $package --user
+        python -m pip install "${package[@]}" --user
     else
         invalid
     fi
@@ -65,24 +62,28 @@ echo "If not using defaults for the following paths please use full filepath"
 echo "Or relative to home using ~"
 read -rp "Directory for certpath (defaults to ~/passdb/certs): " certpath
 
-certpath=$(default "$certpath" "$home"/certs)
-makeDir "$certpath"
+certpath="${certpath:-${home}/certs}"
+certpath="${certpath/#\~/$HOME}" 
+mkdir -p "${certpath}"
 
 read -rp "Directory for keypath (defaults to ~/passdb/keys): " keypath
 
-keypath=$(default "$keypath" "$home"/keys)
-makeDir "$keypath"
+keypath="${keypath:-${home}/keys}"
+keypath="${keypath/#\~/$HOME}"
+mkdir -p "${keypath}"
 
 read -rp "Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): " cabundle
 
-cabundle=$(default "$cabundle" "$home"/cabundles/ca.bundle)
-makeDir "$(dirname "$cabundle")"
-touch "$cabundle"
+cabundle="${cabundle:-${home}/cabundles/ca.bundle}"
+cabundle="${cabundle/#\~/$HOME}"
+mkdir -p "$(dirname "${cabundle}")"
+touch "${cabundle}"
 
 read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwstore
 
-pwstore=$(default "$pwstore" "$home"/passwords)
-makeDir "$pwstore"
+pwstore="${pwstore:-${home}/passwords}"
+pwstore="${pwstore/#\~/$HOME}"
+mkdir -p "${pwstore}"
 
 echo -e "certpath: $certpath 
 keypath: $keypath
