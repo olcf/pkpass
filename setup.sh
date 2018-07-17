@@ -56,7 +56,11 @@ function pyinstall(){
         invalid
     fi
 }
-
+python -c "import pip" 2>/dev/null
+if [[ "$?" == "1" ]]; then
+    echo "python package pip not found, it is required for installation, please install and re-run setup.sh"
+    exit 1
+fi
 home="$HOME"/passdb
 echo "If not using defaults for the following paths please use full filepath"
 echo "Or relative to home using ~"
