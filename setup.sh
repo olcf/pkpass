@@ -56,6 +56,7 @@ function pyinstall(){
         invalid
     fi
 }
+OLD_PATH=$PATH
 python -c "import pip" 2>/dev/null
 if [[ "$?" == "1" ]]; then
     echo "python package pip not found, it is required for installation, please install and re-run setup.sh"
@@ -93,7 +94,7 @@ echo -e "certpath: $certpath
 keypath: $keypath
 cabundle: $cabundle
 pwstore: $pwstore" > .pkpassrc
-
+ 
 read -rp "Would you like to install the python requirements as root(0),user(1),or venv(2)?" pinstall
 
 pyinstall "$pinstall" '-r requirements.txt'
@@ -106,3 +107,10 @@ echo "pkcs15-tool --version: OpenSC-0.18.0, rev: eb60481f, commit-time: 2018-05-
 echo "------YOUR VALUES BELOW THIS LINE -----------"
 openssl version
 pkcs15-tool --version
+
+if [[ "$pinstall" == "2" ]]; then
+    venv="$(ls -tcd */ | head -1)"
+    echo "you may have installed with a virtual environment if so use"
+    echo source "$venv"bin/activate
+fi
+PATH=$OLD_PATH
