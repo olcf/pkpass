@@ -90,10 +90,16 @@ pwstore="${pwstore:-${home}/passwords}"
 pwstore="${pwstore/#\~/$HOME}"
 mkdir -p "${pwstore}"
 
+pkcs11-tool -L
+
+read -rp "Available slots listed above, which would you like to use? (defaults to 0): " cardslot
+cardslot="${cardslot:-0}"
+
 echo -e "certpath: $certpath 
 keypath: $keypath
 cabundle: $cabundle
-pwstore: $pwstore" > .pkpassrc
+pwstore: $pwstore
+default_card: $cardslot" > .pkpassrc
  
 read -rp "Would you like to install the python requirements as root(0),user(1),or venv(2)?" pinstall
 
@@ -109,8 +115,8 @@ openssl version
 pkcs15-tool --version
 
 if [[ "$pinstall" == "2" ]]; then
-    venv="$(ls -tcd */ | head -1)"
+    venv="$(find .. -maxdepth 1 -mindepth 1 -type d -cmin -1 -not -path '*/\.*' | cut -c 4-)"
     echo "you may have installed with a virtual environment if so use"
-    echo source "$venv"bin/activate
+    echo source "$venv"/bin/activate
 fi
 PATH=$OLD_PATH

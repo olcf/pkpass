@@ -8,7 +8,7 @@ from libpkpass.errors import *
 class Create(Command):
   name='create'
   description='Create a new password entry and encrypt it for yourself'
-  selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath', 'keypath', 'cabundle', 'nopassphrase', 'noverify', 'nosign']
+  selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath', 'keypath', 'cabundle', 'nopassphrase', 'noverify', 'nosign', 'default_card']
 
 
   def _run_command_execution(self):
@@ -30,7 +30,8 @@ class Create(Command):
                              distributor = self.args['identity'],
                              recipients = [self.args['identity']],
                              identitydb = self.identities,
-                             passphrase = self.passphrase
+                             passphrase = self.passphrase,
+                             default_card = self.args["default_card"]
                            )
 
     password.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])

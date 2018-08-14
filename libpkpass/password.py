@@ -1,6 +1,6 @@
 import time
-import yaml
 import os
+import yaml
 from libpkpass.errors import *
 import libpkpass.crypto as crypto
 
@@ -30,7 +30,7 @@ class PasswordEntry(object):
             recipients=[],
             identitydb=None,
             encryption_algorithm='rsautl',
-            passphrase=None):
+            passphrase=None, default_card=None):
         #######################################################################
         """ Add recipients to the recipient list of this password object           """
         #######################################################################
@@ -54,11 +54,11 @@ class PasswordEntry(object):
             recipient_entry['signature'] = crypto.pk_sign_string(
                 message,
                 identitydb.iddb[distributor],
-                passphrase)
+                passphrase, default_card)
 
             self.recipients[recipient] = recipient_entry
 
-    def decrypt_entry(self, identity=None, passphrase=None):
+    def decrypt_entry(self, identity=None, passphrase=None,default_card=None):
         #######################################################################
         """ Decrypt this password entry for a particular identity (usually the user) """
         #######################################################################
@@ -74,7 +74,8 @@ class PasswordEntry(object):
                 recipient_entry['encrypted_secret'],
                 recipient_entry['derived_key'],
                 identity,
-                passphrase)
+                passphrase,
+                default_card)
         except DecryptionError:
             raise DecryptionError(
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
