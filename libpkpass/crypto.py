@@ -6,6 +6,7 @@ import os
 import hashlib
 from cryptography.fernet import Fernet
 from subprocess import Popen, PIPE, STDOUT
+#from libpkpass.commands.card import Cards
 from libpkpass.errors import *
 
 
@@ -32,7 +33,7 @@ def pk_encrypt_string(plaintext_string, identity):
 
 
 ##############################################################################
-def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase):
+def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, default_card=None):
   """ Decrypt a base64 encoded string for the provided identity"""
 ##############################################################################
 
@@ -50,12 +51,17 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
       f.write( base64.urlsafe_b64decode(ciphertext_derived_key) )
     command = "pkcs15-crypt --decipher --raw --pkcs --input --pin -".split()
     command.insert(5, f.name)
+    index=1
+    if default_card is not None:
+        command.insert(6, "--reader")
+        command.insert(7, str(default_card))
+        index=0
     p = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, stderr = p.communicate( input=passphrase )
     os.unlink( f.name )
     try:
-      plaintext_derived_key = stdout.splitlines()[1]
-    except IndexError:
+      plaintext_derived_key = stdout.splitlines()[index]
+    except IndexError as error:
       raise DecryptionError(stdout)
 
   if p.returncode != 0:
@@ -68,7 +74,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
 
 
 ##############################################################################
-def pk_sign_string(string, identity, passphrase):
+def pk_sign_string(string, identity, passphrase,default_card=None):
   """ Compute the hash of string and create a digital signature """
 ##############################################################################
   stringhash = hashlib.sha256(string).hexdigest()
@@ -88,6 +94,9 @@ def pk_sign_string(string, identity, passphrase):
     command = 'pkcs15-crypt --sign -i -o --pkcs1 --raw --pin -'.split()
     command.insert(3, f.name)
     command.insert(5, o.name)
+    if default_card is not None:
+        command.insert(7, "--reader")
+        command.insert(8, str(default_card))
     p = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, stderr = p.communicate( input=passphrase )
     o.close()

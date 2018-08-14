@@ -91,6 +91,11 @@ read -rp "Available slots listed above, which would you like to use? (defaults t
 
 cardslot="${cardslot:-0}"
 
+pkcs11-tool -L
+
+read -rp "Available slots listed above, which would you like to use? (defaults to 0): " cardslot
+cardslot="${cardslot:-0}"
+
 echo -e "certpath: $certpath 
 keypath: $keypath
 cabundle: $cabundle
