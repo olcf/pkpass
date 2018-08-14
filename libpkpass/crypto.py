@@ -6,7 +6,6 @@ import os
 import hashlib
 from cryptography.fernet import Fernet
 from subprocess import Popen, PIPE, STDOUT
-#from libpkpass.commands.card import Cards
 from libpkpass.errors import *
 
 
@@ -61,7 +60,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
     os.unlink( f.name )
     try:
       plaintext_derived_key = stdout.splitlines()[index]
-    except IndexError as error:
+    except IndexError:
       raise DecryptionError(stdout)
 
   if p.returncode != 0:

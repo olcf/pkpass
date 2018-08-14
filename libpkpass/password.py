@@ -145,5 +145,5 @@ class PasswordEntry(object):
                 os.makedirs(os.path.dirname(filename))
             with open(filename, 'w+') as f:
                 f.write(yaml.dump(self.todict(), default_flow_style=False))
-        except OSError as IOError:
+        except OSError, IOError:
             raise PasswordIOError("Error creating '%s'" % filename)
