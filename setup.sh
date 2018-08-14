@@ -85,11 +85,6 @@ read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwsto
 pwstore="${pwstore:-${home}/passwords}"
 pwstore="${pwstore/#\~/$HOME}"
 mkdir -p "${pwstore}"
-pkcs11-tool -L
-
-read -rp "Available slots listed above, which would you like to use? (defaults to 0): " cardslot
-
-cardslot="${cardslot:-0}"
 
 pkcs11-tool -L
 
