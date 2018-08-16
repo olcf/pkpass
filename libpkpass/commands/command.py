@@ -27,10 +27,10 @@ class Command(object):
                      'certpath': './certs',
                      'keypath': './private',
                      'ca_bundle_path': './certs/ca-bundle',
-                     'time': 10}
+                     'time': 10,
+                     'card_slot':None}
         self.recipient_list = []
         self.identities = IdentityDB()
-        self.default_card = None
         cli.register(self, self.name, self.description)
 
     def register(self, parser):
@@ -66,7 +66,6 @@ class Command(object):
                 self.args[key] = value
 
         #print self.args
-        self.default_card = self.args["default_card"]
         self._validate_args()
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:

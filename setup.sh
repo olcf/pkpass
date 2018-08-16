@@ -95,7 +95,7 @@ echo -e "certpath: $certpath
 keypath: $keypath
 cabundle: $cabundle
 pwstore: $pwstore
-default_card: $cardslot" > .pkpassrc
+card_slot: $cardslot" > .pkpassrc
  
 read -rp "Would you like to install the python requirements as root(0),user(1),or venv(2)?" pinstall
 

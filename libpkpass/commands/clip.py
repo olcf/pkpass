@@ -9,7 +9,7 @@ from libpkpass.errors import *
 class Clip(Command):
   name='clip'
   description='Copy a password to clipboard'
-  selected_args = ['pwname', 'pwstore', 'stdin', 'time', 'identity', 'certpath', 'keypath', 'cabundle', 'nopassphrase', 'noverify','default_card']
+  selected_args = ['pwname', 'pwstore', 'stdin', 'time', 'identity', 'certpath', 'keypath', 'cabundle', 'nopassphrase', 'noverify','card_slot']
 
 
   def _run_command_execution(self):
@@ -24,7 +24,7 @@ class Clip(Command):
     plaintext_pw = password.decrypt_entry(
             identity = myidentity,
             passphrase = self.passphrase,
-            default_card = self.args["default_card"])
+            card_slot = self.args["card_slot"])
 
     if( not self.args['noverify'] ):
       result = password.verify_entry( myidentity['uid'], self.identities.iddb )

@@ -8,7 +8,7 @@ from libpkpass.errors import *
 class Export(Command):
   name='export'
   description='Export passwords that you have access to and encrypt with aes'
-  selected_args = ['stdin', 'identity', 'certpath', 'cabundle', 'noverify', 'dstpwstore', 'default_card']
+  selected_args = ['stdin', 'identity', 'certpath', 'cabundle', 'noverify', 'dstpwstore', 'card_slot']
 
 
   def _run_command_execution(self):
@@ -29,7 +29,7 @@ class Export(Command):
       plaintext_pw = password.decrypt_entry(
               identity = myidentity,
               passphrase = self.passphrase,
-              default_card = self.args["default_card"])
+              card_slot = self.args["card_slot"])
       # Encrypt with passphrase
       sk_encrypt_string( plaintext_pw, key )
       # Replace derived key and encryption algorithm

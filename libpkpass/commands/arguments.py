@@ -40,7 +40,7 @@ arguments = {
                         'help': 'Comma seperated list of recipient groups'
                    }
           },
-'default_card':{'args':['-d','--default_card'],
+'card_slot':{'args':['-c','--card_slot'],
             'kwargs':{'type':str,
                         'help':'The slot number of the card that should be used'
                         }

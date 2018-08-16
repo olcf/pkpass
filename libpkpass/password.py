@@ -30,7 +30,7 @@ class PasswordEntry(object):
             recipients=[],
             identitydb=None,
             encryption_algorithm='rsautl',
-            passphrase=None, default_card=None):
+            passphrase=None, card_slot=None):
         #######################################################################
         """ Add recipients to the recipient list of this password object           """
         #######################################################################
@@ -54,11 +54,11 @@ class PasswordEntry(object):
             recipient_entry['signature'] = crypto.pk_sign_string(
                 message,
                 identitydb.iddb[distributor],
-                passphrase, default_card)
+                passphrase, card_slot)
 
             self.recipients[recipient] = recipient_entry
 
-    def decrypt_entry(self, identity=None, passphrase=None,default_card=None):
+    def decrypt_entry(self, identity=None, passphrase=None,card_slot=None):
         #######################################################################
         """ Decrypt this password entry for a particular identity (usually the user) """
         #######################################################################
@@ -75,7 +75,7 @@ class PasswordEntry(object):
                 recipient_entry['derived_key'],
                 identity,
                 passphrase,
-                default_card)
+                card_slot)
         except DecryptionError:
             raise DecryptionError(
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
