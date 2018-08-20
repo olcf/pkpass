@@ -32,7 +32,7 @@ def pk_encrypt_string(plaintext_string, identity):
 
 
 ##############################################################################
-def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase):
+def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None):
   """ Decrypt a base64 encoded string for the provided identity"""
 ##############################################################################
 
@@ -50,11 +50,16 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
       f.write( base64.urlsafe_b64decode(ciphertext_derived_key) )
     command = "pkcs15-crypt --decipher --raw --pkcs --input --pin -".split()
     command.insert(5, f.name)
+    index=1
+    if card_slot is not None:
+        command.insert(6, "--reader")
+        command.insert(7, str(card_slot))
+        index=0
     p = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, stderr = p.communicate( input=passphrase )
     os.unlink( f.name )
     try:
-      plaintext_derived_key = stdout.splitlines()[1]
+      plaintext_derived_key = stdout.splitlines()[index]
     except IndexError:
       raise DecryptionError(stdout)
 
@@ -68,7 +73,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
 
 
 ##############################################################################
-def pk_sign_string(string, identity, passphrase):
+def pk_sign_string(string, identity, passphrase,card_slot=None):
   """ Compute the hash of string and create a digital signature """
 ##############################################################################
   stringhash = hashlib.sha256(string).hexdigest()
@@ -88,6 +93,9 @@ def pk_sign_string(string, identity, passphrase):
     command = 'pkcs15-crypt --sign -i -o --pkcs1 --raw --pin -'.split()
     command.insert(3, f.name)
     command.insert(5, o.name)
+    if card_slot is not None:
+        command.insert(7, "--reader")
+        command.insert(8, str(card_slot))
     p = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, stderr = p.communicate( input=passphrase )
     o.close()

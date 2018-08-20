@@ -7,7 +7,7 @@ from libpkpass.errors import *
 class Distribute(Command):
   name='distribute'
   description='Distribute an existing password entry to another entity'
-  selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'certpath', 'cabundle', 'keypath', 'nopassphrase', 'noverify', 'nosign']
+  selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'certpath', 'cabundle', 'keypath', 'nopassphrase', 'noverify', 'nosign', 'card_slot']
 
 
   def _run_command_execution(self):
@@ -25,7 +25,8 @@ class Distribute(Command):
                              distributor = self.args['identity'],
                              recipients = self.recipient_list,
                              identitydb = self.identities,
-                             passphrase = self.passphrase
+                             passphrase = self.passphrase,
+                             card_slot = self.args["card_slot"]
                            )
 
     password.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
