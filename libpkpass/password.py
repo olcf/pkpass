@@ -1,7 +1,8 @@
+"""This Module defines what a password contains"""
 import time
 import os
 import yaml
-from libpkpass.errors import *
+from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError
 import libpkpass.crypto as crypto
 
 
@@ -35,7 +36,7 @@ class PasswordEntry(object):
         """ Add recipients to the recipient list of this password object           """
         #######################################################################
         for recipient in recipients:
-            if(encryption_algorithm == 'rsautl'):
+            if encryption_algorithm == 'rsautl':
                 (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
                     secret, identitydb.iddb[recipient])
 
@@ -58,7 +59,7 @@ class PasswordEntry(object):
 
             self.recipients[recipient] = recipient_entry
 
-    def decrypt_entry(self, identity=None, passphrase=None,card_slot=None):
+    def decrypt_entry(self, identity=None, passphrase=None, card_slot=None):
         #######################################################################
         """ Decrypt this password entry for a particular identity (usually the user) """
         #######################################################################
@@ -89,10 +90,10 @@ class PasswordEntry(object):
         distributor = recipient_entry['distributor']
         signature = recipient_entry.pop('signature')
         message = self._create_signable_string(recipient_entry)
-        sigOK = crypto.pk_verify_signature(
+        sig_ok = crypto.pk_verify_signature(
             message, signature, identitydb[distributor])
         return {'distributor': distributor,
-                'sigOK': sigOK,
+                'sigOK': sig_ok,
                 'certOK': identitydb[distributor]['verified']}
 
     def _create_signable_string(self, recipient_entry):
@@ -106,9 +107,11 @@ class PasswordEntry(object):
         return message
 
     def todict(self):
+        """Returns a dictionary"""
         return vars(self)
 
     def validate(self):
+        """This function validates a password object"""
         # for field in ['field1', 'field2']:
         #  if weird: raise PasswordValidationError(field, value)
         return True
@@ -125,15 +128,15 @@ class PasswordEntry(object):
         """ Open a password file, load passwords and read metadata               """
     ##########################################################################
         try:
-            with open(filename, 'r') as f:
-                password_data = yaml.safe_load(f)
+            with open(filename, 'r') as fname:
+                password_data = yaml.safe_load(fname)
                 self.metadata = password_data['metadata']
                 self.recipients = password_data['recipients']
             self.validate()
-        except (OSError, IOError) as e:
+        except (OSError, IOError) as error:
             raise PasswordIOError(
                 "Error Opening %s due to %s" %
-                (filename, e.strerror))
+                (filename, error.strerror))
 
     ##########################################################################
     def write_password_data(self, filename, overwrite=False):
@@ -143,7 +146,7 @@ class PasswordEntry(object):
         try:
             if not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            with open(filename, 'w+') as f:
-                f.write(yaml.dump(self.todict(), default_flow_style=False))
-        except OSError, IOError:
+            with open(filename, 'w+') as fname:
+                fname.write(yaml.dump(self.todict(), default_flow_style=False))
+        except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)
