@@ -10,6 +10,7 @@ from libpkpass.errors import DecryptionError, CliArgumentError
 
 BADPIN = "Error decrypting password named 'test'.  Perhaps a bad pin/passphrase?"
 
+
 class ShowErrors(unittest.TestCase):
     """This class tests the show class"""
 
