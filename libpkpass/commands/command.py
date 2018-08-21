@@ -1,9 +1,9 @@
-import argparse
-import yaml
+"""This module is a generic for all pkpass commands"""
 import getpass
-from arguments import arguments
+import yaml
+from libpkpass.commands.arguments import arguments
 from libpkpass.identities import IdentityDB
-from libpkpass.errors import *
+from libpkpass.errors import NullRecipientError, NoRCFileError, CliArgumentError
 
 
 class Command(object):
@@ -28,7 +28,7 @@ class Command(object):
                      'keypath': './private',
                      'ca_bundle_path': './certs/ca-bundle',
                      'time': 10,
-                     'card_slot':None}
+                     'card_slot': None}
         self.recipient_list = []
         self.identities = IdentityDB()
         cli.register(self, self.name, self.description)
@@ -97,12 +97,12 @@ class Command(object):
 
     def _get_config_args(self, config):
         try:
-            with open(config, 'r') as f:
-                config_args = yaml.safe_load(f)
+            with open(config, 'r') as fname:
+                config_args = yaml.safe_load(fname)
             if config_args is None:
                 config_args = {}
             return config_args
-        except IOError as e:
+        except IOError:
             raise NoRCFileError
 
     def _validate_args(self):

@@ -1,6 +1,7 @@
+"""This Module handles the identitydb object"""
 import os
 import libpkpass.crypto as crypto
-from libpkpass.errors import *
+from libpkpass.errors import FileOpenError
 
 
 class IdentityDB(object):
@@ -25,25 +26,25 @@ class IdentityDB(object):
         """ Helper function to read in (keys|certs) and store them correctly """
         #######################################################################
         try:
-            for f in os.listdir(path):
-                if f.endswith(self.extensions[filetype]):
-                    uid = f.split('.')[0]
-                    filepath = os.path.join(path, f)
+            for fname in os.listdir(path):
+                if fname.endswith(self.extensions[filetype]):
+                    uid = fname.split('.')[0]
+                    filepath = os.path.join(path, fname)
                     try:
                         self.iddb[uid]["%s_path" % filetype] = filepath
-                    except KeyError as e:
-                        identity = {'uid': f.split('.')[0],
+                    except KeyError as error:
+                        identity = {'uid': fname.split('.')[0],
                                     "%s_path" % filetype: filepath}
                         self.iddb[identity['uid']] = identity
-        except OSError as e:
-            raise FileOpenError(path, str(e.strerror))
+        except OSError as error:
+            raise FileOpenError(path, str(error.strerror))
 
     def load_certs_from_directory(self, certpath, cabundle):
         #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
         self._load_from_directory(certpath, 'certificate')
-        for key in self.iddb.keys():
+        for key, _ in self.iddb.items():
             self.iddb[key]['cabundle'] = cabundle
             self.iddb[key]['verified'] = crypto.pk_verify_chain(self.iddb[key])
             self.iddb[key]['fingerprint'] = crypto.get_cert_fingerprint(
