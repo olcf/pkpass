@@ -7,7 +7,9 @@ arguments = {
 
 'pwname': { 'args': ['pwname'],
             'kwargs': { 'type': str,
-                        'help': 'Name of the password. Ex: passwords/team/infrastructure/root'
+                        'help': 'Name of the password. Ex: passwords/team/infrastructure/root',
+                        'nargs': '?',
+                        'default': None
                    }
           },
 
@@ -107,4 +109,12 @@ arguments = {
                        'help': "Path to directory containing private keys.  Keys must end in '.key'"
                   }
         },
+    'all': {'args': ['-a', '--all'],
+            'kwargs': {
+                'help': "Show all available password to the given user",
+                'action': "store_true"
+            }
+           },
 }
+
+
