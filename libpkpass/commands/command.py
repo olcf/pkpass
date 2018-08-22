@@ -1,7 +1,7 @@
 """This module is a generic for all pkpass commands"""
 import getpass
 import yaml
-from libpkpass.commands.arguments import arguments
+from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.identities import IdentityDB
 from libpkpass.errors import NullRecipientError, NoRCFileError, CliArgumentError
 

@@ -1,5 +1,5 @@
 """This Module defines the arguments that argparse will accept from the CLI"""
-arguments = {
+ARGUMENTS = {
     ############################################################################
     # Data structure containing all arguments a user could pass into pkpass
     # This helps us de-dupe our work and keep args consistent between
@@ -116,4 +116,5 @@ arguments = {
                 'action': "store_true"
             }
            },
+
 }

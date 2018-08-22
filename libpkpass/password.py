@@ -28,13 +28,15 @@ class PasswordEntry(object):
             self,
             secret=None,
             distributor=None,
-            recipients=[],
+            recipients=None,
             identitydb=None,
             encryption_algorithm='rsautl',
             passphrase=None, card_slot=None):
         #######################################################################
         """ Add recipients to the recipient list of this password object           """
         #######################################################################
+        if recipients is None:
+            recipients = []
         for recipient in recipients:
             if encryption_algorithm == 'rsautl':
                 (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
