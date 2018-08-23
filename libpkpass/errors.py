@@ -1,4 +1,6 @@
 #!/usr/bin/python
+"""This Module is the base module for custom errors to allow for reduced tracebacks and
+more actionable items on the user's side"""
 
 
 class PKPassError(Exception):
@@ -68,6 +70,7 @@ class FileOpenError(PKPassError):
 class NullRecipientError(PKPassError):
     def __init__(self):
         self.msg = "There is a blank Recipient in the list, please check for trailing commas"
+
 
 class NoRCFileError(PKPassError):
     def __init__(self):
