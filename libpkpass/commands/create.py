@@ -23,9 +23,10 @@ class Create(Command):
             raise PasswordMismatchError
 
         password_metadata = {}
-        for item in ['Name', 'Description', 'Authorizer']:
+        for item in ['Description', 'Authorizer']:
             password_metadata[item.lower()] = raw_input("%s: " % item)
         password_metadata['creator'] = self.args['identity']
+        password_metadata['name'] = self.args['pwname']
 
         password = PasswordEntry(**password_metadata)
 
