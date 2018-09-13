@@ -42,7 +42,7 @@ class Create(Command):
             self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])
 
     def _validate_args(self):
-        for argument in ['certpath', 'keypath']:
+        for argument in ['pwname', 'certpath', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)
