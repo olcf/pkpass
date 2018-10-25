@@ -37,11 +37,11 @@ class Show(Command):
 
     def _walk_dir(self, directory, password, myidentity):
         # os.walk returns root, dirs, and files we just need files
-        for _, __, pwnames in os.walk(directory):
+        for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
-                password.read_password_data(os.path.join(directory, pwname))
+                password.read_password_data(os.path.join(root, pwname))
                 self._decrypt_password_entry(
-                    directory, password, myidentity, pwname)
+                    root, password, myidentity, pwname)
         return
 
     def _decrypt_password_entry(self, directory, password, myidentity, pwname):
