@@ -64,4 +64,4 @@ class IdentityDB(object):
         if os.path.isdir(path):
             self._load_from_directory(path, 'key')
         else:
-            print "WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST"
+            print "WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST OR IS NOT POPULATED"
