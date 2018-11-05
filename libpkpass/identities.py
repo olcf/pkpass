@@ -61,4 +61,7 @@ class IdentityDB(object):
         #######################################################################
         """ Read in all rsa keys from directory and name them as found """
         #######################################################################
-        self._load_from_directory(path, 'key')
+        if os.path.isdir(path):
+            self._load_from_directory(path, 'key')
+        else:
+            print "WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST OR IS NOT POPULATED"
