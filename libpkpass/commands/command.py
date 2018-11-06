@@ -26,7 +26,7 @@ class Command(object):
                      'pwstore': './passwords',
                      'certpath': './certs',
                      'keypath': './private',
-                     'ca_bundle_path': './certs/ca-bundle',
+                     'cabundle': './certs/ca-bundle',
                      'time': 10,
                      'card_slot': None}
         self.recipient_list = []
