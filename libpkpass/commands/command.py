@@ -4,7 +4,7 @@ import os
 import yaml
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.identities import IdentityDB
-from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError#, NoRCFileError
+from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError
 
 
 class Command(object):
