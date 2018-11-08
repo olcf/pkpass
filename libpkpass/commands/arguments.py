@@ -14,7 +14,7 @@ ARGUMENTS = {
                          }
               },
 
-    'pwstore': {'args': ['--pwstore, --srcpwstore'],
+    'pwstore': {'args': ['--pwstore', '--srcpwstore'],
                 'kwargs': {'type': str,
                            'help': 'Path to the source password store.  Defaults to "./passwords"'
                           }

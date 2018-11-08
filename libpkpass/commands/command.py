@@ -1,9 +1,10 @@
 """This module is a generic for all pkpass commands"""
 import getpass
+import os
 import yaml
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.identities import IdentityDB
-from libpkpass.errors import NullRecipientError, NoRCFileError, CliArgumentError
+from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError#, NoRCFileError
 
 
 class Command(object):
@@ -61,9 +62,12 @@ class Command(object):
         config_args = self._get_config_args(cli_args['config'])
         self.args.update(config_args)
 
+        fles = ['certpath', 'keypath', 'cabundle', 'pwstore']
         for key, value in cli_args.iteritems():
             if value is not None or key not in self.args:
                 self.args[key] = value
+            if key in fles and not os.path.exists(self.args[key]):
+                raise FileOpenError(self.args[key], "No such file or directory")
 
         #print self.args
         self._validate_args()
@@ -103,7 +107,8 @@ class Command(object):
                 config_args = {}
             return config_args
         except IOError:
-            raise NoRCFileError
+            print "No .pkpassrc file found, consider running ./setup.sh"
+            return {}
 
     def _validate_args(self):
         raise NotImplementedError
