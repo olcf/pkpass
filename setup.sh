@@ -88,14 +88,17 @@ mkdir -p "${pwstore}"
 pkcs11-tool -L
 
 read -rp "Available slots listed above, which would you like to use? (defaults to 0): " cardslot
-
 cardslot="${cardslot:-0}"
+
+read -rp "What user name would you like to use? (defaults to system user): " identity
+identity="${identity:-$(whoami)}"
 
 echo -e "certpath: $certpath 
 keypath: $keypath
 cabundle: $cabundle
 pwstore: $pwstore
-card_slot: $cardslot" > .pkpassrc
+card_slot: $cardslot
+identity: $identity" > .pkpassrc
  
 read -rp "Would you like to install the python requirements as root(0),user(1),or venv(2)?" pinstall
 
