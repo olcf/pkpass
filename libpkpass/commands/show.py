@@ -2,7 +2,7 @@
 import os
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
-from libpkpass.errors import PasswordIOError, CliArgumentError
+from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError
 
 
 class Show(Command):
@@ -40,8 +40,11 @@ class Show(Command):
         for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
                 password.read_password_data(os.path.join(root, pwname))
-                self._decrypt_password_entry(
-                    root, password, myidentity, pwname)
+                try:
+                    self._decrypt_password_entry(
+                        root, password, myidentity, pwname)
+                except NotARecipientError:
+                    continue
         return
 
     def _decrypt_password_entry(self, directory, password, myidentity, pwname):
