@@ -13,14 +13,14 @@ The password management solution provides:
   - Password history and change logs
   - Distributed backup capabilities
   - PIV/Smartcard Credential encryption/decryption
-  - Import and export functionality
+  - Import and export functionality (WIP)
 
-Passwords that are created are distributed to recipients by public key encryption.  The x509 certificate of the intended recipient is used to create an encrypted copy of the distributed password that is then saved in a password-specific git repository.  Multiple encrypted copies of the secret are created... one for each user.  End users then check out the git repo and are able to read passwords using their PIV/Smartcard credential to decrypt.
+Passwords that are created are distributed to recipients by public key encryption.  The x509 certificate of the intended recipient is used to create an encrypted copy of the distributed password that is then saved in a password-specific git repository.  Multiple encrypted copies of the secret are created, one for each user.  End users then check out the git repo and are able to read passwords using their PIV/Smartcard credential to decrypt.
 
 
 x509 Certificate Repository
 -------
-PKPass needs a trusted x509 certificate repository, which is typically is managed using git.  Certificates in this repository should all be
+PKPass needs a trusted x509 certificate repository, which typically is managed using git.  Certificates in this repository should all be
 signed by Certificate Authorities that can be found in the CABundle file that PKPass is configured to look at.  Since this repository should be
 considered 'trusted', it is typically managed by a smaller trusted set of site administrators.  PKPass validates all encryption certificates as they are used to make sure they are signed by a trusted Certificate Authority (CA).
 
@@ -56,22 +56,30 @@ compromise, there may be other information such as system names, account names, 
 Setup/Initial
 -----------
 
+For inital setup you may want to run the provided setup script at the root of the project
+`./setup.sh`
+This interactive setup script will install dependencies and create a .pkpassrc file for you
+
+If you would like to proceed manually, or have problems with the setup script:
 You will want to create a .pkpassrc file in the pkpass repository that you have cloned.  A typical pkpassrc file looks like this:
 
-  certpath: /Users/username/passdb/certs/
-  keypath: /Users/username/passdb/keys/
-  cabundle: /Users/username/passdb/cabundles/ca.bundle
-  pwstore: /Users/username/passdb/passwords/
+
+  certpath: /Users/username/passdb/certs/  
+  keypath: /Users/username/passdb/keys/  
+  cabundle: /Users/username/passdb/cabundles/ca.bundle  
+  pwstore: /Users/username/passdb/passwords/  
+
 
 In this case, 'passdb' is the name of the directory in the user's home area that contains x509 certificates, keys (if necessary) and the ca bundle.
 
 You can create a ca bundle by combining all CA Certificates that you trust into one file and moving the file to the cabundle path.  Usually the site admins create this CA Bundle for users as part of their certificate management practices.
 
+Additionally, note that arguments you can pass on the command line may be passed in through the .pkpassrc file as well.
 
 Command Overview
 ----------------
 
-
+```
   $ ./pkpass.py --help
   usage: pkpass.py [-h] [--config CONFIG]
                  {create,distribute,show,clip,list,listrecipients,export} ...
@@ -96,7 +104,7 @@ Command Overview
   -h, --help            show this help message and exit
   --config CONFIG       Path to a PKPass configuration file. Defaults to
                         '.pkpassrc'
-
+```
 
 
 General Usage
@@ -114,8 +122,8 @@ Run ./pkpass.py with the '-h' flag for a list of options as well as syntax.  Som
   - Show the infrastructure team root password:
     * `./pkpass.py show infra-team/rootpw`
 
-  - Show all passwords that you know:
-    * `./pkpass.py showall`
+  - Show all the passwords that you know:
+    * `./pkpass.py show -a`
 
   - List the names of all passwords that have been distributed to user identity 'foo':
     * `./pkpass.py list -i foo`
@@ -149,7 +157,7 @@ As long as the private and public keys are in directories that pkpass can find, 
 
 Import/Export Passwords to/from file: formatting considerations
 ====================
-** Work in Progress **
+__Work In Progress__  
 Pkpass's import and export function utilizes a file to pull passwords from or put passwords in. This can be particularly useful for backing up your passwords or when you are switching smartcards.
 
 The import file should contain one entry per line, with the password name and value separated by `<COLON><TAB>`. For example:
@@ -162,7 +170,8 @@ The import file should contain one entry per line, with the password name and va
 
 Export Passwords: Security Considerations
 ====================
-Pkpass supports automtic encryption of passwords while utilizing password export. This is the recomended use of Pkpass. Ex:
+__Work In Progress__
+Pkpass supports automatic encryption of passwords while utilizing password export. This is the recomended use of Pkpass. Ex:
   `./pkpass export ~/exportFile`
 
 You can then subsequntly import the cipher text using the import function:
@@ -171,8 +180,8 @@ You can then subsequntly import the cipher text using the import function:
 Please remember to use good password practices with this file.
 
 
-If you so choose, you can export to a plaintext file using the `--nocrypto` flag. This method is not recommended for security purposes:
-  ./pkpass export --nocrypto ~/exportFile
+If you so choose, you can export to a plaintext file using the `--nocrypto` flag. This method is not recommended for security purposes:  
+  `./pkpass export --nocrypto ~/exportFile`
 
 
 Software Dependencies
@@ -180,4 +189,5 @@ Software Dependencies
 Pkpass has few dependencies. Fernet is a crypto library used to allow automatic symmetric encrypting.  Fernet can be installed using pip:
   pip install cryptography
 
-Other dependencies can be found in requirements.txt
+Other dependencies can be found in requirements.txt  
+__Note:__ All dependencies will be installed if the setup script is run.
