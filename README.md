@@ -63,12 +63,12 @@ This interactive setup script will install dependencies and create a .pkpassrc f
 If you would like to proceed manually, or have problems with the setup script:
 You will want to create a .pkpassrc file in the pkpass repository that you have cloned.  A typical pkpassrc file looks like this:
 
-
+```
   certpath: /Users/username/passdb/certs/  
   keypath: /Users/username/passdb/keys/  
   cabundle: /Users/username/passdb/cabundles/ca.bundle  
   pwstore: /Users/username/passdb/passwords/  
-
+```
 
 In this case, 'passdb' is the name of the directory in the user's home area that contains x509 certificates, keys (if necessary) and the ca bundle.
 
