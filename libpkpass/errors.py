@@ -70,3 +70,7 @@ class FileOpenError(PKPassError):
 class NullRecipientError(PKPassError):
     def __init__(self):
         self.msg = "There is a blank Recipient in the list, please check for trailing commas"
+
+class YamlFormatError(PKPassError):
+    def __init__(self, value, reason):
+        self.msg = "Error%s due to: %s" % (value, reason)

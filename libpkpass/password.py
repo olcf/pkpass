@@ -2,7 +2,7 @@
 import time
 import os
 import yaml
-from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError
+from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError
 import libpkpass.crypto as crypto
 
 
@@ -139,6 +139,8 @@ class PasswordEntry(object):
             raise PasswordIOError(
                 "Error Opening %s due to %s" %
                 (filename, error.strerror))
+        except (yaml.scanner.ScannerError, yaml.parser.ParserError) as error:
+            raise YamlFormatError(str(error.problem_mark), error.problem)
 
     ##########################################################################
     def write_password_data(self, filename, overwrite=False):
