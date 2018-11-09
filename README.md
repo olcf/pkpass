@@ -72,7 +72,13 @@ You will want to create a .pkpassrc file in the pkpass repository that you have 
 
 In this case, 'passdb' is the name of the directory in the user's home area that contains x509 certificates, keys (if necessary) and the ca bundle.
 
-You can create a ca bundle by combining all CA Certificates that you trust into one file and moving the file to the cabundle path.  Usually the site admins create this CA Bundle for users as part of their certificate management practices.
+You can create a ca bundle by combining all CA Certificates that you trust into one file and moving the file to the cabundle path.  Usually the site admins create this CA Bundle for users as part of their certificate management practices.  
+Example:  
+```
+cd "${directory_with_ca_certs}"
+cat * > ca.bundle
+cp ca.bundle "${cabundle_path_in_rc_file}"
+```
 
 Additionally, note that arguments you can pass on the command line may be passed in through the .pkpassrc file as well.
 
@@ -150,7 +156,7 @@ keys still need to be signed by a CA in the CA bundle.  Basic usage:
 Create a keypair
 ----------------
 This will create an unsigned keypair.  We really want it to create a certificate request in the future
-`openssl req -newkey rsa:4096 -keyout local.key -x509 -out local.crt`
+`openssl req -newkey rsa:4096 -keyout local.key -x509 -out local.cert`
 
 As long as the private and public keys are in directories that pkpass can find, distribution to those identities works exactly the same.  Keys must be named 'username.key'.  For user foo, the private key must be named 'foo.key' and reside in the keypath directory.
 
