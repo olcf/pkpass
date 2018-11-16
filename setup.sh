@@ -6,9 +6,9 @@ function invalid(){
     exit 1
 }
 
-#user and groups lists should not have empty values,
-#this removes any trailing whitespace as well as 
+#user and groups lists should not have empty values, this removes any trailing whitespace as well as 
 #trailing commas mixed in. 
+#arg1 is list of csvs
 function csv(){
     csv="$(echo "$1" | tr -d '[:space:]')"
     while [[ $csv =~ (^,.*) || $csv =~ (.*,$) ]]; do
@@ -17,8 +17,20 @@ function csv(){
     echo "$csv"
 }
 
-#This function installs python dependencies as either
-#root, user level or in a virtualenv
+#handle yes or no user input in pyinstall to make virtualenv installation nicer
+#arg1 is prompt
+function decision(){
+    while [[ -z "$chosen" ]]; do
+        read -rp "$1" choice
+        case "$choice" in
+            y|Y|yes|Yes|YES ) echo "y" && chosen="true";;
+            n|N|no|No|NO ) echo "n" && chosen="true" ;;
+            * ) ;;
+        esac
+    done
+}
+
+#This function installs python dependencies as either root, user level or in a virtualenv
 function pyinstall(){
     #method can be root(0), user(1), or virtualenv(2)
     method=$1
@@ -30,8 +42,7 @@ function pyinstall(){
         python -c "import virtualenv" 2>/dev/null
 
         if [[ "$?" == "1" ]]; then
-            read -rp "virtualenv package not detected would you like to install it? (y/n): " installenv
-            installenv="$(echo "$installenv" | tr '[:upper:]' '[:lower:]')"
+            installenv="$(decision "virtualenv package not detected would you like to install it? (y/n): ")"
 
             if [[ "$installenv" == "y" ]]; then
                 read -rp "Would you like to install virtualenv as root(0) or user(1)?" vinstall
@@ -41,15 +52,14 @@ function pyinstall(){
                 pyinstall "$preq" "${package[@]}"
                 return 0
             else
+                #This is here in case something weird happens
                 invalid
             fi
         fi 
 
         read -rp "What would you like to call the virtualenv? (Default pkpass): " venv
+        venv="${venv:-"pkpass"}"
 
-        if [ -z "${venv}" ]; then
-            venv="pkpass"
-        fi
         python -m virtualenv "$venv"
         source "$venv"/bin/activate
         pip install "${package[@]}"
@@ -85,7 +95,7 @@ if [[ -f "./.pkpassrc" ]]; then
     read -rp "Would you like to skip the .pkpassrc file setup(defaults n) (y/n): " skip
 fi 
 
-#defaul skip to n and convert uppper to lower in the event they typed Y
+#default skip to n and convert uppper to lower in the event they typed Y
 skip="${skip:-"n"}"
 skip="$(echo "$skip" | tr '[:upper:]' '[:lower:]')"
 
@@ -179,7 +189,7 @@ pkcs15-tool --version: OpenSC-0.18.0, rev: eb60481f, commit-time: 2018-05-16 13:
 openssl version
 pkcs15-tool --version
 
-#guess if pyinstall worked probably and if the guess is that it did
+#guess if pyinstall worked properly and if the guess is that it did
 #inform user how to activate that virtualenv
 if [[ "$pinstall" == "2" ]]; then
     venv="$(find .. -maxdepth 1 -mindepth 1 -type d -cmin -1 -not -path '*/\.*' | cut -c 4-)"
