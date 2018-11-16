@@ -8,6 +8,7 @@ function invalid(){
 
 #user and groups lists should not have empty values, this removes any trailing whitespace as well as 
 #trailing commas mixed in. 
+#it will not remove blanks in between though
 #arg1 is list of csvs
 function csv(){
     csv="$(echo "$1" | tr -d '[:space:]')"
@@ -19,14 +20,21 @@ function csv(){
 
 #handle yes or no user input in pyinstall to make virtualenv installation nicer
 #arg1 is prompt
+#arg2 is default
 function decision(){
     while [[ -z "$chosen" ]]; do
         read -rp "$1" choice
-        case "$choice" in
-            y|Y|yes|Yes|YES ) echo "y" && chosen="true";;
-            n|N|no|No|NO ) echo "n" && chosen="true" ;;
-            * ) ;;
-        esac
+        if [[ -z "$2" ]]; then
+            case "$choice" in
+                y|Y|yes|Yes|YES ) echo "y" && chosen="true";;
+                n|N|no|No|NO ) echo "n" && chosen="true" ;;
+                * ) ;;
+            esac
+        else
+            chosen="true"
+            choice="${choice:-"$2"}"
+            echo "$choice"
+        fi
     done
 }
 
@@ -92,12 +100,8 @@ if [[ -f "./.pkpassrc" ]]; then
     echo -e ".pkpassrc file detected, you may either overwrite this .pkpassrc file and 
     use the script as normal; or skip setup on the pkpassrc file and continue to 
     the python depedencies"
-    read -rp "Would you like to skip the .pkpassrc file setup(defaults n) (y/n): " skip
+    skip="$(decision "Would you like to skip the .pkpassrc file setup(defaults n) (y/n): " n)"
 fi 
-
-#default skip to n and convert uppper to lower in the event they typed Y
-skip="${skip:-"n"}"
-skip="$(echo "$skip" | tr '[:upper:]' '[:lower:]')"
 
 #if skip is no setup .pkpassrc file
 if [[ "$skip" == "n" ]]; then
@@ -146,8 +150,7 @@ if [[ "$skip" == "n" ]]; then
     echo -e "Escrow users is a feature of Pkpass. Escrow allows a password to be recovered by
     the majority of the escrow users in the event of an emergency."
     
-    read -rp "Would you like to setup a group of default escrow users?(y/n)" escrow
-    escrow="$(echo "$escrow" | tr '[:upper:]' '[:lower:]')"
+    escrow="$(decision "Would you like to setup a group of default escrow users?(y/n)" n)"
     
     if [[ "$escrow" == "y" ]]; then
     
@@ -165,13 +168,13 @@ if [[ "$skip" == "n" ]]; then
     
     #overwrite a file .pkpassrc with defined values here
     echo -e "certpath: $certpath 
-    keypath: $keypath
-    cabundle: $cabundle
-    pwstore: $pwstore
-    card_slot: $cardslot
-    identity: $identity
-    escrow_users: $escrowusers
-    min_escrow: $minescrow" > .pkpassrc
+keypath: $keypath
+cabundle: $cabundle
+pwstore: $pwstore
+card_slot: $cardslot
+identity: $identity
+escrow_users: $escrowusers
+min_escrow: $minescrow" > .pkpassrc
 
 fi
 
