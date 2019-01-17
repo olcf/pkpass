@@ -4,6 +4,7 @@ import os
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
+#import secretsharing
 
 
 class Create(Command):
@@ -41,6 +42,13 @@ class Create(Command):
 
         password.write_password_data(os.path.join(
             self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])
+
+#    def _escrow_encrypt(self, password):
+#        escrow_users = self.args['escrow_users'].split(",")
+#        secret, shares = shamir.make_random_shares(self.args['min_escrow'], len(escrow_users))
+#
+#    def _escrow_decrypt(self):
+#        return "bleh"
 
     def _validate_args(self):
         for argument in ['pwname', 'certpath', 'keypath']:
