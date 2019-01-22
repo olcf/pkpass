@@ -70,6 +70,8 @@ class Command(object):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
         #print self.args
+        if 'escrow_users' in self.args:
+            self.args['escrow_users'] = self.args['escrow_users'].split(",")
         self._validate_args()
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:

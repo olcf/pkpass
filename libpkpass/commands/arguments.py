@@ -42,7 +42,7 @@ ARGUMENTS = {
                      'kwargs': {
                          'help': "Escrow users list is a comma sepearated list of recovery users that each get part of a key",
                          'type': str
-                     }
+                     },
                     },
 
     'groups': {'args': ['-g', '--groups'],
