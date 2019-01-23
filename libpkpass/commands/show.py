@@ -11,8 +11,7 @@ class Show(Command):
     name = 'show'
     description = 'Display a password'
     selected_args = ['pwname', 'pwstore', 'stdin', 'identity', 'certpath', 'escrow_users',
-                     'keypath', 'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all',
-                     'min_escrow']
+                     'keypath', 'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all']
 
     def _run_command_execution(self):
         ####################################################################
