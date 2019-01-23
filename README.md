@@ -80,7 +80,7 @@ cat * > ca.bundle
 cp ca.bundle "${cabundle_path_in_rc_file}"
 ```
 
-Additionally, note that arguments you can pass on the command line may be passed in through the .pkpassrc file as well.
+Additionally, note that options you can pass on the command line may be passed in through the .pkpassrc file as well.
 
 Command Overview
 ----------------
