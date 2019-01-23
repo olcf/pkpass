@@ -7,4 +7,5 @@ ipaddress==1.0.19
 pycparser==2.18
 pyperclip==1.6.0
 PyYAML==3.12
+secretsharing==0.2.6
 six==1.11.0

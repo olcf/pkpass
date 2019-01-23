@@ -9,6 +9,7 @@ import libpkpass.commands.clip as clip
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
 import libpkpass.commands.export as export
+import libpkpass.commands.recover as recover
 
 
 class Cli(object):
@@ -37,6 +38,7 @@ class Cli(object):
         pklist.List(self)
         listrecipients.Listrecipients(self)
         export.Export(self)
+        recover.Recover(self)
 
         self.parsedargs = self.parser.parse_args()
         self.actions[self.parsedargs.subparser_name].run(self.parsedargs)

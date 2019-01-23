@@ -11,7 +11,8 @@ class Create(Command):
     name = 'create'
     description = 'Create a new password entry and encrypt it for yourself'
     selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath',
-                     'keypath', 'cabundle', 'nopassphrase', 'noverify', 'nosign', 'card_slot']
+                     'keypath', 'cabundle', 'nopassphrase', 'noverify', 'nosign', 'card_slot',
+                     'escrow_users', 'min_escrow']
 
     def _run_command_execution(self):
         ####################################################################
@@ -27,6 +28,8 @@ class Create(Command):
             password_metadata[item.lower()] = raw_input("%s: " % item)
         password_metadata['creator'] = self.args['identity']
         password_metadata['name'] = self.args['pwname']
+        if 'min_escrow' in self.args:
+            password_metadata['min_escrow'] = self.args['min_escrow']
 
         password = PasswordEntry(**password_metadata)
 
@@ -35,7 +38,9 @@ class Create(Command):
                                 recipients=[self.args['identity']],
                                 identitydb=self.identities,
                                 passphrase=self.passphrase,
-                                card_slot=self.args["card_slot"]
+                                card_slot=self.args['card_slot'],
+                                escrow_users=self.args['escrow_users'],
+                                minimum=self.args['min_escrow']
                                )
 
         password.write_password_data(os.path.join(
