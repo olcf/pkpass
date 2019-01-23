@@ -86,14 +86,15 @@ Command Overview
 ----------------
 
 ```
-  $ ./pkpass.py --help
-  usage: pkpass.py [-h] [--config CONFIG]
-                 {create,distribute,show,clip,list,listrecipients,export} ...
+> python pkpass.py -h
+usage: pkpass.py [-h] [--config CONFIG]
+                 {create,distribute,show,clip,list,listrecipients,export,recover}
+                 ...
 
-  Public Key Password Manager
+Public Key Password Manager
 
-  positional arguments:
-  {create,distribute,show,clip,list,listrecipients,export}
+positional arguments:
+  {create,distribute,show,clip,list,listrecipients,export,recover}
                         sub-commands
     create              Create a new password entry and encrypt it for
                         yourself
@@ -105,8 +106,10 @@ Command Overview
     listrecipients      List the recipients that pkpass knows about
     export              Export passwords that you have access to and encrypt
                         with aes
+    recover             Recover a password that has been distributed using
+                        escrow functions
 
-  optional arguments:
+optional arguments:
   -h, --help            show this help message and exit
   --config CONFIG       Path to a PKPass configuration file. Defaults to
                         '.pkpassrc'
