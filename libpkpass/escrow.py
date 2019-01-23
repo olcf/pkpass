@@ -11,7 +11,7 @@ def pk_split_secret(plaintext_string, escrow_list, minimum=None):
     if not minimum and escrow_len % 2 != 0:
         minimum = (escrow_len + 1) / 2
     elif not minimum:
-        minimum = escrow_len / 2
+        minimum = (escrow_len / 2) + 1
     return ptohss.split_secret(plaintext_string, minimum, escrow_len)
 
 ##############################################################################
