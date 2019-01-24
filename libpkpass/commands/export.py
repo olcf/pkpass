@@ -11,7 +11,7 @@ class Export(Command):
     """This Class implements the cli functionality of export"""
     name = 'export'
     description = 'Export passwords that you have access to and encrypt with aes'
-    selected_args = ['stdin', 'identity', 'certpath',
+    selected_args = ['pwfile', 'stdin', 'identity', 'certpath',
                      'cabundle', 'noverify', 'dstpwstore', 'card_slot']
 
     def _run_command_execution(self):
@@ -43,7 +43,7 @@ class Export(Command):
         ####################################################################
         """ Ensure arguments are appropriate for this command           """
         ####################################################################
-        for argument in ['certpath', 'keypath']:
+        for argument in ['pwfile', 'certpath', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)

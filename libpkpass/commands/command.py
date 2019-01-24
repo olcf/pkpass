@@ -6,6 +6,7 @@ import os
 import yaml
 from six import iteritems as iteritems
 from libpkpass.commands.arguments import ARGUMENTS as arguments
+from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError
 
@@ -88,6 +89,33 @@ class Command(object):
             self.args['certpath'], self.args['cabundle'])
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
+
+    def create_pass(self, password1, description, authorizer):
+        ####################################################################
+        """ Run function for class.                                      """
+        ####################################################################
+        password_metadata = {}
+        password_metadata['description'] = description
+        password_metadata['authorizer'] = authorizer
+        password_metadata['creator'] = self.args['identity']
+        password_metadata['name'] = self.args['pwname']
+        if 'min_escrow' in self.args:
+            password_metadata['min_escrow'] = self.args['min_escrow']
+
+        password = PasswordEntry(**password_metadata)
+
+        password.add_recipients(secret=password1,
+                                distributor=self.args['identity'],
+                                recipients=[self.args['identity']],
+                                identitydb=self.identities,
+                                passphrase=self.passphrase,
+                                card_slot=self.args['card_slot'],
+                                escrow_users=self.args['escrow_users'],
+                                minimum=self.args['min_escrow']
+                               )
+
+        password.write_password_data(os.path.join(
+            self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])
 
     def _run_command_execution(self):
         ##################################################################

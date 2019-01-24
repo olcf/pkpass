@@ -1,9 +1,7 @@
 """This module allows for the creation of passwords"""
 import getpass
-import os
 from builtins import input
 from libpkpass.commands.command import Command
-from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
 
 
@@ -24,28 +22,9 @@ class Create(Command):
         if password1 != password2:
             raise PasswordMismatchError
 
-        password_metadata = {}
-        for item in ['Description', 'Authorizer']:
-            password_metadata[item.lower()] = input("%s: " % item)
-        password_metadata['creator'] = self.args['identity']
-        password_metadata['name'] = self.args['pwname']
-        if 'min_escrow' in self.args:
-            password_metadata['min_escrow'] = self.args['min_escrow']
-
-        password = PasswordEntry(**password_metadata)
-
-        password.add_recipients(secret=password1,
-                                distributor=self.args['identity'],
-                                recipients=[self.args['identity']],
-                                identitydb=self.identities,
-                                passphrase=self.passphrase,
-                                card_slot=self.args['card_slot'],
-                                escrow_users=self.args['escrow_users'],
-                                minimum=self.args['min_escrow']
-                               )
-
-        password.write_password_data(os.path.join(
-            self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])
+        description = input("Description: ")
+        authorizer = input("Authorizer: ")
+        self.create_pass(password1, description, authorizer)
 
     def _validate_args(self):
         for argument in ['pwname', 'certpath', 'keypath']:

@@ -99,6 +99,14 @@ ARGUMENTS = {
                   }
                  },
 
+    'pwfile': {'args': ['pwfile'],
+               'kwargs': {'type': str,
+                          'help': 'path to the import/export file',
+                          'nargs': '?',
+                          'default': None
+                         }
+              },
+
     'pwname': {'args': ['pwname'],
                'kwargs': {'type': str,
                           'help': 'Name of the password. Ex: passwords/team/infrastructure/root',
