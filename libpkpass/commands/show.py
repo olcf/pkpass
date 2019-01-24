@@ -1,4 +1,6 @@
 """This module is used to process the decryption of keys"""
+
+from __future__ import print_function
 import os
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
@@ -45,7 +47,6 @@ class Show(Command):
                         root, password, myidentity, pwname)
                 except NotARecipientError:
                     continue
-        return
 
     def _decrypt_password_entry(self, directory, password, myidentity, pwname):
         """This decrypts a given password entry"""
@@ -62,4 +63,4 @@ class Show(Command):
                 print("Warning: could not verify the certificate authenticity of user '%s'." %
                       result['distributor'])
 
-        print("%s: %s") % (password.metadata['name'], plaintext_pw)
+        print(("%s: %s") % (password.metadata['name'], plaintext_pw))

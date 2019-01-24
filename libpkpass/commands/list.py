@@ -1,4 +1,6 @@
 """This Module allows for the listing of users passwords"""
+
+from __future__ import print_function
 import os
 import yaml
 from libpkpass.commands.command import Command
@@ -31,8 +33,8 @@ class List(Command):
                                   'distributor': passwordentry.recipients[self.args['identity']]['distributor']
                                  }
 
-        print "Passwords for '%s':" % self.args['identity']
-        print "\n%s" % yaml.dump(result, default_flow_style=False)
+        print("Passwords for '%s':" % self.args['identity'])
+        print("\n%s" % yaml.dump(result, default_flow_style=False))
 
     def _validate_args(self):
         for argument in ['certpath', 'keypath']:

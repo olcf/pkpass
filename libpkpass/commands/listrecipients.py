@@ -1,4 +1,6 @@
 """This Module allows for the listing of recipients"""
+
+from __future__ import print_function
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
 
@@ -14,15 +16,15 @@ class Listrecipients(Command):
         """ Run function for class.                                      """
         ####################################################################
 
-        print 'Certificate store: "%s"' % self.args['certpath']
-        print 'Key store: "%s"' % self.args['keypath']
-        print 'CA Bundle file: "%s"' % self.args['cabundle']
+        print('Certificate store: "%s"' % self.args['certpath'])
+        print('Key store: "%s"' % self.args['keypath'])
+        print('CA Bundle file: "%s"' % self.args['cabundle'])
         print('Looking for Key Extension: "%s"' %
               self.identities.extensions['key'])
         print('Looking for Certificate Extension: "%s"' %
               self.identities.extensions['certificate'])
 
-        print "Loaded %s identities:" % len(self.identities.iddb.keys())
+        print("Loaded %s identities:" % len(self.identities.iddb.keys()))
         for key, _ in self.identities.iddb.items():
             print("\n%s:\n\tVerified: %s\n\tSubject: %s\n\tSubject Hash: %s\n\tIssuer: %s\n\tIssuer Hash: %s\n\tFingerprint: %s\n\tExpires: %s\n" % (
                 self.identities.iddb[key]['uid'],

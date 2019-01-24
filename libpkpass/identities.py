@@ -1,4 +1,6 @@
 """This Module handles the identitydb object"""
+
+from __future__ import print_function
 import os
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError
@@ -64,4 +66,4 @@ class IdentityDB(object):
         if os.path.isdir(path):
             self._load_from_directory(path, 'key')
         else:
-            print "WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST OR IS NOT POPULATED"
+            print("WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST OR IS NOT POPULATED")

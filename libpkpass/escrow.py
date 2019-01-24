@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """This Module handles the escrow functions i.e. creating shares and recovery"""
 
-from secretsharing import PlaintextToHexSecretSharer as ptohss
+from nginsecretsharing import PlaintextToHexSecretSharer as ptohss
+from .errors import EscrowError
 
 ##############################################################################
 def pk_split_secret(plaintext_string, escrow_list, minimum=None):
@@ -12,7 +13,12 @@ def pk_split_secret(plaintext_string, escrow_list, minimum=None):
         minimum = (escrow_len + 1) / 2
     elif not minimum:
         minimum = (escrow_len / 2) + 1
-    return ptohss.split_secret(plaintext_string, minimum, escrow_len)
+    if minimum < 2:
+        raise EscrowError("minimum escrow", 2, minimum)
+    elif escrow_len < 3:
+        raise EscrowError("escrow users list", 3, escrow_len)
+    else:
+        return ptohss.split_secret(plaintext_string, minimum, escrow_len)
 
 ##############################################################################
 def pk_recover_secret(shares):

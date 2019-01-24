@@ -1,7 +1,10 @@
 """This module is a generic for all pkpass commands"""
+
+from __future__ import print_function
 import getpass
 import os
 import yaml
+from six import iteritems as iteritems
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.identities import IdentityDB
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError
@@ -63,7 +66,7 @@ class Command(object):
         self.args.update(config_args)
 
         fles = ['certpath', 'keypath', 'cabundle', 'pwstore']
-        for key, value in cli_args.iteritems():
+        for key, value in iteritems(cli_args):
             if value is not None or key not in self.args:
                 self.args[key] = value
             if key in fles and not os.path.exists(self.args[key]):
@@ -109,7 +112,7 @@ class Command(object):
                 config_args = {}
             return config_args
         except IOError:
-            print "No .pkpassrc file found, consider running ./setup.sh"
+            print("No .pkpassrc file found, consider running ./setup.sh")
             return {}
 
     def _validate_args(self):
@@ -128,5 +131,5 @@ class Command(object):
                 self.args['identity'])
 
     def _print_debug(self):
-        print self.recipient_list
-        print self.identities.iddb.keys()
+        print(self.recipient_list)
+        print(self.identities.iddb.keys())

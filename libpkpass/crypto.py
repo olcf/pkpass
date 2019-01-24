@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """This Module handles the crypto functions i.e. encryption and decryption"""
 
+from __future__ import print_function
 import base64
 import tempfile
 import os
@@ -28,7 +29,7 @@ def pk_encrypt_string(plaintext_string, identity):
     ciphertext_derived_key = stdout
 
     fern = Fernet(plaintext_derived_key)
-    encrypted_string = fern.encrypt(plaintext_string)
+    encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
 
     return (encrypted_string, base64.urlsafe_b64encode(ciphertext_derived_key))
 
@@ -59,7 +60,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
             command.insert(7, str(card_slot))
             index = 0
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(input=passphrase)
+        stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         os.unlink(fname.name)
         try:
             plaintext_derived_key = stdout.splitlines()[index]
@@ -70,28 +71,32 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         raise DecryptionError(stdout)
 
     fern = Fernet(plaintext_derived_key)
+
+    #python2/3 stuff
+    if not isinstance(ciphertext_string, bytes):
+        ciphertext_string = ciphertext_string.encode("ASCII")
     plaintext_string = fern.decrypt(ciphertext_string)
 
-    return plaintext_string
+    return plaintext_string.decode("ASCII")
 
 
 ##############################################################################
 def pk_sign_string(string, identity, passphrase, card_slot=None):
     """ Compute the hash of string and create a digital signature """
 ##############################################################################
-    stringhash = hashlib.sha256(string).hexdigest()
+    stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
     if 'key_path' in identity:
         command = 'openssl rsautl -sign -inkey'.split()
         command.insert(4, identity['key_path'])
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(input=stringhash)
+        stdout, _ = proc.communicate(input=stringhash.encode('ASCII'))
         signature = base64.urlsafe_b64encode(stdout)
     else:
         # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
         # command line (insecure) or via stdin.  So, we have to put signature text
         # into a file for pkcs15-crypt to read.  YUCK!
         with tempfile.NamedTemporaryFile(delete=False) as fname:
-            fname.write(stringhash)
+            fname.write(stringhash.encode('ASCII'))
         out = tempfile.NamedTemporaryFile(delete=False)
         command = 'pkcs15-crypt --sign -i -o --pkcs1 --raw --pin -'.split()
         command.insert(3, fname.name)
@@ -100,10 +105,10 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
             command.insert(7, "--reader")
             command.insert(8, str(card_slot))
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(input=passphrase)
+        stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         out.close()
 
-        with open(out.name, 'r') as sigfile:
+        with open(out.name, 'rb') as sigfile:
             signature = base64.urlsafe_b64encode(sigfile.read())
 
         os.unlink(fname.name)
@@ -119,7 +124,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
 def pk_verify_signature(string, signature, identity):
     """ Compute the hash of string and verify the digital signature """
 ##############################################################################
-    stringhash = hashlib.sha256(string).hexdigest()
+    stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
     command = 'openssl rsautl -inkey -certin -verify'.split()
     command.insert(3, identity['certificate_path'])
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
@@ -128,7 +133,7 @@ def pk_verify_signature(string, signature, identity):
     if proc.returncode != 0:
         raise SignatureVerificationError(stdout)
 
-    return stdout == stringhash
+    return stdout.decode("ASCII") == stringhash
 
 
 ##############################################################################
@@ -144,7 +149,7 @@ def pk_verify_chain(identity):
     if proc.returncode != 0:
         raise TrustChainVerificationError(stdout)
 
-    return stdout.rstrip() == "%s: OK" % identity['certificate_path']
+    return stdout.decode("ASCII").rstrip() == "%s: OK" % identity['certificate_path']
 
 
 ##############################################################################
@@ -202,12 +207,11 @@ def get_cert_element(identity, element):
     command.append("-%s" % element)
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate()
-
     if proc.returncode != 0:
         raise X509CertificateError(stdout)
 
     try:
-        return stdout.rstrip()
+        return stdout.decode("ASCII").rstrip()
     except IndexError:
         raise X509CertificateError(stdout)
 
@@ -218,6 +222,7 @@ def sk_encrypt_string(plaintext_string, key):
 ##############################################################################
 
     fern = Fernet(key)
+#    encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
     encrypted_string = fern.encrypt(plaintext_string)
     return base64.urlsafe_b64encode(encrypted_string)
 
@@ -228,5 +233,5 @@ def sk_decrypt_string(ciphertext_string, key):
 ##############################################################################
 
     fern = Fernet(key)
-    plaintext_string = fern.decrypt(base64.urlsafe_b64decode(ciphertext_string))
+    plaintext_string = fern.decrypt(base64.urlsafe_b64decode(ciphertext_string.encode('ASCII')))
     return plaintext_string

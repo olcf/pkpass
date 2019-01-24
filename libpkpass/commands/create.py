@@ -1,6 +1,7 @@
 """This module allows for the creation of passwords"""
 import getpass
 import os
+from builtins import input
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
@@ -25,7 +26,7 @@ class Create(Command):
 
         password_metadata = {}
         for item in ['Description', 'Authorizer']:
-            password_metadata[item.lower()] = raw_input("%s: " % item)
+            password_metadata[item.lower()] = input("%s: " % item)
         password_metadata['creator'] = self.args['identity']
         password_metadata['name'] = self.args['pwname']
         if 'min_escrow' in self.args:

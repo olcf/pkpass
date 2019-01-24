@@ -1,5 +1,7 @@
 """This module handles the CLI for password recovery"""
 
+from __future__ import print_function
+from builtins import input
 from libpkpass.escrow import pk_recover_secret
 from libpkpass.commands.command import Command
 #from libpkpass.errors import CliArgumentError
@@ -15,11 +17,11 @@ class Recover(Command):
         ####################################################################
         """ Run function for class.                                      """
         ####################################################################
-        print "If the password returned is not correct, you may need more shares"
-        shares = raw_input("Enter comma separated list of shares: ")
+        print("If the password returned is not correct, you may need more shares")
+        shares = input("Enter comma separated list of shares: ")
         shares = shares.split(",")
         shares = map(str.strip, shares)
-        print pk_recover_secret(shares)
+        print(pk_recover_secret(shares))
 
     def _validate_args(self):
         pass

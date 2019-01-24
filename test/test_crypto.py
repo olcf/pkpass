@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """This Module tests crypto functionality"""
 
+from __future__ import print_function
 import unittest
 import libpkpass.crypto as crypto
 from libpkpass.identities import IdentityDB
@@ -23,34 +24,34 @@ class TestBasicFunction(unittest.TestCase):
     def test_encrypt_string(self):
         """Test encrypting a string"""
         results = []
-        for _, identity in self.identities.iddb.iteritems():
+        for _, identity in self.identities.iddb.items():
             results.append(crypto.pk_encrypt_string(self.plaintext, identity))
         self.assertTrue(results[0] != results[1])
 
     # Encrypt/Decrypt strings for all test identities and make sure we get back what we put in
-        for _, identity in self.identities.iddb.iteritems():
+        for _, identity in self.identities.iddb.items():
             (ciphertext, derived_key) = crypto.pk_encrypt_string(
                 self.plaintext, identity)
             plaintext = crypto.pk_decrypt_string(
                 ciphertext, derived_key, identity, None)
-            self.assertTrue(self.plaintext == plaintext)
+            self.assertEqual(self.plaintext, plaintext)
 
     def test_verify_string(self):
         """verify string is correct"""
         results = []
-        for _, identity in self.identities.iddb.iteritems():
+        for _, identity in self.identities.iddb.items():
             results.append(crypto.pk_sign_string(
                 self.plaintext, identity, None))
         self.assertTrue(results[0] != results[1])
 
-        for _, identity in self.identities.iddb.iteritems():
+        for _, identity in self.identities.iddb.items():
             signature = crypto.pk_sign_string(self.plaintext, identity, None)
             self.assertTrue(crypto.pk_verify_signature(
                 self.plaintext, signature, identity))
 
     def test_cert_fingerprint(self):
         """Verify fingerprint is correct"""
-        for _, identity in self.identities.iddb.iteritems():
+        for _, identity in self.identities.iddb.items():
             fingerprint = crypto.get_cert_fingerprint(identity)
             self.assertTrue(len(fingerprint.split(':')) == 20)
 

@@ -4,3 +4,5 @@
 test/pki/ca
 test/pki/intermediate
 test/scratch/*
+venv/*
+.tox/*
