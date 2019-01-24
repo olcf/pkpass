@@ -9,6 +9,7 @@ import libpkpass.commands.clip as clip
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
 import libpkpass.commands.export as export
+import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.recover as recover
 
 
@@ -31,14 +32,15 @@ class Cli(object):
         self.subparsers = self.parser.add_subparsers(
             help='sub-commands', dest='subparser_name')
 
+        clip.Clip(self)
         create.Create(self)
         distribute.Distribute(self)
-        show.Show(self)
-        clip.Clip(self)
-        pklist.List(self)
-        listrecipients.Listrecipients(self)
         export.Export(self)
+        listrecipients.Listrecipients(self)
+        pkimport.Import(self)
+        pklist.List(self)
         recover.Recover(self)
+        show.Show(self)
 
         self.parsedargs = self.parser.parse_args()
         self.actions[self.parsedargs.subparser_name].run(self.parsedargs)
