@@ -200,3 +200,7 @@ Pkpass has few dependencies. Fernet is a crypto library used to allow automatic 
 
 Other dependencies can be found in requirements.txt  
 __Note:__ All dependencies will be installed if the setup script is run.
+
+Python 2 support
+====================
+We will support python2 until the end of the year, this tool was originally written in python2; and should also work with python3.

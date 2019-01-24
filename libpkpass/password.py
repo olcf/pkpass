@@ -1,4 +1,6 @@
 """This Module defines what a password contains"""
+
+from __future__ import print_function
 import time
 import os
 import yaml
@@ -45,16 +47,23 @@ class PasswordEntry(object):
             self.recipients[recipient] = self._add_recipient(recipient, secret, distributor,
                                                              identitydb, encryption_algorithm, passphrase,
                                                              card_slot)
-        if escrow_users is None:
-            escrow_users = []
-        else:
-            split_secret = pk_split_secret(secret, escrow_users, minimum)
-        i = 0
-        for escrow_user in escrow_users:
-            if escrow_user not in recipients:
-                self.recipients[escrow_user] = self._add_recipient(escrow_user, split_secret[i], distributor,
-                                                                   identitydb, encryption_algorithm, passphrase,
-                                                                   card_slot)
+        if escrow_users is not None:
+            escrow_len = len(escrow_users)
+            escrow_users = list(set(escrow_users) - set(recipients))
+            if (escrow_len > 3) and (len(escrow_users) < 3):
+                print("warning: recipient users overlapped with escrow users too much not enough escrow")
+
+            #escrow_users may now be none after the set operations
+            if escrow_users is None:
+                escrow_users = []
+            else:
+                split_secret = pk_split_secret(secret, escrow_users, minimum)
+            i = 0
+            for escrow_user in escrow_users:
+                if escrow_user not in recipients:
+                    self.recipients[escrow_user] = self._add_recipient(escrow_user, split_secret[i], distributor,
+                                                                       identitydb, encryption_algorithm, passphrase,
+                                                                       card_slot)
                 i += 1
 
     def _add_recipient(
@@ -72,7 +81,6 @@ class PasswordEntry(object):
         if encryption_algorithm == 'rsautl':
             (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
                 secret, identitydb.iddb[recipient])
-
         recipient_entry = {'encrypted_secret': encrypted_secret,
                            'derived_key': encrypted_derived_key,
                            'distributor': distributor,
@@ -135,7 +143,12 @@ class PasswordEntry(object):
         #######################################################################
         message = ""
         for key in sorted(recipient_entry.keys()):
+            if key == 'timestamp':
+                recipient_entry[key] = "{0:12.2f}".format(float(recipient_entry[key]))
+#                recipient_entry[key] = (round(recipient_entry[key] * 100) / 100)
             if key != 'signature':
+                if isinstance(recipient_entry[key], bytes):
+                    recipient_entry[key] = recipient_entry[key].decode('ASCII')
                 message = message + str(key) + str(recipient_entry[key])
         return message
 

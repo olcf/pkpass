@@ -65,8 +65,8 @@ function pyinstall(){
             fi
         fi 
 
-        read -rp "What would you like to call the virtualenv? (Default pkpass): " venv
-        venv="${venv:-"pkpass"}"
+        read -rp "What would you like to call the virtualenv? (Default venv): " venv
+        venv="${venv:-"venv"}"
 
         python -m virtualenv "$venv"
         source "$venv"/bin/activate

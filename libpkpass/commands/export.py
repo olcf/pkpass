@@ -1,4 +1,6 @@
 """This Module allows for the export of passwords for the purpose of importing to a new card"""
+
+from __future__ import print_function
 import os
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
@@ -34,7 +36,7 @@ class Export(Command):
             # Encrypt with passphrase
             sk_encrypt_string(plaintext_pw, key)
             # Replace derived key and encryption algorithm
-            print plaintext_pw
+            print(plaintext_pw)
             # Write out the password entry
 
     def _validate_args(self):
