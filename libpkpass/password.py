@@ -27,6 +27,9 @@ class PasswordEntry(object):
         self.metadata.update(kwargs)
         self.recipients = {}
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
     def add_recipients(
             self,
             secret=None,
@@ -187,7 +190,7 @@ class PasswordEntry(object):
             raise YamlFormatError(str(error.problem_mark), error.problem)
 
     ##########################################################################
-    def write_password_data(self, filename, overwrite=False):
+    def write_password_data(self, filename, overwrite=False, encrypted_export=False, password=None):
         """ Write password data and metadata to the appropriate password file """
     ##########################################################################
         self.validate()
@@ -195,6 +198,12 @@ class PasswordEntry(object):
             if not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
             with open(filename, 'w+') as fname:
-                fname.write(yaml.safe_dump(self.todict(), default_flow_style=False))
+                if encrypted_export and password:
+                    encrypted = crypto.sk_encrypt_string(
+                        yaml.safe_dump(self.todict(), default_flow_style=False), 
+                        password)
+                    fname.write(encrypted)
+                else:
+                    fname.write(yaml.safe_dump(self.todict(), default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)

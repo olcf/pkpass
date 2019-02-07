@@ -33,7 +33,9 @@ class Command(object):
                      'keypath': './private',
                      'cabundle': './certs/ca-bundle',
                      'time': 10,
-                     'card_slot': None}
+                     'card_slot': None,
+                     'min_escrow': None,
+                     'escrow_users': None}
         self.recipient_list = []
         self.identities = IdentityDB()
         cli.register(self, self.name, self.description)
@@ -74,7 +76,7 @@ class Command(object):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
         #print self.args
-        if 'escrow_users' in self.args:
+        if self.args['escrow_users']:
             self.args['escrow_users'] = self.args['escrow_users'].split(",")
         self._validate_args()
 
@@ -99,7 +101,7 @@ class Command(object):
         password_metadata['authorizer'] = authorizer
         password_metadata['creator'] = self.args['identity']
         password_metadata['name'] = self.args['pwname']
-        if 'min_escrow' in self.args:
+        if self.args['min_escrow']:
             password_metadata['min_escrow'] = self.args['min_escrow']
 
         password = PasswordEntry(**password_metadata)
