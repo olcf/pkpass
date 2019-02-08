@@ -27,6 +27,10 @@ class FileOpenError(PKPassError):
         self.msg = "File %s found in config, could not be opened due to %s" % (
             value, reason)
 
+class LegacyImportFormatError(PKPassError):
+    def __init__(self):
+        self.msg = "Passwords in import file not in key:value notation"
+
 class NotARecipientError(PKPassError):
     pass
 

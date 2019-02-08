@@ -27,6 +27,9 @@ class PasswordEntry(object):
         self.metadata.update(kwargs)
         self.recipients = {}
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
     def add_recipients(
             self,
             secret=None,
@@ -169,7 +172,6 @@ class PasswordEntry(object):
         return "%r" % self.__dict__
 
     ##########################################################################
-
     def read_password_data(self, filename):
         """ Open a password file, load passwords and read metadata               """
     ##########################################################################
@@ -187,14 +189,26 @@ class PasswordEntry(object):
             raise YamlFormatError(str(error.problem_mark), error.problem)
 
     ##########################################################################
-    def write_password_data(self, filename, overwrite=False):
+    def write_password_data(self, filename, overwrite=False, encrypted_export=False, password=None):
         """ Write password data and metadata to the appropriate password file """
     ##########################################################################
         self.validate()
+        iscwd = os.path.basename(filename) == filename
+        passdata = self.todict()
+        open_mode = 'w+'
+        if password is not None:
+            passdata = {self['metadata']['name']: passdata}
+            open_mode = 'a'
         try:
-            if not os.path.isdir(os.path.dirname(filename)):
+            if not iscwd and not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            with open(filename, 'w+') as fname:
-                fname.write(yaml.safe_dump(self.todict(), default_flow_style=False))
+            with open(filename, open_mode) as fname:
+                if encrypted_export and password:
+                    encrypted = crypto.sk_encrypt_string(
+                        yaml.safe_dump(passdata, default_flow_style=False),
+                        password)
+                    fname.write(encrypted)
+                else:
+                    fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)

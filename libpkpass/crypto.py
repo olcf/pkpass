@@ -7,7 +7,10 @@ import tempfile
 import os
 import hashlib
 from subprocess import Popen, PIPE, STDOUT
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, \
         SignatureVerificationError, TrustChainVerificationError, X509CertificateError
 
@@ -221,9 +224,8 @@ def sk_encrypt_string(plaintext_string, key):
     """ Symmetrically Encrypt and return a base 64 encoded string using the provided secret"""
 ##############################################################################
 
-    fern = Fernet(key)
-#    encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
-    encrypted_string = fern.encrypt(plaintext_string)
+    fern = Fernet(hash_password(key))
+    encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
     return base64.urlsafe_b64encode(encrypted_string)
 
 
@@ -232,6 +234,22 @@ def sk_decrypt_string(ciphertext_string, key):
     """ Symmetrically Decrypt a base64 encoded string using the provided key"""
 ##############################################################################
 
-    fern = Fernet(key)
-    plaintext_string = fern.decrypt(base64.urlsafe_b64decode(ciphertext_string.encode('ASCII')))
-    return plaintext_string
+    fern = Fernet(hash_password(key))
+    #python2/3 stuff
+    if not isinstance(ciphertext_string, bytes):
+        ciphertext_string = ciphertext_string.encode("ASCII")
+    try:
+        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(ciphertext_string))
+        return plaintext_string.decode("ASCII")
+    except InvalidToken:
+        raise DecryptionError("Incorrect Password")
+
+
+##############################################################################
+def hash_password(password):
+    """Hash people's password"""
+##############################################################################
+    password = b"%s" % password
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
+                     iterations=100000, backend=default_backend())
+    return base64.urlsafe_b64encode(kdf.derive(password))

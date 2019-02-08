@@ -33,7 +33,9 @@ class Command(object):
                      'keypath': './private',
                      'cabundle': './certs/ca-bundle',
                      'time': 10,
-                     'card_slot': None}
+                     'card_slot': None,
+                     'min_escrow': None,
+                     'escrow_users': None}
         self.recipient_list = []
         self.identities = IdentityDB()
         cli.register(self, self.name, self.description)
@@ -74,7 +76,7 @@ class Command(object):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
         #print self.args
-        if 'escrow_users' in self.args:
+        if self.args['escrow_users']:
             self.args['escrow_users'] = self.args['escrow_users'].split(",")
         self._validate_args()
 
@@ -90,7 +92,7 @@ class Command(object):
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
-    def create_pass(self, password1, description, authorizer):
+    def create_pass(self, password1, description, authorizer, recipient_list=None):
         ####################################################################
         """ Run function for class.                                      """
         ####################################################################
@@ -99,14 +101,16 @@ class Command(object):
         password_metadata['authorizer'] = authorizer
         password_metadata['creator'] = self.args['identity']
         password_metadata['name'] = self.args['pwname']
-        if 'min_escrow' in self.args:
+        if self.args['min_escrow']:
             password_metadata['min_escrow'] = self.args['min_escrow']
+        if recipient_list is None:
+            recipient_list = [self.args['identity']]
 
         password = PasswordEntry(**password_metadata)
 
         password.add_recipients(secret=password1,
                                 distributor=self.args['identity'],
-                                recipients=[self.args['identity']],
+                                recipients=recipient_list,
                                 identitydb=self.identities,
                                 passphrase=self.passphrase,
                                 card_slot=self.args['card_slot'],

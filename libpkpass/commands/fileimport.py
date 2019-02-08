@@ -1,9 +1,13 @@
 """This Module allows for the import of passwords"""
 
 from __future__ import print_function
+import getpass
+import os.path
 import yaml
+import libpkpass.crypto as crypto
 from libpkpass.commands.command import Command
-from libpkpass.errors import CliArgumentError
+from libpkpass.password import PasswordEntry
+from libpkpass.errors import CliArgumentError, LegacyImportFormatError, FileOpenError
 
 
 class Import(Command):
@@ -11,30 +15,39 @@ class Import(Command):
     name = 'import'
     description = 'Import passwords that you have saved to a file'
     selected_args = ['pwfile', 'stdin', 'identity', 'certpath', 'nopassphrase',
-                     'cabundle', 'noverify', 'dstpwstore', 'card_slot']
+                     'cabundle', 'noverify', 'dstpwstore', 'card_slot', 'nocrypto',]
 
     def _run_command_execution(self):
         ####################################################################
         """ Run function for class.                                      """
         ####################################################################
-        self._handle_file(self.args['pwfile'])
-
-    def _handle_file(self, pwfile):
-        """This function handles the two expected ways to have password files"""
         try:
-            with open(pwfile, 'r') as fname:
-                passwords = yaml.safe_load(fname)
-            return passwords
-        except yaml.scanner.ScannerError:
-            with open(pwfile, 'r') as fname:
-                passwords = fname.readlines()
-            self._flat_file(passwords)
-            return passwords
+            contents = ""
+            with open(self.args['pwfile'], 'r') as fcontents:
+                contents = fcontents.read()
+            if self.args['nocrypto']:
+                self._file_handler(contents)
+            else:
+                passwd = getpass.getpass("Please enter the password for the file: ")
+                self._file_handler(crypto.sk_decrypt_string(contents, passwd))
         except IOError:
-            print("pwfile argument not found: " + self.args['pwfile'])
+            raise FileOpenError(self.args['pwfile'], "No such file or directory")
+
+    def _file_handler(self, string):
+        """This function handles the contents of a file"""
+        try:
+            self._yaml_file(yaml.safe_load(string))
+        except yaml.scanner.ScannerError:
+            self._flat_file(string.strip().split("\n"))
+        except TypeError:
+            raise LegacyImportFormatError
 
     def _flat_file(self, passwords):
         """This function handles the simple key:value pair"""
+        print("INFO: Flat password file detected, using 'imported' as description\
+you can manually change the description in the file if you would like")
+        db_len = len(passwords)
+        i = 1
         for password in passwords:
             psplit = password.split(":")
             fname = psplit[0].strip()
@@ -42,6 +55,34 @@ class Import(Command):
             self.args['pwname'] = fname
             self.args['overwrite'] = False
             self.create_pass(pvalue, "imported", self.args['identity'])
+            print("%s of %s imported" % (i, db_len))
+            i += 1
+
+    def _yaml_file(self, passwords):
+        """This function handles the yaml format of pkpass"""
+        myidentity = self.identities.iddb[self.args['identity']]
+        uid = myidentity['uid']
+        pwstore = self.args['pwstore']
+        db_len = len(passwords)
+        i = 1
+        for password in passwords:
+            plaintext_str = passwords[password]['recipients'][uid]['encrypted_secret']
+            full_path = os.path.join(pwstore, password)
+            self.args['pwname'] = password
+            self.args['overwrite'] = True
+            plist = list(passwords[password]['recipients'])
+            if os.path.isfile(full_path):
+                existing_password = PasswordEntry()
+                existing_password.read_password_data(full_path)
+                self.args['overwrite'] = False
+                passwords[password]['metadata'] = existing_password['metadata']
+                plist += list(existing_password['recipients'])
+
+            description = passwords[password]['metadata']['description']
+            authorizer = passwords[password]['metadata']['authorizer']
+            self.create_pass(plaintext_str, description, authorizer, plist)
+            print("%s of %s imported" % (i, db_len))
+            i += 1
 
     def _validate_args(self):
         ####################################################################

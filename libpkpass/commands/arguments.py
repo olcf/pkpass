@@ -71,6 +71,13 @@ ARGUMENTS = {
                    }
                   },
 
+    'nocrypto': {'args': ['--nocrypto'],
+                 'kwargs': {
+                     'action': 'store_true',
+                     'help': 'Do not use a password for import/export files'
+                 }
+                },
+
     'nopassphrase': {'args': ['--nopassphrase', '--nopin'],
                      'kwargs': {
                          'action': 'store_true',

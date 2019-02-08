@@ -21,6 +21,9 @@ class PasswordDB(object):
     def __str__(self):
         return "%r" % self.__dict__
 
+    def __sizeof__(self):
+        return len(self.pwdb)
+
     ##############################################################################
     def load_password_data(self, password_id):
         """ Load and return password from wherever it may be stored              """
