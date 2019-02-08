@@ -3,15 +3,10 @@
 from __future__ import print_function
 import os
 import getpass
-#import base64
-#from cryptography.fernet import Fernet
-#from cryptography.hazmat.backends import default_backend
-#from cryptography.hazmat.primitives import hashes
-#from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-#import libpkpass.crypto as crypto
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
+import libpkpass.crypto as crypto
 
 
 class Export(Command):
@@ -27,7 +22,7 @@ class Export(Command):
         ####################################################################
         myidentity = self.identities.iddb[self.args['identity']]
         passworddb = PasswordDB()
-        crypt_pass = None
+        crypt_pass = False
         for path, _, files in os.walk(self.args['pwstore']):
             for passwordname in files:
                 passwordpath = os.path.join(path, passwordname)
@@ -39,10 +34,18 @@ class Export(Command):
                 raise PasswordMismatchError()
 
         self._iterate_pdb(myidentity, passworddb, crypt_pass)
+        if crypt_pass:
+            plaintext = ''
+            with open(self.args['pwfile'], 'r') as plain_file:
+                plaintext = plain_file.read()
 
+            with open(self.args['pwfile'], 'w') as enc_file:
+                enc_file.write(crypto.sk_encrypt_string(plaintext, crypt_pass))
 
-    def _iterate_pdb(self, myidentity, passworddb, crypt_pass=None):
+    def _iterate_pdb(self, myidentity, passworddb, crypt_pass=False):
         uid = myidentity['uid']
+        db_len = len(passworddb.pwdb.items())
+        i = 1
         for _, password in passworddb.pwdb.items():
             plaintext_pw = password.decrypt_entry(
                 identity=myidentity,
@@ -50,6 +53,8 @@ class Export(Command):
                 card_slot=self.args["card_slot"])
             password['recipients'][uid]['encrypted_secret'] = plaintext_pw.encode("ASCII")
             password.write_password_data(self.args['pwfile'], False, self.args['nocrypto'], crypt_pass)
+            print("%s of %s exported" % (i, db_len))
+            i += 1
 
     def _validate_args(self):
         ####################################################################

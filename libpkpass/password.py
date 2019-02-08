@@ -172,7 +172,6 @@ class PasswordEntry(object):
         return "%r" % self.__dict__
 
     ##########################################################################
-
     def read_password_data(self, filename):
         """ Open a password file, load passwords and read metadata               """
     ##########################################################################
@@ -194,16 +193,22 @@ class PasswordEntry(object):
         """ Write password data and metadata to the appropriate password file """
     ##########################################################################
         self.validate()
+        iscwd = os.path.basename(filename) == filename
+        passdata = self.todict()
+        open_mode = 'w+'
+        if password is not None:
+            passdata = {self['metadata']['name']: passdata}
+            open_mode = 'a'
         try:
-            if not os.path.isdir(os.path.dirname(filename)):
+            if not iscwd and not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            with open(filename, 'w+') as fname:
+            with open(filename, open_mode) as fname:
                 if encrypted_export and password:
                     encrypted = crypto.sk_encrypt_string(
-                        yaml.safe_dump(self.todict(), default_flow_style=False), 
+                        yaml.safe_dump(passdata, default_flow_style=False),
                         password)
                     fname.write(encrypted)
                 else:
-                    fname.write(yaml.safe_dump(self.todict(), default_flow_style=False))
+                    fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)

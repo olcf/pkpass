@@ -92,7 +92,7 @@ class Command(object):
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
-    def create_pass(self, password1, description, authorizer):
+    def create_pass(self, password1, description, authorizer, recipient_list=None):
         ####################################################################
         """ Run function for class.                                      """
         ####################################################################
@@ -103,12 +103,14 @@ class Command(object):
         password_metadata['name'] = self.args['pwname']
         if self.args['min_escrow']:
             password_metadata['min_escrow'] = self.args['min_escrow']
+        if recipient_list is None:
+            recipient_list = [self.args['identity']]
 
         password = PasswordEntry(**password_metadata)
 
         password.add_recipients(secret=password1,
                                 distributor=self.args['identity'],
-                                recipients=[self.args['identity']],
+                                recipients=recipient_list,
                                 identitydb=self.identities,
                                 passphrase=self.passphrase,
                                 card_slot=self.args['card_slot'],

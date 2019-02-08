@@ -6,3 +6,4 @@ test/pki/intermediate
 test/scratch/*
 venv/*
 .tox/*
+.coverage
