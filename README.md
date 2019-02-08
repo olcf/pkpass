@@ -166,25 +166,48 @@ As long as the private and public keys are in directories that pkpass can find, 
 
 Import/Export Passwords to/from file: formatting considerations
 ====================
-__Work In Progress__  
 Pkpass's import and export function utilizes a file to pull passwords from or put passwords in. This can be particularly useful for backing up your passwords or when you are switching smartcards.
 
-The import file should contain one entry per line, with the password name and value separated by `<COLON><TAB>`. For example:
+PkPass supports two file types for import, the first being a simple key value pair
+The import file should contain one entry per line, with the password name and value separated by `:`. For example:
 
 ```
-# ImportOldPasswords.txt
-./passwords/security-team/testPassName:	ThisIsYourPassword
-./passwords/security-team/otherpassword:	YetAnotherPassword
+security-team/testPassName:ThisIsYourPassword
+security-team/otherpassword:	YetAnotherPassword
+storage-team/secretstuff: ThisIsYourPassword
+```
+
+The other file type is a yaml file: This type of file will be directly exported from pkpass if you use our export functionality
+You should note, that the `encrypted_secret` section after export will be in plaintext
+```
+metadata:
+  authorizer: ginsburgnm
+  creator: ginsburgnm
+  description: dummy_pass
+  name: dummy_pass
+  schemaVersion: v1
+  signature: null
+recipients:
+  nginsburg:
+    derived_key: 0VxFCW2rlq1Dx7QtkNJD_YilSvuf2goFMurAYD5X1YcZLYaWM0QhZussvjUV9H6WkSjSWZauZ7_Le7kvGw8Smrs_E2sBi1CDenheGu-l-zpGuz-bSl_VAv_EjxvtvBF82M7RPpKutyhXlGuYMZht7MIHmP5ieVpK-vnVnHE9ROKcm5brAbm09VQRrAIwLYlRMbn_DKg6j8HYcTbDbNfzgrLC2RL0CE76IwwBbzLgEJwto_EGIy5_pzSjEfpz8KKtjsezgyDXaNYfTRKpsD5gzaDsCloyD8vNLPiV1RBIoqISGf4bTjAxjn__s_bv-P0MJYfgyofZG7-u5H1Ea0MjDw==
+    distributor: ginsburgnm
+    distributor_hash: 7f5cd34a
+    encrypted_secret: plaintext_secret_goes_here
+    encryption_algorithm: rsautl
+    recipient_hash: 7f5cd34a
+    signature: nPZKX7Pa7PdgSPGTtC73s4nZxYCqmPD15iJCRHUCngbnBIP_QSy4QgRbsAVNuk-Y84viIIIXl2ImFejn_l39mNsWYt_p5N_m8YqRp9x8_xkAGWgBF2wO_LpqphNPcuximGPd7gKXYjxT9EldZdUdqiW4eVJFDV6HA2eEKCBrASD6mxuFjWQ3q6CH4D-3FoMVSv1FfPY7oBeu3Tczea79fRXZWokemt8cpxaTlqBNBZhzasCJFWyVeYtghywR7kEcjL4a4x5DQApSF3QwVbgdfagmRVBihlZPVSw3mLVNn_BMwXxn1KFCUQU-6Kjd5wS62OxY1PptDYPcMMdRf1trBg==
+    timestamp: '1549654190.84'
 ```
 
 Export Passwords: Security Considerations
 ====================
-__Work In Progress__
 Pkpass supports automatic encryption of passwords while utilizing password export. This is the recomended use of Pkpass. Ex:
   `./pkpass export ~/exportFile`
 
 You can then subsequntly import the cipher text using the import function:
   `./pkpass import ~/exportFile`
+
+Utilizing this function will encrypt the entire file. metadata or keys will not be readable.
 
 Please remember to use good password practices with this file.
 
