@@ -6,8 +6,6 @@ import getpass
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
-import libpkpass.crypto as crypto
-
 
 class Export(Command):
     """This Class implements the cli functionality of export"""
@@ -34,13 +32,6 @@ class Export(Command):
                 raise PasswordMismatchError()
 
         self._iterate_pdb(myidentity, passworddb, crypt_pass)
-        if crypt_pass:
-            plaintext = ''
-            with open(self.args['pwfile'], 'r') as plain_file:
-                plaintext = plain_file.read()
-
-            with open(self.args['pwfile'], 'w') as enc_file:
-                enc_file.write(crypto.sk_encrypt_string(plaintext, crypt_pass))
 
     def _iterate_pdb(self, myidentity, passworddb, crypt_pass=False):
         uid = myidentity['uid']
@@ -52,9 +43,10 @@ class Export(Command):
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"])
             password['recipients'][uid]['encrypted_secret'] = plaintext_pw.encode("ASCII")
-            password.write_password_data(self.args['pwfile'], False, self.args['nocrypto'], crypt_pass)
-            print("%s of %s exported" % (i, db_len))
+            password.write_password_data(self.args['pwfile'], False, not self.args['nocrypto'], crypt_pass)
+            self.progress_bar(i, db_len)
             i += 1
+        print("")
 
     def _validate_args(self):
         ####################################################################

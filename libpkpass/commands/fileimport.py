@@ -24,12 +24,15 @@ class Import(Command):
         try:
             contents = ""
             with open(self.args['pwfile'], 'r') as fcontents:
-                contents = fcontents.read()
+                contents = fcontents.read().strip()
             if self.args['nocrypto']:
                 self._file_handler(contents)
             else:
                 passwd = getpass.getpass("Please enter the password for the file: ")
-                self._file_handler(crypto.sk_decrypt_string(contents, passwd))
+                passwords = []
+                for password in contents.split("\n"):
+                    passwords.append(crypto.sk_decrypt_string(password, passwd))
+                self._file_handler("\n".join(passwords))
         except IOError:
             raise FileOpenError(self.args['pwfile'], "No such file or directory")
 
@@ -55,8 +58,9 @@ you can manually change the description in the file if you would like")
             self.args['pwname'] = fname
             self.args['overwrite'] = False
             self.create_pass(pvalue, "imported", self.args['identity'])
-            print("%s of %s imported" % (i, db_len))
+            self.progress_bar(i, db_len)
             i += 1
+        print("")
 
     def _yaml_file(self, passwords):
         """This function handles the yaml format of pkpass"""
@@ -81,8 +85,9 @@ you can manually change the description in the file if you would like")
             description = passwords[password]['metadata']['description']
             authorizer = passwords[password]['metadata']['authorizer']
             self.create_pass(plaintext_str, description, authorizer, plist)
-            print("%s of %s imported" % (i, db_len))
+            self.progress_bar(i, db_len)
             i += 1
+        print("")
 
     def _validate_args(self):
         ####################################################################
