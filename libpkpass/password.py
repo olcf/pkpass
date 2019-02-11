@@ -207,7 +207,7 @@ class PasswordEntry(object):
                     encrypted = crypto.sk_encrypt_string(
                         yaml.safe_dump(passdata, default_flow_style=False),
                         password)
-                    fname.write(encrypted)
+                    fname.write(encrypted + "\n")
                 else:
                     fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):

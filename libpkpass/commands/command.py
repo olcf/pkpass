@@ -1,6 +1,7 @@
 """This module is a generic for all pkpass commands"""
 
 from __future__ import print_function
+import sys
 import getpass
 import os
 import yaml
@@ -165,3 +166,10 @@ class Command(object):
     def _print_debug(self):
         print(self.recipient_list)
         print(self.identities.iddb.keys())
+
+    def progress_bar(self, value, endvalue, bar_length=20):
+        percent = float(value) / endvalue
+        arrow = '-' * int(round(percent * bar_length)-1) + '>'
+        spaces = ' ' * (bar_length - len(arrow))
+        sys.stdout.write("\rPercent: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
+        sys.stdout.flush()
