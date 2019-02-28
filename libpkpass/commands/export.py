@@ -52,7 +52,10 @@ class Export(Command):
         ####################################################################
         """ Ensure arguments are appropriate for this command           """
         ####################################################################
-        for argument in ['pwfile', 'certpath', 'keypath']:
+        for argument in ['pwfile', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)
+
+    def _validate_combinatorial_args(self):
+        pass

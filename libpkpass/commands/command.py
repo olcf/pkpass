@@ -3,6 +3,7 @@
 from __future__ import print_function
 import sys
 import getpass
+import json
 import os
 import yaml
 from six import iteritems as iteritems
@@ -28,12 +29,14 @@ class Command(object):
         """ Intialization function for class. Register with argparse   """
         ##################################################################
         self.cli = cli
+        #default certpath to none because connect string is allowed
         self.args = {'identity': getpass.getuser(),
                      'pwstore': './passwords',
-                     'certpath': './certs',
+                     'certpath': None,
                      'keypath': './private',
                      'cabundle': './certs/ca-bundle',
                      'time': 10,
+                     'noverify': None,
                      'card_slot': None,
                      'min_escrow': None,
                      'escrow_users': None}
@@ -69,17 +72,21 @@ class Command(object):
         config_args = self._get_config_args(cli_args['config'])
         self.args.update(config_args)
 
-        fles = ['certpath', 'keypath', 'cabundle', 'pwstore']
+        fles = ['keypath', 'cabundle', 'pwstore']
         for key, value in iteritems(cli_args):
             if value is not None or key not in self.args:
                 self.args[key] = value
             if key in fles and not os.path.exists(self.args[key]):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
-        #print self.args
+        #print(self.args)
         if self.args['escrow_users']:
             self.args['escrow_users'] = self.args['escrow_users'].split(",")
+        self._validate_combinatorial_args()
         self._validate_args()
+
+        if self.args['subparser_name'] != 'show' and self.args['noverify'] is True:
+            self.args['noverify'] = False
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
@@ -87,9 +94,14 @@ class Command(object):
         # Build the list of recipients that this command will act on
         self._build_recipient_list()
 
+        connectmap = None
+        if 'connect' in self.args and self.args['connect']:
+            connectmap = json.loads(self.args['connect'])
+
         # If there are defined repositories of keys and certificates, load them
         self.identities.load_certs_from_directory(
-            self.args['certpath'], self.args['cabundle'])
+            self.args['certpath'], self.args['cabundle'],
+            connectmap, self.args['noverify'])
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
@@ -150,6 +162,29 @@ class Command(object):
 
     def _validate_args(self):
         raise NotImplementedError
+
+    def _validate_combinatorial_args(self):
+        ##################################################################
+        """ This is a weird function name so: combinatorial in this case
+            means that one of the 'combinatorial' arguments are required
+            however, not all of them are necessarily required.
+            Ex: We need certs, we can get this from certpath or connect
+            we do not need both of these arguments but at least one is
+            required"""
+        ##################################################################
+        # we want a multi-dim of lists, this way if more combinations come up
+        # that would be required in a 1 or more capacity, we just add
+        # a list to this list
+        args_list = [['certpath', 'connect']]
+        for arg_set in args_list:
+            valid = False
+            for arg in arg_set:
+                if arg in self.args and self.args[arg] != None:
+                    valid = True
+                    break
+            if not valid:
+                raise CliArgumentError(
+                    "'%s' or '%s' is required" % tuple(arg_set))
 
     def _validate_identities(self):
         for recipient in self.recipient_list:

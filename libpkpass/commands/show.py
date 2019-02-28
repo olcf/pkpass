@@ -31,12 +31,6 @@ class Show(Command):
             self._decrypt_password_entry(
                 self.args['pwstore'], password, myidentity, self.args['pwname'])
 
-    def _validate_args(self):
-        for argument in ['certpath', 'keypath']:
-            if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
-
     def _walk_dir(self, directory, password, myidentity):
         # os.walk returns root, dirs, and files we just need files
         for root, _, pwnames in os.walk(directory):
@@ -64,3 +58,9 @@ class Show(Command):
                       result['distributor'])
 
         print(("%s: %s") % (password.metadata['name'], plaintext_pw))
+
+    def _validate_args(self):
+        for argument in ['keypath']:
+            if argument not in self.args or self.args[argument] is None:
+                raise CliArgumentError(
+                    "'%s' is a required argument" % argument)

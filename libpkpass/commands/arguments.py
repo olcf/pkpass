@@ -1,4 +1,6 @@
 """This Module defines the arguments that argparse will accept from the CLI"""
+import json
+
 ARGUMENTS = {
     ############################################################################
     # Data structure containing all arguments a user could pass into pkpass
@@ -31,6 +33,13 @@ ARGUMENTS = {
                      'help': "Path to directory containing public keys.  Certificates must end in '.cert'"
                  }
                 },
+
+    'connect': {'args': ['--connect'],
+                'kwargs': {
+                    'type': json.loads,
+                    'help': "Connection string for the api to retrieve certs"
+                    }
+               },
 
     'dstpwstore': {'args': ['--dstpwstore'],
                    'kwargs': {'type': str,

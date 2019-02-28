@@ -51,7 +51,7 @@ class Clip(Command):
             pyperclip.copy(oldclip)
 
     def _validate_args(self):
-        for argument in ['certpath', 'keypath']:
+        for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)
