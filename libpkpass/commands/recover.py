@@ -4,7 +4,6 @@ from __future__ import print_function
 from builtins import input
 from libpkpass.escrow import pk_recover_secret
 from libpkpass.commands.command import Command
-#from libpkpass.errors import CliArgumentError
 
 class Recover(Command):
     """This class implements the CLI functionality of recovery for passwords"""
@@ -24,4 +23,7 @@ class Recover(Command):
         print(pk_recover_secret(shares))
 
     def _validate_args(self):
+        pass
+
+    def _validate_combinatorial_args(self):
         pass

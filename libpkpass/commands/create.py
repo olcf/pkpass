@@ -27,7 +27,7 @@ class Create(Command):
         self.create_pass(password1, description, authorizer)
 
     def _validate_args(self):
-        for argument in ['pwname', 'certpath', 'keypath']:
+        for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)

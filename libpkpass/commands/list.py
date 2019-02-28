@@ -37,7 +37,7 @@ class List(Command):
         print("\n%s" % yaml.dump(result, default_flow_style=False))
 
     def _validate_args(self):
-        for argument in ['certpath', 'keypath']:
+        for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)
