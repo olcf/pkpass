@@ -143,8 +143,9 @@ class Command(object):
     def _build_recipient_list(self):
         try:
             if 'groups' in self.args and self.args['groups'] is not None:
-                self._parse_group_membership()
-            self.recipient_list += self.args['users'].split(',')
+                self.recipient_list += self._parse_group_membership()
+            if 'users' in self.args and self.args['users'] is not None:
+                self.recipient_list += self.args['users'].split(',')
             self.recipient_list = [x.strip() for x in self.recipient_list]
             for user in self.recipient_list:
                 if str(user) == '':
@@ -153,11 +154,11 @@ class Command(object):
             pass
 
     def _parse_group_membership(self):
+        member_list = []
         try:
-            if 'users' not in self.args or self.args['users'] is None:
-                self.args['users'] = ""
             for group in self.args['groups'].split(','):
-                self.recipient_list += self.args[group.strip()].split(',')
+                member_list += self.args[group.strip()].split(',')
+            return member_list
         except KeyError as err:
             raise GroupDefinitionError(str(err))
 
