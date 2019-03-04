@@ -10,7 +10,7 @@ from six import iteritems as iteritems
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
-from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError
+from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError
 
 
 class Command(object):
@@ -142,12 +142,25 @@ class Command(object):
 
     def _build_recipient_list(self):
         try:
-            self.recipient_list = self.args['users'].split(',')
+            if 'groups' in self.args and self.args['groups'] is not None:
+                self.recipient_list += self._parse_group_membership()
+            if 'users' in self.args and self.args['users'] is not None:
+                self.recipient_list += self.args['users'].split(',')
+            self.recipient_list = [x.strip() for x in self.recipient_list]
             for user in self.recipient_list:
                 if str(user) == '':
                     raise NullRecipientError
         except KeyError:  # If this is a command with no users, don't worry about it
             pass
+
+    def _parse_group_membership(self):
+        member_list = []
+        try:
+            for group in self.args['groups'].split(','):
+                member_list += self.args[group.strip()].split(',')
+            return member_list
+        except KeyError as err:
+            raise GroupDefinitionError(str(err))
 
     def _get_config_args(self, config):
         try:
