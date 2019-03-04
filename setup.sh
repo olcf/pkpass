@@ -195,7 +195,8 @@ pkcs15-tool --version
 #guess if pyinstall worked properly and if the guess is that it did
 #inform user how to activate that virtualenv
 if [[ "$pinstall" == "2" ]]; then
-    venv="$(find .. -maxdepth 1 -mindepth 1 -type d -cmin -1 -not -path '*/\.*' | cut -c 4-)"
+    venv="$(find . -mindepth 1 -maxdepth 1 -type d -printf '%T+ %p\n' | sort -r | grep -v git | head -1 | cut -d ' ' -f 2)"
+    echo "The following is a guess:"
     echo "you may have installed with a virtual environment if so use"
     echo source "$venv"/bin/activate
 fi
