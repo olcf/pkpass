@@ -148,7 +148,17 @@ Configuring the Tool
 Password Repository
 -------------------
 
-Passwords are created on the file system, so any destination may be specified.  For passwords that need to be distributed to other users, convention suggests putting these into a hierarchy with the root in 'passwords'.  To make the repository as flat as possible, the top level will contain mostly groupings of passwords, with the next level containing the passwords themselves.  Examples of groups may include "security-team", "database-users", "passwords/general", etc.  It is up to each organization to determine the best hierarchy for storing passwords.  The 'list' command and 'showall' commands will crawl the hierarchy starting at the root regardless of structure.
+Passwords are created on the file system, so any destination may be specified.  For passwords that need to be distributed to other users, convention suggests putting these into a hierarchy with the root in 'passwords'.  To make the repository as flat as possible, the top level will contain mostly groupings of passwords, with the next level containing the passwords themselves.  
+Examples of groups may include "security-team", "database-users", "passwords/general", etc.  It is up to each organization to determine the best hierarchy for storing passwords.  The 'list' command and 'showall' commands will crawl the hierarchy starting at the root regardless of structure.
+
+You may distribute passwords to a specified group defined in your pkpassrc file. These groups may be arbitrary
+```
+databaseadmins: db1, db2,db3
+secadmins: admin1,  admin2 ,  admin3
+groups: secadmins, databaseadmins
+```
+
+you may also specify on the command line which groups to use: ` pkpass.py distribute password -g secadmins`
 
 Special Treatment for Non-piv accounts/credentials
 ====================
