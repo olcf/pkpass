@@ -7,3 +7,6 @@ test/scratch/*
 venv/*
 .tox/*
 .coverage
+build/*
+dist/*
+pkpass.egg-info/*

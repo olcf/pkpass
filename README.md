@@ -13,7 +13,7 @@ The password management solution provides:
   - Password history and change logs
   - Distributed backup capabilities
   - PIV/Smartcard Credential encryption/decryption
-  - Import and export functionality (WIP)
+  - Import and export functionality
 
 Passwords that are created are distributed to recipients by public key encryption.  The x509 certificate of the intended recipient is used to create an encrypted copy of the distributed password that is then saved in a password-specific git repository.  Multiple encrypted copies of the secret are created, one for each user.  End users then check out the git repo and are able to read passwords using their PIV/Smartcard credential to decrypt.
 
@@ -55,13 +55,25 @@ compromise, there may be other information such as system names, account names, 
 
 Setup/Initial
 -----------
+For the initial setup there are two scripts that you can run, each can serve the same function.
+The bash script `./setup.sh` obviously will only work on systems with bash such as linux and macos
+The python script `./setup.py` *should* run on all systems.
 
-For inital setup you may want to run the provided setup script at the root of the project
-`./setup.sh`
-This interactive setup script will install dependencies and create a .pkpassrc file for you
+* bash:  
+    This script will walk you through a full installation including setting up venvs if you need that.  
+
+* python:  
+    This will run through specific commands  
+    `python setup.py rcfile` will create an rcfile  
+    `python setup.py install` will run the installation on a system level  
+    `python setup.py install --user` will run the installation on a user level  
+    This file is a relatively standard setup file and I will not run through all options  
+    if you need the -h flag may help.  
+
+In both cases, these files can install dependencies and create a .pkpassrc file for you
 
 If you would like to proceed manually, or have problems with the setup script:
-You will want to create a .pkpassrc file in the pkpass repository that you have cloned.  A typical pkpassrc file looks like this:
+You will want to create a .pkpassrc file in your home directory.  A typical pkpassrc file looks like this:
 
 ```
   certpath: /Users/username/passdb/certs/  
@@ -86,33 +98,34 @@ Command Overview
 ----------------
 
 ```
-> python pkpass.py -h
+python pkpass.py -h
 usage: pkpass.py [-h] [--config CONFIG]
-                 {create,distribute,show,clip,list,listrecipients,export,recover}
+                 {clip,create,distribute,export,listrecipients,import,list,recover,show}
                  ...
 
 Public Key Password Manager
 
 positional arguments:
-  {create,distribute,show,clip,list,listrecipients,export,recover}
+  {clip,create,distribute,export,listrecipients,import,list,recover,show}
                         sub-commands
+    clip                Copy a password to clipboard
     create              Create a new password entry and encrypt it for
                         yourself
     distribute          Distribute an existing password entry to another
                         entity
-    show                Display a password
-    clip                Copy a password to clipboard
-    list                List passwords you have access to
-    listrecipients      List the recipients that pkpass knows about
     export              Export passwords that you have access to and encrypt
                         with aes
+    listrecipients      List the recipients that pkpass knows about
+    import              Import passwords that you have saved to a file
+    list                List passwords you have access to
     recover             Recover a password that has been distributed using
                         escrow functions
+    show                Display a password
 
 optional arguments:
   -h, --help            show this help message and exit
   --config CONFIG       Path to a PKPass configuration file. Defaults to
-                        '.pkpassrc'
+                        '~/.pkpassrc'
 ```
 
 
@@ -221,7 +234,6 @@ Utilizing this function will encrypt the entire file. metadata or keys will not 
 
 Please remember to use good password practices with this file.
 
-
 If you so choose, you can export to a plaintext file using the `--nocrypto` flag. This method is not recommended for security purposes:  
   `./pkpass export --nocrypto ~/exportFile`
 
@@ -237,3 +249,8 @@ __Note:__ All dependencies will be installed if the setup script is run.
 Python 2 support
 ====================
 We will support python2 until the end of the year, this tool was originally written in python2; and should also work with python3.
+
+Windows Consideration
+====================
+There has not been much (if any) testing around the windows ecosystem. Coding has been attempted to comply with portability standards;
+but compatibility is not guaranteed. If you need it, feel free to submit a PR 😀
