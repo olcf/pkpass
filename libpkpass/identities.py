@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import os
+import tempfile
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError
 
@@ -23,8 +24,9 @@ class IdentityDB(object):
         return "%r" % self.__dict__
 
     def _load_certs_from_external(self, connection_map):
+        temp_dir = str(tempfile.gettempdir())
         for key, value in connection_map.items():
-            dirname = "/tmp/" + str(key) + "/"
+            dirname = os.path.join(temp_dir, str(key))
             encoded = key.encode("ASCII")
             connector = "libpkpass.connectors." + encoded.lower()
             connector = __import__(connector, fromlist=[encoded])
@@ -37,9 +39,10 @@ class IdentityDB(object):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
             for name, certlist in certs.items():
-                with open(dirname + str(name) + str(self.extensions['certificate'][0]), 'w') as tmpcert:
+                with open(os.path.join(dirname, str(name), str(self.extensions['certificate'][0]), 'w')) as tmpcert:
                     tmpcert.write("\n".join(certlist))
-            self._load_from_directory("/tmp/" + str(key) + "/", 'certificate')
+
+            self._load_from_directory(dirname, 'certificate')
 
     def _load_from_directory(self, path, filetype):
         #######################################################################
