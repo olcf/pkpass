@@ -73,7 +73,7 @@ basicConstraints = critical, CA:true
 keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 
 EOF
-
+intermediate(){
 cat << EOF > intermediate/openssl.cnf
 [ca]
 
@@ -129,6 +129,7 @@ countryName_default             = UT
 stateOrProvinceName_default     = unittesting
 localityName_default            = unittesting
 0.organizationName_default      = unittesting
+commonName_default              = $cnrecipient
 
 [ v3_ca ]
 subjectKeyIdentifier = hash
@@ -138,6 +139,8 @@ keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 
 EOF
 
+}
+intermediate
 
 # Create Root CA
 openssl genrsa -out ca/private/ca.key 4096
@@ -155,9 +158,11 @@ cat ca/certs/ca.cert intermediate/certs/ca.cert > intermediate/certs/ca-bundle
 chmod 444 intermediate/certs/ca-bundle
 
 for recipient in 'r1' 'r2' 'r3'; do
+  export cnrecipient=$recipient
+  intermediate
   openssl genrsa -out intermediate/private/${recipient}.key 4096
   chmod 400 intermediate/private/${recipient}.key
-
+  
   echo
   echo
   echo
