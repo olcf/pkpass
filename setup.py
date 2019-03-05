@@ -6,6 +6,8 @@ from __future__ import print_function
 import io
 import os
 import sys
+from subprocess import Popen, PIPE, STDOUT
+import getpass
 from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
@@ -52,39 +54,10 @@ except IOError:
 # Load the package's __version__.py module as a dictionary.
 ABOUT = {}
 if not VERSION:
-    PROJECT_SLUG = NAME.lower().replace("-", "_").replace(" ", "_")
-    with open(os.path.join(HERE, PROJECT_SLUG, 'VERSION')) as version_file:
+    with open(os.path.join(HERE, 'VERSION')) as version_file:
         ABOUT['__version__'] = version_file.read().strip()
 else:
     ABOUT['__version__'] = VERSION
-
-def user_input(prompt, default):
-    u_input = raw_input(prompt).strip()
-    return u_input if u_input else default
-
-def directory_creation(user_prompt, default):
-    directory = user_input(user_prompt, default)
-    if not os.path.isdir(directory):
-        os.makedirs(directory)
-    return str(directory)
-
-def file_creation(user_prompt, default):
-    fname = user_input(user_prompt, default)
-    if not os.path.exists(fname):
-        with open(fname, 'a'):
-            os.utime(fname, None)
-    return str(fname)
-
-PASSDB_HOME = os.path.join(str(os.path.expanduser("~")), "passdb")
-CERTS = directory_creation("Directory for certpath (defaults to ~/passdb/certs): ",
-                           os.path.join(PASSDB_HOME, "certs"))
-KEYS = directory_creation("Directory for keypath (defaults to ~/passdb/keys): ",
-                          os.path.join(PASSDB_HOME, "keys"))
-CABUNDLE = file_creation("Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): ",
-                         os.path.join(PASSDB_HOME, "cabundles", "ca.bundle"))
-PASSWORDS = directory_creation("Directory for passwords (defaults to ~/passdb/passwords): ",
-                               os.path.join(PASSDB_HOME, "passwords"))
-
 
 class UploadCommand(Command):
     """Support setup.py upload."""
@@ -121,6 +94,89 @@ class UploadCommand(Command):
 
         sys.exit()
 
+class RCFile(Command):
+    """Re/Create RCFile"""
+    description = 'Create a pkpass rc file'
+    user_options = []
+
+    def initialize_options(self):
+        self.home = os.path.expanduser("~")
+
+    def finalize_options(self):
+        # this command object complains with you do stuff in init
+        self.home = os.path.expanduser("~") #pylint: attribute-defined-outside-init
+
+    def user_input(self, prompt, default):
+        u_input = raw_input(prompt).strip()
+        return u_input if u_input else default
+
+    def directory_creation(self, user_prompt, default):
+        directory = self.user_input(user_prompt, default) if user_prompt else default
+        directory = os.path.expanduser(directory)
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
+        return str(directory)
+
+    def file_creation(self, user_prompt, default):
+        filename = self.user_input(user_prompt, default)
+        filename = os.path.expanduser(filename)
+        if not os.path.exists(filename):
+            self.directory_creation(None, os.path.dirname(filename))
+            with open(filename, 'w+') as newfile:
+                newfile.write("")
+        return str(filename)
+
+    def finish_run(self):
+        testing = """testing versions of openssl and pkcs15-tool if version numbers return you're probably good
+        for sanity sake Noah's return values were: 
+        openssl version: LibreSSL 2.2.7
+        pkcs15-tool --version: OpenSC-0.18.0, rev: eb60481f, commit-time: 2018-05-16 13:48:37 +0200
+        ------YOUR VALUES BELOW THIS LINE -----------"""
+
+        print(testing)
+        print(Popen("openssl version".split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT).communicate()[0])
+        print(Popen("pkcs15-tool --version".split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT).communicate()[0])
+
+    def run(self):
+        print("If not using defaults for the following paths please use full filepath or relative to home using ~")
+        passdb_home = os.path.join(self.home, "passdb")
+        certs = self.directory_creation("Directory for certpath (defaults to ~/passdb/certs): ",
+                                        os.path.join(passdb_home, "certs"))
+        keys = self.directory_creation("Directory for keypath (defaults to ~/passdb/keys): ",
+                                       os.path.join(passdb_home, "keys"))
+        cabundle = self.file_creation("Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): ",
+                                      os.path.join(passdb_home, "cabundles", "ca.bundle"))
+        passwords = self.directory_creation("Directory for passwords (defaults to ~/passdb/passwords): ",
+                                            os.path.join(passdb_home, "passwords"))
+
+        print(Popen("pkcs11-tool -L".split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT).communicate()[0])
+        card_slot = self.user_input("Available slots listed above, which would you like to use? (defaults to 0): ", "0")
+        identity = self.user_input("What user name would you like to use? (defaults to system user): ", getpass.getuser())
+        print("Escrow users is a feature of Pkpass. Escrow allows a password to be recovered by the majority of the escrow users in the event of an emergency.")
+        check_escrow = self.user_input("Would you like to setup escrow? ", "n")
+        if check_escrow.lower()[0] != 'y':
+            escrow_users = ""
+            min_escrow = ""
+        else:
+            escrow_users = self.user_input("Please enter a comma seperated list of usernames: ", "").split(',')
+            escrow_users = ",".join([user.strip() for user in escrow_users])
+            min_escrow = self.user_input("What should be the minimum number of escrow users required to unlock? ",
+                                         len(escrow_users.split(',')) - 1)
+
+        contents = """certpath: %s
+keypath: %s
+cabundle: %s
+pwstore: %s
+card_slot: %s
+identity: %s
+escrow_users: %s
+min_escrow: %s""" % (certs, keys, cabundle, passwords, card_slot, identity, escrow_users, min_escrow)
+
+        with open(os.path.join(self.home, '.pkpassrc'), 'w') as fname:
+            fname.write(contents)
+
+        self.finish_run()
+
 setup(
     name=NAME,
     version=ABOUT['__version__'],
@@ -143,5 +199,6 @@ setup(
         ],
     cmdclass={
         'upload': UploadCommand,
+        'rcfile': RCFile,
         },
     )

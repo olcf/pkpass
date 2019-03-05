@@ -2,6 +2,7 @@
 """This Module implements a CLI"""
 
 import argparse
+import os
 import libpkpass.commands.create as create
 import libpkpass.commands.distribute as distribute
 import libpkpass.commands.show as show
@@ -25,10 +26,12 @@ class Cli(object):
         ####################################################################
         # Hash of registered subparser actions, mapping string to actual subparser
         self.actions = {}
+        home = os.path.expanduser("~")
         self.parser = argparse.ArgumentParser(
             description='Public Key Password Manager')
         self.parser.add_argument(
-            '--config', type=str, help="Path to a PKPass configuration file.  Defaults to '.pkpassrc'", default='.pkpassrc')
+            '--config', type=str, help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
+            default=os.path.join(home, '.pkpassrc'))
         self.subparsers = self.parser.add_subparsers(
             help='sub-commands', dest='subparser_name')
 

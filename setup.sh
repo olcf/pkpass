@@ -93,10 +93,10 @@ fi
 
 #define a home default for passdb
 home="$HOME"/passdb
-
+rcfile="$HOME/.pkpassrc"
 #check for a .pkpassrc file and ask user if they want to overwrite or skip to pyinstall
 #This is useful in the event that an error occurred during last setup
-if [[ -f "./.pkpassrc" ]]; then
+if [[ -f "$rcfile" ]]; then
     echo -e ".pkpassrc file detected, you may either overwrite this .pkpassrc file and 
     use the script as normal; or skip setup on the pkpassrc file and continue to 
     the python depedencies"
@@ -174,7 +174,7 @@ pwstore: $pwstore
 card_slot: $cardslot
 identity: $identity
 escrow_users: $escrowusers
-min_escrow: $minescrow" > .pkpassrc
+min_escrow: $minescrow" > "$rcfile"
 
 fi
 
