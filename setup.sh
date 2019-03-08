@@ -96,6 +96,7 @@ home="$HOME"/passdb
 rcfile="$HOME/.pkpassrc"
 #check for a .pkpassrc file and ask user if they want to overwrite or skip to pyinstall
 #This is useful in the event that an error occurred during last setup
+skip="n"
 if [[ -f "$rcfile" ]]; then
     echo -e ".pkpassrc file detected, you may either overwrite this .pkpassrc file and 
     use the script as normal; or skip setup on the pkpassrc file and continue to 
