@@ -13,7 +13,7 @@ class Clip(Command):
     """This class allows for the copying of a password to the clipboard"""
     name = 'clip'
     description = 'Copy a password to clipboard'
-    selected_args = ['pwname', 'pwstore', 'stdin', 'time', 'identity',
+    selected_args = ['pwname', 'pwstore', 'stdin', 'time', 'identity', 'nocache',
                      'certpath', 'keypath', 'cabundle', 'nopassphrase', 'noverify', 'card_slot']
 
     def _run_command_execution(self):

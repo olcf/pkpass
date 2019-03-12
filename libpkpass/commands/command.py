@@ -100,8 +100,11 @@ class Command(object):
 
         # If there are defined repositories of keys and certificates, load them
         self.identities.load_certs_from_directory(
-            self.args['certpath'], self.args['cabundle'],
-            connectmap, self.args['noverify'])
+            self.args['certpath'],
+            self.args['cabundle'],
+            connectmap,
+            self.args['noverify'],
+            self.args['nocache'] if 'nocache' in self.args else False)
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 

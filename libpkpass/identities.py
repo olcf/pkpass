@@ -23,24 +23,25 @@ class IdentityDB(object):
     def __str__(self):
         return "%r" % self.__dict__
 
-    def _load_certs_from_external(self, connection_map):
+    def _load_certs_from_external(self, connection_map, nocache):
         temp_dir = str(tempfile.gettempdir())
         for key, value in connection_map.items():
             dirname = os.path.join(temp_dir, str(key))
-            encoded = key.encode("ASCII")
-            connector = "libpkpass.connectors." + encoded.lower()
-            connector = __import__(connector, fromlist=[encoded])
-            connector = getattr(connector, encoded)
-            connector = connector(value)
-            # connector.list_certificates() should return a dict
-            # the key being the username and the value being
-            # a list of certs
-            certs = connector.list_certificates()
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            for name, certlist in certs.items():
-                with open(os.path.join(dirname, str(name), str(self.extensions['certificate'][0]), 'w')) as tmpcert:
-                    tmpcert.write("\n".join(certlist))
+            if nocache and os.path.exists(dirname):
+                encoded = key.encode("ASCII")
+                connector = "libpkpass.connectors." + encoded.lower()
+                connector = __import__(connector, fromlist=[encoded])
+                connector = getattr(connector, encoded)
+                connector = connector(value)
+                # connector.list_certificates() should return a dict
+                # the key being the username and the value being
+                # a list of certs
+                certs = connector.list_certificates()
+                if not os.path.exists(dirname):
+                    os.makedirs(dirname)
+                for name, certlist in certs.items():
+                    with open(os.path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
+                        tmpcert.write("\n".join(certlist))
 
             self._load_from_directory(dirname, 'certificate')
 
@@ -62,12 +63,12 @@ class IdentityDB(object):
         except OSError as error:
             raise FileOpenError(path, str(error.strerror))
 
-    def load_certs_from_directory(self, certpath, cabundle, connectmap=None, noverify=False):
+    def load_certs_from_directory(self, certpath, cabundle, connectmap=None, noverify=False, nocache=False):
         #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
         if connectmap:
-            self._load_certs_from_external(connectmap)
+            self._load_certs_from_external(connectmap, nocache)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
         for key, _ in self.iddb.items():
