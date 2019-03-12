@@ -133,14 +133,6 @@ for recipient in 'r1' 'r2' 'r3'; do
   intermediate
   openssl genrsa -out intermediate/private/${recipient}.key 4096
   chmod 400 intermediate/private/${recipient}.key
-  
-  echo
-  echo
-  echo
-  echo "!!!! ENTER '$recipient' for Common Name and type 'y' when asked! !!!!"
-  echo
-  echo
-  echo
 
   openssl req -config intermediate/openssl.cnf -key intermediate/private/${recipient}.key -new -sha256 -out intermediate/csr/${recipient}.csr
 
