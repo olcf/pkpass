@@ -39,9 +39,9 @@ class Cli(object):
         create.Create(self)
         distribute.Distribute(self)
         export.Export(self)
-        listrecipients.Listrecipients(self)
         pkimport.Import(self)
         pklist.List(self)
+        listrecipients.Listrecipients(self)
         recover.Recover(self)
         show.Show(self)
 
