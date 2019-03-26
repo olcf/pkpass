@@ -16,6 +16,7 @@ class IdentityDB(object):
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
         self.iddb = {}
+        self.recipient_list = []
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.__dict__)
@@ -73,7 +74,7 @@ class IdentityDB(object):
             self._load_from_directory(certpath, 'certificate')
         for key, _ in self.iddb.items():
             self.iddb[key]['cabundle'] = cabundle
-            if not noverify:
+            if not noverify and key in self.recipient_list:
                 self.iddb[key]['verified'] = crypto.pk_verify_chain(self.iddb[key])
                 self.iddb[key]['fingerprint'] = crypto.get_cert_fingerprint(
                     self.iddb[key])

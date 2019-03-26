@@ -85,7 +85,7 @@ class Command(object):
         self._validate_combinatorial_args()
         self._validate_args()
 
-        if self.args['subparser_name'] != 'show' and self.args['noverify'] is True:
+        if self.args['subparser_name'] in ['create', 'distribute'] and self.args['noverify'] is True:
             self.args['noverify'] = False
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
@@ -93,6 +93,7 @@ class Command(object):
 
         # Build the list of recipients that this command will act on
         self._build_recipient_list()
+        self.identities.recipient_list = self.recipient_list + [self.args['identity']]
 
         connectmap = None
         if 'connect' in self.args and self.args['connect']:
