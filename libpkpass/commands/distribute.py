@@ -9,7 +9,7 @@ class Distribute(Command):
     """This Class implements the CLI functionality for ditribution"""
     name = 'distribute'
     description = 'Distribute an existing password entry to another entity'
-    selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity',
+    selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'min_escrow', 'escrow_users',
                      'certpath', 'cabundle', 'keypath', 'nopassphrase', 'noverify', 'nosign', 'card_slot']
 
     def _run_command_execution(self):
@@ -29,7 +29,10 @@ class Distribute(Command):
                                 recipients=self.recipient_list,
                                 identitydb=self.identities,
                                 passphrase=self.passphrase,
-                                card_slot=self.args["card_slot"]
+                                card_slot=self.args['card_slot'],
+                                minimum=self.args['min_escrow'],
+                                escrow_users=self.args['escrow_users'],
+                                pwstore=self.args['pwstore']
                                )
 
         password.write_password_data(os.path.join(

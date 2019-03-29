@@ -12,7 +12,7 @@ class List(Command):
     """This class implements the cli list"""
     name = 'list'
     description = 'List passwords you have access to'
-    selected_args = ['pwstore', 'stdin', 'identity', 'nocache',
+    selected_args = ['pwstore', 'stdin', 'identity', 'nocache', 'recovery',
                      'certpath', 'cabundle', 'noverify']
 
     def _run_command_execution(self):
@@ -32,6 +32,15 @@ class List(Command):
                 result[pwname] = {'name': passwordentry.metadata['name'],
                                   'distributor': passwordentry.recipients[self.args['identity']]['distributor']
                                  }
+            elif self.args['recovery'] and  passwordentry.escrow:
+                for key, value in passwordentry.escrow.items():
+                    if self.args['identity'] in value:
+                        result[pwname] = {
+                            'name': passwordentry.metadata['name'],
+                            'share': key,
+                            'distributor': value[self.args['identity']]['distributor']
+                            }
+
 
         print("Passwords for '%s':" % self.args['identity'])
         print("\n%s" % yaml.dump(result, default_flow_style=False))

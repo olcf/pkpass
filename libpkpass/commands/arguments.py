@@ -145,6 +145,13 @@ ARGUMENTS = {
                           }
                },
 
+    'recovery': {'args': ['-r', '--recovery'],
+                 'kwargs': {
+                     'action': 'store_true',
+                     'help': 'Work with passwords distributed through escrow functionality'
+                 }
+                },
+
     'stdin': {'args': ['--stdin'],
               'kwargs': {
                   'action': 'store_true',

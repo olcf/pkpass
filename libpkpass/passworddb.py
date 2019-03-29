@@ -51,6 +51,8 @@ class PasswordDB(object):
             password_entry = PasswordEntry()
             password_entry.metadata = password_data['metadata']
             password_entry.recipients = password_data['recipients']
+            if 'escrow' in password_data:
+                password_entry.escrow = password_data['escrow']
         password_entry.validate()
         return password_entry
 
@@ -62,7 +64,8 @@ class PasswordDB(object):
             if not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
             with open(filename, 'w+') as fname:
-                fname.write(yaml.dump(password_data.todict(),
+                passdata = {key: value for key, value in password_data.todict().items() if value}
+                fname.write(yaml.dump(passdata,
                                       default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)
