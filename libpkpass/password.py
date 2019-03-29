@@ -1,6 +1,7 @@
 """This Module defines what a password contains"""
 
 from __future__ import print_function
+import uuid
 import time
 import os
 import yaml
@@ -26,9 +27,70 @@ class PasswordEntry(object):
 
         self.metadata.update(kwargs)
         self.recipients = {}
+        self.escrow = {}
 
     def __getitem__(self, key):
         return getattr(self, key)
+
+    def read_escrow(self, filename):
+        try:
+            with open(filename, 'r') as fname:
+                password_data = yaml.safe_load(fname)
+                return password_data['escrow']
+        except (OSError, IOError, yaml.scanner.ScannerError, yaml.parser.ParserError):
+            #we actually don't care here.. file might not exist yet
+            return {}
+
+    def process_escrow_map(
+            self,
+            escrow_map,
+            split_secret=None,
+            distributor=None,
+            recipients=None,
+            identitydb=None,
+            encryption_algorithm='rsautl',
+            passphrase=None,
+            card_slot=None,
+            escrow_users=None,
+            minimum=None):
+        #######################################################################
+        """Process the escrow user map into escrow users"""
+        #######################################################################
+        escrow_guid = str(uuid.uuid1()).replace('-', '')
+        if escrow_map:
+            for key, value in escrow_map.items():
+                if set(value) == set(escrow_users):
+                    escrow_guid = key
+        self.escrow[escrow_guid] = {'minimum_escrow': minimum}
+        i = 0
+        for escrow_user in escrow_users:
+            if escrow_user not in recipients:
+                self.escrow[escrow_guid][escrow_user] = self._add_recipient(
+                    escrow_user, split_secret[i], distributor,
+                    identitydb, encryption_algorithm, passphrase, card_slot)
+            i += 1
+
+
+    def add_escrow(
+            self,
+            secret=None,
+            recipients=None,
+            escrow_users=None,
+            minimum=None,
+            pwstore=None):
+        #######################################################################
+        """ Add escrow users to the recipient list of this password object"""
+        #######################################################################
+        escrow_users = list((set(escrow_users) - set(recipients)))
+        if (len(escrow_users) > 3) and (len(escrow_users) < 3):
+            print("warning: recipient users overlapped with escrow users too much, not enough escrow")
+
+        #escrow_users may now be none after the set operations
+        if escrow_users is None:
+            escrow_users = []
+        else:
+            split_secret = pk_split_secret(secret, escrow_users, minimum)
+        return (self.read_escrow(os.path.join(pwstore, self.metadata['name'])), split_secret)
 
     def add_recipients(
             self,
@@ -40,9 +102,10 @@ class PasswordEntry(object):
             passphrase=None,
             card_slot=None,
             escrow_users=None,
-            minimum=None):
+            minimum=None,
+            pwstore=None):
         #######################################################################
-        """ Add recipients to the recipient list of this password object           """
+        """ Add recipients to the recipient list of this password object"""
         #######################################################################
         if recipients is None:
             recipients = []
@@ -51,23 +114,23 @@ class PasswordEntry(object):
                                                              identitydb, encryption_algorithm, passphrase,
                                                              card_slot)
         if escrow_users is not None:
-            escrow_len = len(escrow_users)
-            escrow_users = list(set(escrow_users) - set(recipients))
-            if (escrow_len > 3) and (len(escrow_users) < 3):
-                print("warning: recipient users overlapped with escrow users too much not enough escrow")
-
-            #escrow_users may now be none after the set operations
-            if escrow_users is None:
-                escrow_users = []
-            else:
-                split_secret = pk_split_secret(secret, escrow_users, minimum)
-            i = 0
-            for escrow_user in escrow_users:
-                if escrow_user not in recipients:
-                    self.recipients[escrow_user] = self._add_recipient(escrow_user, split_secret[i], distributor,
-                                                                       identitydb, encryption_algorithm, passphrase,
-                                                                       card_slot)
-                i += 1
+            escrow_map, split_secret = self.add_escrow(
+                secret=secret,
+                recipients=recipients,
+                escrow_users=escrow_users,
+                minimum=minimum,
+                pwstore=pwstore)
+            self.process_escrow_map(
+                escrow_map,
+                split_secret=split_secret,
+                distributor=distributor,
+                recipients=recipients,
+                identitydb=identitydb,
+                encryption_algorithm=encryption_algorithm,
+                passphrase=passphrase,
+                card_slot=card_slot,
+                escrow_users=escrow_users,
+                minimum=minimum)
 
     def _add_recipient(
             self,
@@ -180,6 +243,8 @@ class PasswordEntry(object):
                 password_data = yaml.safe_load(fname)
                 self.metadata = password_data['metadata']
                 self.recipients = password_data['recipients']
+                if 'escrow' in password_data:
+                    self.escrow = password_data['escrow']
             self.validate()
         except (OSError, IOError) as error:
             raise PasswordIOError(
@@ -194,7 +259,7 @@ class PasswordEntry(object):
     ##########################################################################
         self.validate()
         iscwd = os.path.basename(filename) == filename
-        passdata = self.todict()
+        passdata = {key: value for key, value in self.todict().items() if value}
         open_mode = 'w+'
         if password is not None:
             passdata = {self['metadata']['name']: passdata}

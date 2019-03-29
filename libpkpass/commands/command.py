@@ -30,16 +30,19 @@ class Command(object):
         ##################################################################
         self.cli = cli
         #default certpath to none because connect string is allowed
-        self.args = {'identity': getpass.getuser(),
-                     'pwstore': './passwords',
-                     'certpath': None,
-                     'keypath': './private',
-                     'cabundle': './certs/ca-bundle',
-                     'time': 10,
-                     'noverify': None,
-                     'card_slot': None,
-                     'min_escrow': None,
-                     'escrow_users': None}
+        self.args = {
+            'identity': getpass.getuser(),
+            'cabundle': './certs/ca-bundle',
+            'keypath': './private',
+            'pwstore': './passwords',
+            'time': 10,
+            'card_slot': None,
+            'certpath': None,
+            'escrow_users': None,
+            'min_escrow': None,
+            'noverify': None,
+            'recovery': False
+            }
         self.recipient_list = []
         self.identities = IdentityDB()
         cli.register(self, self.name, self.description)
@@ -79,7 +82,6 @@ class Command(object):
             if key in fles and not os.path.exists(self.args[key]):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
-        #print(self.args)
         if self.args['escrow_users']:
             self.args['escrow_users'] = self.args['escrow_users'].split(",")
         self._validate_combinatorial_args()
@@ -118,8 +120,6 @@ class Command(object):
         password_metadata['authorizer'] = authorizer
         password_metadata['creator'] = self.args['identity']
         password_metadata['name'] = self.args['pwname']
-        if self.args['min_escrow']:
-            password_metadata['min_escrow'] = self.args['min_escrow']
         if recipient_list is None:
             recipient_list = [self.args['identity']]
 
@@ -132,7 +132,8 @@ class Command(object):
                                 passphrase=self.passphrase,
                                 card_slot=self.args['card_slot'],
                                 escrow_users=self.args['escrow_users'],
-                                minimum=self.args['min_escrow']
+                                minimum=self.args['min_escrow'],
+                                pwstore=self.args['pwstore']
                                )
 
         password.write_password_data(os.path.join(

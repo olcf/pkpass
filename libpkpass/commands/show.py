@@ -13,7 +13,7 @@ class Show(Command):
     name = 'show'
     description = 'Display a password'
     selected_args = ['pwname', 'pwstore', 'stdin', 'identity', 'certpath', 'keypath', 'nocache',
-                     'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all']
+                     'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all', 'recovery']
 
     def _run_command_execution(self):
         ####################################################################
@@ -28,23 +28,47 @@ class Show(Command):
         elif self.args['pwname'] is None:
             raise PasswordIOError("No password supplied")
         else:
-            self._decrypt_password_entry(
+            self._decrypt_wrapper(
                 self.args['pwstore'], password, myidentity, self.args['pwname'])
 
     def _walk_dir(self, directory, password, myidentity):
         # os.walk returns root, dirs, and files we just need files
         for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
-                password.read_password_data(os.path.join(root, pwname))
                 try:
-                    self._decrypt_password_entry(
+                    self._decrypt_wrapper(
                         root, password, myidentity, pwname)
                 except NotARecipientError:
                     continue
 
-    def _decrypt_password_entry(self, directory, password, myidentity, pwname):
-        """This decrypts a given password entry"""
+    def _handle_escrow_show(self, password, myidentity):
+        ####################################################################
+        """This populates the user's escrow as passwords"""
+        ####################################################################
+        myescrow = []
+        if password.escrow:
+            for key, value in password['escrow'].items():
+                if myidentity['uid'] in value.keys():
+                    myescrow.append([value[myidentity['uid']], key])
+        return myescrow
+
+    def _decrypt_wrapper(self, directory, password, myidentity, pwname):
         password.read_password_data(os.path.join(directory, pwname))
+        myescrow = []
+        if self.args['recovery']:
+            myescrow = self._handle_escrow_show(password, myidentity)
+        if myescrow:
+            for share in myescrow:
+                password['recipients'][myidentity['uid']] = share[0]
+                print("Share for escrow group: %s" % share[1])
+                self._decrypt_password_entry(password, myidentity)
+        else:
+            self._decrypt_password_entry(password, myidentity)
+
+    def _decrypt_password_entry(self, password, myidentity):
+        ####################################################################
+        """This decrypts a given password entry"""
+        ####################################################################
         plaintext_pw = password.decrypt_entry(
             identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
         if not self.args['noverify']:
