@@ -150,27 +150,32 @@ class PasswordEntry(object):
         #######################################################################
         """Add recipient or sharer to list"""
         #######################################################################
-        if encryption_algorithm == 'rsautl':
-            (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
-                secret, identitydb.iddb[recipient])
-        recipient_entry = {'encrypted_secret': encrypted_secret,
-                           'derived_key': encrypted_derived_key,
-                           'distributor': distributor,
-                           'distributor_hash': identitydb.iddb[distributor]['subjecthash'],
-                           'recipient_hash': identitydb.iddb[recipient]['subjecthash'],
-                           # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
-                           # 'recipient_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[recipient] ),
-                           'encryption_algorithm': encryption_algorithm,
-                           'timestamp': time.time()}
+        try:
+            if encryption_algorithm == 'rsautl':
+                (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
+                    secret, identitydb.iddb[recipient])
+            recipient_entry = {'encrypted_secret': encrypted_secret,
+                               'derived_key': encrypted_derived_key,
+                               'distributor': distributor,
+                               'distributor_hash': identitydb.iddb[distributor]['subjecthash'],
+                               'recipient_hash': identitydb.iddb[recipient]['subjecthash'],
+                               # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
+                               # 'recipient_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[recipient] ),
+                               'encryption_algorithm': encryption_algorithm,
+                               'timestamp': time.time()}
 
-        message = self._create_signable_string(recipient_entry)
+            message = self._create_signable_string(recipient_entry)
 
-        recipient_entry['signature'] = crypto.pk_sign_string(
-            message,
-            identitydb.iddb[distributor],
-            passphrase, card_slot)
+            recipient_entry['signature'] = crypto.pk_sign_string(
+                message,
+                identitydb.iddb[distributor],
+                passphrase, card_slot)
 
-        return recipient_entry
+            return recipient_entry
+        except KeyError:
+            raise NotARecipientError(
+                "Identity '%s' is not on the recipient list for password '%s" %
+                (recipient, self.metadata['name']))
 
     def decrypt_entry(self, identity=None, passphrase=None, card_slot=None):
         #######################################################################
