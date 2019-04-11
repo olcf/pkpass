@@ -3,6 +3,7 @@
 # $ pip install twine
 
 from __future__ import print_function
+import yaml
 import io
 import os
 import sys
@@ -177,6 +178,75 @@ min_escrow: %s""" % (certs, keys, cabundle, passwords, card_slot, identity, escr
 
         self.finish_run()
 
+class verify(Command):
+    """Verify the RC file is still valid
+    use this with:
+        python setup.py verify -r "/path/to/.pkpassrc" """
+    description = 'Lints the pkpassrc file'
+    user_options = [("rcfile=", "r", 'Specify the rc file path')]
+
+    def initialize_options(self):
+        self.rcfile = ""
+
+    def finalize_options(self):
+        pass
+
+    def check_if_recipient(self, user, certpath):
+        for fname in os.listdir(certpath):
+            if fname.endswith(tuple(['.crt','.cert'])):
+                uid = fname.split('.')[0]
+                if uid == user:
+                    return True
+        return False
+
+    def check_users(self, args_dict, certpath):
+        args = ['escrow_users', 'groups', 'identity','users']
+        for arg in args:
+            users_list = []
+            if arg in args_dict.keys():
+                users_list = args_dict[arg].strip().split(',')
+                for user in users_list:
+                    if not self.check_if_recipient(user.strip(), certpath):
+                        print("'%s' found in config, not in recipientsdb" % user)
+
+    def check_paths(self, args_dict):
+        args = ['cabundle', 'certpath', 'dstpwstore','pwstore']
+        for arg in args:
+            if arg in args_dict.keys():
+                if not os.path.exists(args_dict[arg]):
+                    print("'%s' found in config, No such file or directory: %s" % 
+                            (arg, args_dict[arg]))
+        
+    def run(self):
+        args = ['cabundle', 'card_slot', 'certpath',
+                'connect', 'dstpwstore', 'escrow_users',
+                'groups', 'identity', 'keypath',
+                'min_escrow', 'pwstore', 'time',
+                'users']
+        store_args = ['all', 'nocache', 'nocrypto',
+                      'nopassphrase', 'nosign', 'noverify',
+                      'overwrite', 'pwfile', 'pwname',
+                      'recovery', 'stdin']
+        args_dict = {}
+        with open(self.rcfile, 'r') as rcyaml:
+            try:
+                args_dict = yaml.safe_load(rcyaml)
+            except yaml.YAMLError as err:
+                print(err)
+        for arg in store_args:
+            if arg in args_dict.keys():
+                print("'%s' found in rc file, this will be ignored" % arg)
+
+        for arg in args_dict.keys():
+            if arg not in args and arg not in store_args:
+                print("'%s' found in rc file, does not appear to be valid argument\
+(It may be a user defined group)" % arg)
+
+        if 'certpath' in args_dict.keys():
+            self.check_users(args_dict, args_dict['certpath'])
+
+        self.check_paths(args_dict)
+
 setup(
     name=NAME,
     version=ABOUT['__version__'],
@@ -200,5 +270,6 @@ setup(
     cmdclass={
         'upload': UploadCommand,
         'rcfile': RCFile,
+        'verify': verify,
         },
     )
