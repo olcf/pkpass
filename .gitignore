@@ -11,3 +11,4 @@ dist/*
 pkpass.egg-info/*
 !libpkpass/connectors/connectorinterface.py
 libpkpass/connectors/*
+docs/build/*
