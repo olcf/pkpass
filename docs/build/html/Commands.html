@@ -1,0 +1,473 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Commands &#8212; PkPass 1.0.3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="General Usage" href="General Usage.html" />
+    <link rel="prev" title="Setup" href="Setup.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="commands">
+<h1>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h1>
+<p>The Commands can be listed out by passing the help flag to pkpass as seen below</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python pkpass.py -h
+usage: pkpass.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--config CONFIG<span class="o">]</span>
+                 <span class="o">{</span>clip,create,distribute,export,import,list,listrecipients,recover,show<span class="o">}</span>
+                 ...
+
+Public Key Password Manager
+
+positional arguments:
+  <span class="o">{</span>clip,create,distribute,export,import,list,listrecipients,recover,show<span class="o">}</span>
+                        sub-commands
+    clip                Copy a password to clipboard
+    create              Create a new password entry and encrypt it <span class="k">for</span>
+                        yourself
+    distribute          Distribute an existing password entry to another
+                        entity
+    <span class="nb">export</span>              Export passwords that you have access to and encrypt
+                        with aes
+    import              Import passwords that you have saved to a file
+    list                List passwords you have access to
+    listrecipients      List the recipients that pkpass knows about
+    recover             Recover a password that has been distributed using
+                        escrow functions
+    show                Display a password
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --config CONFIG       Path to a PKPass configuration file. Defaults to
+                        <span class="s1">&#39;~/.pkpassrc&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="clip">
+<h2>Clip<a class="headerlink" href="#clip" title="Permalink to this headline">¶</a></h2>
+<p>The intent of clip is to copy a password to your clipboard on the unlock event, currently we are aware of a bug with linux systems</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py clip <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>-c CARD_SLOT<span class="o">]</span>
+                      <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--keypath KEYPATH<span class="o">]</span>
+                      <span class="o">[</span>--nocache<span class="o">]</span> <span class="o">[</span>--nopassphrase<span class="o">]</span> <span class="o">[</span>--noverify<span class="o">]</span>
+                      <span class="o">[</span>--pwstore PWSTORE<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span> <span class="o">[</span>-t TIME<span class="o">]</span>
+                      <span class="o">[</span>pwname<span class="o">]</span>
+
+positional arguments:
+  pwname                Name of the password. Ex:
+                        passwords/team/infrastructure/root
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  -c CARD_SLOT, --card_slot CARD_SLOT
+                        The slot number of the card that should be used
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --keypath KEYPATH     Path to directory containing private keys. Keys must
+                        end in <span class="s1">&#39;.key&#39;</span>
+  --nocache             Do not use the cached certs <span class="k">for</span> connectors
+  --nopassphrase, --nopin
+                        Do not prompt <span class="k">for</span> a pin/passphrase
+  --noverify            Do not verify certificates and signatures
+  --pwstore PWSTORE, --srcpwstore PWSTORE
+                        Path to the <span class="nb">source</span> password store. Defaults to
+                        <span class="s2">&quot;./passwords&quot;</span>
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+  -t TIME, --time TIME  Number of seconds to keep password in paste buffer
+</pre></div>
+</div>
+</div>
+<div class="section" id="create">
+<h2>Create<a class="headerlink" href="#create" title="Permalink to this headline">¶</a></h2>
+<p>Create is used to create a password in the configured password repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py create <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>-c CARD_SLOT<span class="o">]</span>
+                        <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>-e ESCROW_USERS<span class="o">]</span> <span class="o">[</span>-i IDENTITY<span class="o">]</span>
+                        <span class="o">[</span>--keypath KEYPATH<span class="o">]</span> <span class="o">[</span>-m MIN_ESCROW<span class="o">]</span> <span class="o">[</span>--nopassphrase<span class="o">]</span>
+                        <span class="o">[</span>--nosign<span class="o">]</span> <span class="o">[</span>--noverify<span class="o">]</span> <span class="o">[</span>--overwrite<span class="o">]</span>
+                        <span class="o">[</span>--pwstore PWSTORE<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+                        <span class="o">[</span>pwname<span class="o">]</span>
+
+positional arguments:
+  pwname                Name of the password. Ex:
+                        passwords/team/infrastructure/root
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  -c CARD_SLOT, --card_slot CARD_SLOT
+                        The slot number of the card that should be used
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -e ESCROW_USERS, --escrow_users ESCROW_USERS
+                        Escrow users list is a comma sepearated list of
+                        recovery users that each get part of a key
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --keypath KEYPATH     Path to directory containing private keys. Keys must
+                        end in <span class="s1">&#39;.key&#39;</span>
+  -m MIN_ESCROW, --min_escrow MIN_ESCROW
+                        Minimum number of users required to unlock escrowed
+                        password
+  --nopassphrase, --nopin
+                        Do not prompt <span class="k">for</span> a pin/passphrase
+  --nosign              Do not digitally sign the password information that
+                        you are generating
+  --noverify            Do not verify certificates and signatures
+  --overwrite           Overwrite a password that already exists
+  --pwstore PWSTORE, --srcpwstore PWSTORE
+                        Path to the <span class="nb">source</span> password store. Defaults to
+                        <span class="s2">&quot;./passwords&quot;</span>
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+</pre></div>
+</div>
+</div>
+<div class="section" id="distribute">
+<h2>Distribute<a class="headerlink" href="#distribute" title="Permalink to this headline">¶</a></h2>
+<p>Distribute takes a pre-existing password in the password repository and grants permission to selected users to be able to unlock it</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py distribute <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>-c CARD_SLOT<span class="o">]</span>
+                            <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>-e ESCROW_USERS<span class="o">]</span>
+                            <span class="o">[</span>-g GROUPS<span class="o">]</span> <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--keypath KEYPATH<span class="o">]</span>
+                            <span class="o">[</span>-m MIN_ESCROW<span class="o">]</span> <span class="o">[</span>--nopassphrase<span class="o">]</span> <span class="o">[</span>--nosign<span class="o">]</span>
+                            <span class="o">[</span>--noverify<span class="o">]</span> <span class="o">[</span>--pwstore PWSTORE<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+                            <span class="o">[</span>-u USERS<span class="o">]</span>
+                            <span class="o">[</span>pwname<span class="o">]</span>
+
+positional arguments:
+  pwname                Name of the password. Ex:
+                        passwords/team/infrastructure/root
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  -c CARD_SLOT, --card_slot CARD_SLOT
+                        The slot number of the card that should be used
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -e ESCROW_USERS, --escrow_users ESCROW_USERS
+                        Escrow users list is a comma sepearated list of
+                        recovery users that each get part of a key
+  -g GROUPS, --groups GROUPS
+                        Comma seperated list of recipient groups
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --keypath KEYPATH     Path to directory containing private keys. Keys must
+                        end in <span class="s1">&#39;.key&#39;</span>
+  -m MIN_ESCROW, --min_escrow MIN_ESCROW
+                        Minimum number of users required to unlock escrowed
+                        password
+  --nopassphrase, --nopin
+                        Do not prompt <span class="k">for</span> a pin/passphrase
+  --nosign              Do not digitally sign the password information that
+                        you are generating
+  --noverify            Do not verify certificates and signatures
+  --pwstore PWSTORE, --srcpwstore PWSTORE
+                        Path to the <span class="nb">source</span> password store. Defaults to
+                        <span class="s2">&quot;./passwords&quot;</span>
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+  -u USERS, --users USERS
+                        Comma seperated list of recipients
+</pre></div>
+</div>
+</div>
+<div class="section" id="export">
+<h2>Export<a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h2>
+<p>Export allows the current user to migrate all his passwords to one file, this tends to be used in conjunction with import</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py <span class="nb">export</span> <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>-c CARD_SLOT<span class="o">]</span>
+                        <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>--dstpwstore DSTPWSTORE<span class="o">]</span>
+                        <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--nocrypto<span class="o">]</span> <span class="o">[</span>--nopassphrase<span class="o">]</span>
+                        <span class="o">[</span>--noverify<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+                        <span class="o">[</span>pwfile<span class="o">]</span>
+
+positional arguments:
+  pwfile                path to the import/export file
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  -c CARD_SLOT, --card_slot CARD_SLOT
+                        The slot number of the card that should be used
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  --dstpwstore DSTPWSTORE
+                        Path to the destination password store.
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --nocrypto            Do not use a password <span class="k">for</span> import/export files
+  --nopassphrase, --nopin
+                        Do not prompt <span class="k">for</span> a pin/passphrase
+  --noverify            Do not verify certificates and signatures
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+</pre></div>
+</div>
+</div>
+<div class="section" id="import">
+<h2>Import<a class="headerlink" href="#import" title="Permalink to this headline">¶</a></h2>
+<p>Import allows a user to take an exported password file and import them into a new smart card</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py import <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>-c CARD_SLOT<span class="o">]</span>
+                        <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>--dstpwstore DSTPWSTORE<span class="o">]</span>
+                        <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--nocrypto<span class="o">]</span> <span class="o">[</span>--nopassphrase<span class="o">]</span>
+                        <span class="o">[</span>--noverify<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+                        <span class="o">[</span>pwfile<span class="o">]</span>
+
+positional arguments:
+  pwfile                path to the import/export file
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  -c CARD_SLOT, --card_slot CARD_SLOT
+                        The slot number of the card that should be used
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  --dstpwstore DSTPWSTORE
+                        Path to the destination password store.
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --nocrypto            Do not use a password <span class="k">for</span> import/export files
+  --nopassphrase, --nopin
+                        Do not prompt <span class="k">for</span> a pin/passphrase
+  --noverify            Do not verify certificates and signatures
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+</pre></div>
+</div>
+</div>
+<div class="section" id="list">
+<h2>List<a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h2>
+<p>List shows all passwords available to a given user</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py list <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>--certpath CERTPATH<span class="o">]</span>
+                      <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--nocache<span class="o">]</span> <span class="o">[</span>--noverify<span class="o">]</span>
+                      <span class="o">[</span>--pwstore PWSTORE<span class="o">]</span> <span class="o">[</span>-r<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --nocache             Do not use the cached certs <span class="k">for</span> connectors
+  --noverify            Do not verify certificates and signatures
+  --pwstore PWSTORE, --srcpwstore PWSTORE
+                        Path to the <span class="nb">source</span> password store. Defaults to
+                        <span class="s2">&quot;./passwords&quot;</span>
+  -r, --recovery        Work with passwords distributed through escrow
+                        functionality
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+</pre></div>
+</div>
+</div>
+<div class="section" id="listrecipients">
+<h2>listrecipients<a class="headerlink" href="#listrecipients" title="Permalink to this headline">¶</a></h2>
+<p>List the recipients that pkpass knows about</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py listrecipients <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span>
+                                <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>-i IDENTITY<span class="o">]</span>
+                                <span class="o">[</span>--noverify<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --noverify            Do not verify certificates and signatures
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+</pre></div>
+</div>
+</div>
+<div class="section" id="recover">
+<h2>recover<a class="headerlink" href="#recover" title="Permalink to this headline">¶</a></h2>
+<p>Recover serves the purpose of recovering escrowed passwords in the event no one in the distributed list can properly unlock a password.
+This requires password owners to have created escrow users. Each necessary escrow user will place his share into the program.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py recover <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>--certpath CERTPATH<span class="o">]</span>
+                         <span class="o">[</span>-e ESCROW_USERS<span class="o">]</span> <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--keypath KEYPATH<span class="o">]</span>
+                         <span class="o">[</span>-m MIN_ESCROW<span class="o">]</span> <span class="o">[</span>--nosign<span class="o">]</span> <span class="o">[</span>--noverify<span class="o">]</span>
+                         <span class="o">[</span>--pwstore PWSTORE<span class="o">]</span>
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -e ESCROW_USERS, --escrow_users ESCROW_USERS
+                        Escrow users list is a comma sepearated list of
+                        recovery users that each get part of a key
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --keypath KEYPATH     Path to directory containing private keys. Keys must
+                        end in <span class="s1">&#39;.key&#39;</span>
+  -m MIN_ESCROW, --min_escrow MIN_ESCROW
+                        Minimum number of users required to unlock escrowed
+                        password
+  --nosign              Do not digitally sign the password information that
+                        you are generating
+  --noverify            Do not verify certificates and signatures
+  --pwstore PWSTORE, --srcpwstore PWSTORE
+                        Path to the <span class="nb">source</span> password store. Defaults to
+                        <span class="s2">&quot;./passwords&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="show">
+<h2>show<a class="headerlink" href="#show" title="Permalink to this headline">¶</a></h2>
+<p>This unlocks a password and displays it on stdout</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: pkpass.py show <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-a<span class="o">]</span> <span class="o">[</span>--cabundle CABUNDLE<span class="o">]</span> <span class="o">[</span>-c CARD_SLOT<span class="o">]</span>
+                      <span class="o">[</span>--certpath CERTPATH<span class="o">]</span> <span class="o">[</span>-i IDENTITY<span class="o">]</span> <span class="o">[</span>--keypath KEYPATH<span class="o">]</span>
+                      <span class="o">[</span>--nocache<span class="o">]</span> <span class="o">[</span>--nopassphrase<span class="o">]</span> <span class="o">[</span>--noverify<span class="o">]</span>
+                      <span class="o">[</span>--pwstore PWSTORE<span class="o">]</span> <span class="o">[</span>-r<span class="o">]</span> <span class="o">[</span>--stdin<span class="o">]</span>
+                      <span class="o">[</span>pwname<span class="o">]</span>
+
+positional arguments:
+  pwname                Name of the password. Ex:
+                        passwords/team/infrastructure/root
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  -a, --all             Show all available password to the given user
+  --cabundle CABUNDLE   Path to CA certificate bundle file
+  -c CARD_SLOT, --card_slot CARD_SLOT
+                        The slot number of the card that should be used
+  --certpath CERTPATH   Path to directory containing public keys. Certificates
+                        must end in <span class="s1">&#39;.cert&#39;</span>
+  -i IDENTITY, --identity IDENTITY
+                        Override identity of user running the program
+  --keypath KEYPATH     Path to directory containing private keys. Keys must
+                        end in <span class="s1">&#39;.key&#39;</span>
+  --nocache             Do not use the cached certs <span class="k">for</span> connectors
+  --nopassphrase, --nopin
+                        Do not prompt <span class="k">for</span> a pin/passphrase
+  --noverify            Do not verify certificates and signatures
+  --pwstore PWSTORE, --srcpwstore PWSTORE
+                        Path to the <span class="nb">source</span> password store. Defaults to
+                        <span class="s2">&quot;./passwords&quot;</span>
+  -r, --recovery        Work with passwords distributed through escrow
+                        functionality
+  --stdin               Take all password input from stdin instead of from a
+                        user input prompt
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PkPass</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Setup.html">Setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#clip">Clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create">Create</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distribute">Distribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#export">Export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import">Import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#list">List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#listrecipients">listrecipients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recover">recover</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#show">show</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="General Usage.html">General Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Development And Testing.html">Development and Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Software Dependencies.html">Software Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Python2.html">Python 2 support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Windows.html">Windows Consideration</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Setup.html" title="previous chapter">Setup</a></li>
+      <li>Next: <a href="General Usage.html" title="next chapter">General Usage</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Noah Ginsburg, Ryan Adamson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Commands.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

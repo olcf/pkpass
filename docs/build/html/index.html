@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to PkPass’s documentation! &#8212; PkPass 1.0.3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Setup" href="Setup.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pkpass-s-documentation">
+<h1>Welcome to PkPass’s documentation!<a class="headerlink" href="#welcome-to-pkpass-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This is a basic password store and password manager for maintaining arbitrary secrets.</p>
+<p>The password management solution provides:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Encryption at Rest</li>
+<li>Password distribution/organization based on definable hierarchies</li>
+<li>Password creation timestamps</li>
+<li>Password history and change logs</li>
+<li>Distributed backup capabilities</li>
+<li>PIV/Smartcard Credential encryption/decryption</li>
+<li>Import and export functionality</li>
+</ul>
+</div></blockquote>
+<p>Passwords that are created are distributed to recipients by public key encryption.  The x509 certificate of the intended recipient is used to create an encrypted copy of the distributed password that is then saved in a password-specific git repository.  Multiple encrypted copies of the secret are created, one for each user.  End users then check out the git repo and are able to read passwords using their PIV/Smartcard credential to decrypt.</p>
+</div>
+<div class="section" id="x509-certificate-repository">
+<h2>x509 Certificate Repository<a class="headerlink" href="#x509-certificate-repository" title="Permalink to this headline">¶</a></h2>
+<p>PKPass needs a trusted x509 certificate repository, which typically is managed using git.  Certificates in this repository should all be
+signed by Certificate Authorities that can be found in the CABundle file that PKPass is configured to look at.  Since this repository should be
+considered ‘trusted’, it is typically managed by a smaller trusted set of site administrators.  PKPass validates all encryption certificates as they are used to make sure they are signed by a trusted Certificate Authority (CA).</p>
+<p>You may also use a local x509 certificate repository that you sync with others using RSYNC, NFS, shared volumes, etc.  You can configure the directory that pkpass will use for the certificate repository either on the command line, or through the .pkpassrc file.</p>
+<p>The CABundle file to use can also be configured in the .pkpassrc file or on the command line.</p>
+<p>Additionally, certificates should be named &lt;username&gt;.cert.  For example, the certificate for user ‘jason’ should be named ‘jason.cert’ inside this x509 directory.</p>
+</div>
+<div class="section" id="password-repository">
+<h2>Password Repository<a class="headerlink" href="#password-repository" title="Permalink to this headline">¶</a></h2>
+<p>PKPass also needs a directory to serve as a ‘password database’.  Like the x509 certificate repository, it is also typically managed with git to provide change control, history, and tracking of changes.  Local directories can also be used and shared via rsync, NFS, shared volumes, etc if preferred.</p>
+<p>To change the default password repository, you may specify another directory on the command line or in the .pkpassrc file.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Setup.html">Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Setup.html#setup-initial">Setup/Initial</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#clip">Clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#create">Create</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#distribute">Distribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#export">Export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#import">Import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#list">List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#listrecipients">listrecipients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#recover">recover</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Commands.html#show">show</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="General Usage.html">General Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Configuration.html#password-repository">Password Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Configuration.html#cert-repository">Cert Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Configuration.html#ca-bundle">CA Bundle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Configuration.html#arguments">Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Configuration.html#special-treatment-for-non-piv-accounts-credentials">Special Treatment for Non-piv accounts/credentials</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Development And Testing.html">Development and Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Development And Testing.html#testing-scripts">Testing Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Development And Testing.html#plugin-behavior-connectors">Plugin Behavior - Connectors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Software Dependencies.html">Software Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Python2.html">Python 2 support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Windows.html">Windows Consideration</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">PkPass</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General Usage.html">General Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Development And Testing.html">Development and Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Software Dependencies.html">Software Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Python2.html">Python 2 support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Windows.html">Windows Consideration</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="Setup.html" title="next chapter">Setup</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Noah Ginsburg, Ryan Adamson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
