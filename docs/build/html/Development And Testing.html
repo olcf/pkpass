@@ -1,0 +1,145 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Development and Testing &#8212; PkPass 1.0.3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Software Dependencies" href="Software Dependencies.html" />
+    <link rel="prev" title="Configuration" href="Configuration.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="development-and-testing">
+<h1>Development and Testing<a class="headerlink" href="#development-and-testing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="testing-scripts">
+<h2>Testing Scripts<a class="headerlink" href="#testing-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Currently there exists a shell script <code class="docutils literal notranslate"><span class="pre">./test/pki/generatepki.sh</span></code> that will generate certificates for a developer to use for unittests
+After running this script, you can run tox or the <code class="docutils literal notranslate"><span class="pre">./unittest.sh</span></code> file; note that <code class="docutils literal notranslate"><span class="pre">./unittest.sh</span></code> does not test multiple versions of
+python like tox does</p>
+</div>
+<div class="section" id="plugin-behavior-connectors">
+<h2>Plugin Behavior - Connectors<a class="headerlink" href="#plugin-behavior-connectors" title="Permalink to this headline">¶</a></h2>
+<p>We currently support dropping arbitary connection plugins into <code class="docutils literal notranslate"><span class="pre">./libpkpass/connectors</span></code> the connectors should return
+certificates, example usage here is if your organization stores certs in a custom web application, or in ldap or
+the like, you can create a connector to interface with that and feed pkpass certs in this manner</p>
+<p>Connectors will be ignored due to the gitignore, I recommend creating a separate repo for that purpose. To use
+a connector pkpass needs a <code class="docutils literal notranslate"><span class="pre">connect</span></code> argument</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>connect: <span class="s1">&#39;{&quot;ConnectorName&quot;:{&quot;arbitrary_argument1&quot;: &quot;aa1_value&quot;, &quot;aa2&quot;: &quot;aa2_value&quot;}}&#39;</span>
+</pre></div>
+</div>
+<p>This connect argument is parsed as a json, the upper level key is the class that python will attempt to import.
+This class name should also be in a file that is name in all lowercase, of the same name.</p>
+<p>Example: ConnectorName would be in file connectorname.py</p>
+<p>The value of “ConnectorName” in our example above will all be passed to init as a dictionary.
+this means that “arbitrary_argument1” and “aa2” will both be available for the connector class
+As you can see the connect argument is a json file, and as such; you may pass multiple connectors in at the same time.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PkPass</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General Usage.html">General Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Development and Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing-scripts">Testing Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-behavior-connectors">Plugin Behavior - Connectors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Software Dependencies.html">Software Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Python2.html">Python 2 support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Windows.html">Windows Consideration</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Configuration.html" title="previous chapter">Configuration</a></li>
+      <li>Next: <a href="Software Dependencies.html" title="next chapter">Software Dependencies</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Noah Ginsburg, Ryan Adamson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Development And Testing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
