@@ -1,6 +1,11 @@
 PKPass: Public Key Based Password Manager
 =============
 
+RTDS
+====
+https://pkpass.readthedocs.io/en/latest/
+
+
 Overview
 --------
 This is a basic password store and password manager for maintaining arbitrary secrets.
