@@ -1,8 +1,8 @@
 PKPass: Public Key Based Password Manager
 =============
 
-RTDS
-====
+RTD
+===
 https://pkpass.readthedocs.io/en/latest/
 
 

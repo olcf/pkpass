@@ -20,7 +20,6 @@
 # -- Project information -----------------------------------------------------
 
 project = u'PkPass'
-copyright = u'2019, Noah Ginsburg, Ryan Adamson'
 author = u'Noah Ginsburg, Ryan Adamson'
 
 # The short X.Y version
