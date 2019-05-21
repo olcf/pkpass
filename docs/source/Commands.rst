@@ -79,8 +79,8 @@ Create is used to create a password in the configured password repository
 
     usage: pkpass.py create [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [-e ESCROW_USERS] [-i IDENTITY]
-                            [--keypath KEYPATH] [-m MIN_ESCROW] [--nopassphrase]
-                            [--nosign] [--noverify] [--overwrite]
+                            [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
+                            [--nopassphrase] [--nosign] [--noverify] [--overwrite]
                             [--pwstore PWSTORE] [--stdin]
                             [pwname]
     
@@ -128,9 +128,9 @@ Distribute takes a pre-existing password in the password repository and grants p
     usage: pkpass.py distribute [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                                 [--certpath CERTPATH] [-e ESCROW_USERS]
                                 [-g GROUPS] [-i IDENTITY] [--keypath KEYPATH]
-                                [-m MIN_ESCROW] [--nopassphrase] [--nosign]
-                                [--noverify] [--pwstore PWSTORE] [--stdin]
-                                [-u USERS]
+                                [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
+                                [--nosign] [--noverify] [--pwstore PWSTORE]
+                                [--stdin] [-u USERS]
                                 [pwname]
     
     positional arguments:
@@ -327,10 +327,11 @@ This unlocks a password and displays it on stdout
 .. code-block:: bash
 
     usage: pkpass.py show [-h] [-a] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                          [--certpath CERTPATH] [-i IDENTITY] [--keypath KEYPATH]
-                          [--nocache] [--nopassphrase] [--noverify]
-                          [--pwstore PWSTORE] [-r] [--stdin]
-                          [pwname]
+                      [--certpath CERTPATH] [-i IDENTITY] [-I]
+                      [--keypath KEYPATH] [--nocache] [--nopassphrase]
+                      [--noverify] [--pwstore PWSTORE] [-r] [--stdin]
+                      [pwname]
+
     
     positional arguments:
       pwname                Name of the password. Ex:
@@ -346,6 +347,7 @@ This unlocks a password and displays it on stdout
                             must end in '.cert'
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      -I, --ignore-decrypt  Ignore decryption errors during show all process
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
       --nocache             Do not use the cached certs for connectors

@@ -29,16 +29,21 @@ class List(Command):
         result = {}
         for pwname, passwordentry in passworddb.pwdb.items():
             if self.args['identity'] in passwordentry.recipients.keys():
-                result[pwname] = {'name': passwordentry.metadata['name'],
-                                  'distributor': passwordentry.recipients[self.args['identity']]['distributor']
-                                 }
+                result[pwname] = {
+                    'name': passwordentry.metadata['name'],
+                    'distributor': passwordentry.recipients[self.args['identity']]['distributor']
+                }
             elif self.args['recovery'] and  passwordentry.escrow:
-                for key, value in passwordentry.escrow.items():
-                    if self.args['identity'] in value:
-                        result[pwname] = {
-                            'name': passwordentry.metadata['name'],
-                            'share': key,
-                            'distributor': value[self.args['identity']]['distributor']
+                for rec_list in passwordentry.escrow.keys():
+                    recipients = passwordentry.escrow[rec_list]['recipients']
+                    for key, value in recipients.items():
+                        if key == self.args['identity']:
+                            result[pwname] = {
+                                'name': passwordentry.metadata['name'],
+                                'group': rec_list,
+                                'stake_holders': recipients.keys(),
+                                'distributor': value['distributor'],
+                                'minimum_shares': passwordentry.escrow[rec_list]['metadata']['minimum_escrow']
                             }
 
 

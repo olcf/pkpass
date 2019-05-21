@@ -31,6 +31,7 @@ class Command(object):
         self.cli = cli
         #default certpath to none because connect string is allowed
         self.args = {
+            'ignore_decrypt': False,
             'identity': getpass.getuser(),
             'cabundle': './certs/ca-bundle',
             'keypath': './private',
@@ -101,7 +102,6 @@ class Command(object):
         connectmap = None
         if 'connect' in self.args and self.args['connect']:
             connectmap = json.loads(self.args['connect'])
-
         # If there are defined repositories of keys and certificates, load them
         self.identities.load_certs_from_directory(
             self.args['certpath'],
