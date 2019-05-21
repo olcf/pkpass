@@ -105,6 +105,8 @@ Create is used to create a password in the configured password repository
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --noescrow            Do not use escrow functionality, ignore defaults in rc
+                            file
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --nosign              Do not digitally sign the password information that
@@ -154,6 +156,8 @@ Distribute takes a pre-existing password in the password repository and grants p
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --noescrow            Do not use escrow functionality, ignore defaults in rc
+                            file
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --nosign              Do not digitally sign the password information that
