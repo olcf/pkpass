@@ -44,8 +44,8 @@ class Command(object):
             'recovery': False
             }
         self.recipient_list = []
-        self.identities = IdentityDB(identity=self.args['identity'])
-        self.identities.identiy = self.args['identity']
+        self.identities = IdentityDB()
+        self.identities.identity = self.args['identity']
         cli.register(self, self.name, self.description)
 
     def register(self, parser):
