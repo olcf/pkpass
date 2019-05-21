@@ -13,7 +13,8 @@ class Show(Command):
     name = 'show'
     description = 'Display a password'
     selected_args = ['pwname', 'pwstore', 'stdin', 'identity', 'certpath', 'keypath', 'nocache',
-                     'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all', 'recovery']
+                     'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all', 'recovery',
+                     'ignore_decrypt']
 
     def _run_command_execution(self):
         ####################################################################
@@ -25,7 +26,7 @@ class Show(Command):
 
         if self.args['all'] and self.args['pwname'] is None:
             try:
-                self._walk_dir(self.args['pwstore'], password, myidentity)
+                self._walk_dir(self.args['pwstore'], password, myidentity, self.args['ignore_decrypt'])
             except DecryptionError as err:
                 raise err
         elif self.args['pwname'] is None:
@@ -34,14 +35,17 @@ class Show(Command):
             self._decrypt_wrapper(
                 self.args['pwstore'], password, myidentity, self.args['pwname'])
 
-    def _walk_dir(self, directory, password, myidentity):
+    def _walk_dir(self, directory, password, myidentity, ignore_decrypt=False):
         # os.walk returns root, dirs, and files we just need files
         for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
                 try:
                     self._decrypt_wrapper(
                         root, password, myidentity, pwname)
-                except DecryptionError:
+                except DecryptionError as err:
+                    if ignore_decrypt:
+                        print(err.msg)
+                        continue
                     raise
                 except NotARecipientError:
                     continue

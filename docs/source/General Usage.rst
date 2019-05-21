@@ -20,6 +20,12 @@ Run ./pkpass.py with the '-h' flag for a list of options as well as syntax.  Som
     
        ./pkpass.py list
 
+  - List the names of all escrow passwords that have been distributed to you:
+ 
+    .. code-block:: bash
+    
+       ./pkpass.py list -r
+
   - Show the infrastructure team root password:
  
     .. code-block:: bash
