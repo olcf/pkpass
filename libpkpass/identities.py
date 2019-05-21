@@ -15,6 +15,7 @@ class IdentityDB(object):
     def __init__(self, **kwargs):
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
+        self.identity = ""
         self.iddb = {}
         self.recipient_list = []
 
@@ -64,7 +65,13 @@ class IdentityDB(object):
         except OSError as error:
             raise FileOpenError(path, str(error.strerror))
 
-    def load_certs_from_directory(self, certpath, cabundle, connectmap=None, noverify=False, nocache=False):
+    def load_certs_from_directory(self,
+                                  certpath,
+                                  cabundle,
+                                  connectmap=None,
+                                  noverify=False,
+                                  nocache=False,
+                                  escrow_users=None):
         #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
@@ -72,9 +79,14 @@ class IdentityDB(object):
             self._load_certs_from_external(connectmap, nocache)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
+        verify_list = self.recipient_list + [self.identity, 'ca']
+        if escrow_users:
+            verify_list += escrow_users
         for key, _ in self.iddb.items():
             self.iddb[key]['cabundle'] = cabundle
-            if not noverify or key in self.recipient_list:
+            if key not in verify_list:
+                continue
+            elif not noverify or key in verify_list:
                 self.iddb[key]['verified'] = crypto.pk_verify_chain(self.iddb[key])
                 self.iddb[key]['fingerprint'] = crypto.get_cert_fingerprint(
                     self.iddb[key])

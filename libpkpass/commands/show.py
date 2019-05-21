@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
-from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError
+from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError, DecryptionError
 
 
 class Show(Command):
@@ -24,7 +24,10 @@ class Show(Command):
         myidentity = self.identities.iddb[self.args['identity']]
 
         if self.args['all'] and self.args['pwname'] is None:
-            self._walk_dir(self.args['pwstore'], password, myidentity)
+            try:
+                self._walk_dir(self.args['pwstore'], password, myidentity)
+            except DecryptionError as err:
+                raise err
         elif self.args['pwname'] is None:
             raise PasswordIOError("No password supplied")
         else:
@@ -38,6 +41,8 @@ class Show(Command):
                 try:
                     self._decrypt_wrapper(
                         root, password, myidentity, pwname)
+                except DecryptionError:
+                    raise
                 except NotARecipientError:
                     continue
 

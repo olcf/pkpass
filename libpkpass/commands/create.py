@@ -11,7 +11,7 @@ class Create(Command):
     description = 'Create a new password entry and encrypt it for yourself'
     selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath',
                      'keypath', 'cabundle', 'nopassphrase', 'noverify', 'nosign', 'card_slot',
-                     'escrow_users', 'min_escrow']
+                     'escrow_users', 'min_escrow', 'noescrow']
 
     def _run_command_execution(self):
         ####################################################################

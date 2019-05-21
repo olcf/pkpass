@@ -10,7 +10,8 @@ class Distribute(Command):
     name = 'distribute'
     description = 'Distribute an existing password entry to another entity'
     selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'min_escrow', 'escrow_users',
-                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'noverify', 'nosign', 'card_slot']
+                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'noverify', 'nosign', 'card_slot',
+                     'noescrow']
 
     def _run_command_execution(self):
         ####################################################################
@@ -20,15 +21,19 @@ class Distribute(Command):
         password = PasswordEntry()
         password.read_password_data(os.path.join(
             self.args['pwstore'], self.args['pwname']))
-        escrow_map = password.read_escrow(self.args['pwname'])
-        # needless computation if escrow already exists. password only changes on create
-        # and create will wipe escrow users; so distribute only needs to happen if the
-        # users do not already exist in a group
-        for _, value in escrow_map.items():
-            if set(value['recipients'].keys()) == set(self.args['escrow_users']):
-                self.args['escrow_users'] = None
-                self.args['min_escrow'] = 0
-                break
+        if self.args['noescrow']:
+            self.args['min_escrow'] = None
+            self.args['escrow_users'] = None
+        else:
+            escrow_map = password.read_escrow(self.args['pwname'])
+            # needless computation if escrow already exists. password only changes on create
+            # and create will wipe escrow users; so distribute only needs to happen if the
+            # users do not already exist in a group
+            for _, value in escrow_map.items():
+                if set(value['recipients'].keys()) == set(self.args['escrow_users']):
+                    self.args['escrow_users'] = None
+                    self.args['min_escrow'] = 0
+                    break
         plaintext_pw = password.decrypt_entry(
             self.identities.iddb[self.args['identity']],
             passphrase=self.passphrase)

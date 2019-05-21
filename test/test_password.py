@@ -17,9 +17,10 @@ class TestBasicFunction(unittest.TestCase):
         self.secret = 'Secret'
         self.textblob = 'Testing TextField'
         self.sender = 'r1'
-        self.receivers = ['r2', 'r3']
 
         self.idobj = IdentityDB()
+        self.idobj.identity = self.sender
+        self.idobj.recipient_list = ['r2', 'r3']
         self.idobj.load_certs_from_directory(self.certdir, self.cabundle)
         self.idobj.load_keys_from_directory(self.keydir)
 
@@ -32,7 +33,7 @@ class TestBasicFunction(unittest.TestCase):
 
         passwordentry.add_recipients(secret=self.secret,
                                      distributor='r1',
-                                     recipients=self.receivers,
+                                     recipients=self.idobj.recipient_list,
                                      identitydb=self.idobj)
 
     def test_read_write(self):
@@ -44,7 +45,6 @@ class TestBasicFunction(unittest.TestCase):
         with open(self.file1, 'r') as file1:
             with open(self.file2, 'r') as file2:
                 self.assertTrue(file1.read() == file2.read())
-
 
 if __name__ == '__main__':
     unittest.main()

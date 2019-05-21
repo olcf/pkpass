@@ -44,7 +44,8 @@ class Command(object):
             'recovery': False
             }
         self.recipient_list = []
-        self.identities = IdentityDB()
+        self.identities = IdentityDB(identity=self.args['identity'])
+        self.identities.identiy = self.args['identity']
         cli.register(self, self.name, self.description)
 
     def register(self, parser):
@@ -107,7 +108,8 @@ class Command(object):
             self.args['cabundle'],
             connectmap,
             self.args['noverify'],
-            self.args['nocache'] if 'nocache' in self.args else False)
+            self.args['nocache'] if 'nocache' in self.args else False,
+            escrow_users=self.args['escrow_users'])
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
@@ -120,6 +122,9 @@ class Command(object):
         password_metadata['authorizer'] = authorizer
         password_metadata['creator'] = self.args['identity']
         password_metadata['name'] = self.args['pwname']
+        if self.args['noescrow']:
+            self.args['min_escrow'] = None
+            self.args['escrow_users'] = None
         if recipient_list is None:
             recipient_list = [self.args['identity']]
 
