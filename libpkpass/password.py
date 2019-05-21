@@ -36,7 +36,9 @@ class PasswordEntry(object):
         try:
             with open(filename, 'r') as fname:
                 password_data = yaml.safe_load(fname)
-                return password_data['escrow']
+                if 'escrow' in password_data.keys():
+                    return password_data['escrow']
+                return {}
         except (OSError, IOError, yaml.scanner.ScannerError, yaml.parser.ParserError):
             #we actually don't care here.. file might not exist yet
             return {}
@@ -174,7 +176,7 @@ class PasswordEntry(object):
             return recipient_entry
         except KeyError:
             raise NotARecipientError(
-                "Identity '%s' is not on the recipient list for password '%s" %
+                "Identity '%s' is not on the recipient list for password '%s'" %
                 (recipient, self.metadata['name']))
 
     def decrypt_entry(self, identity=None, passphrase=None, card_slot=None):

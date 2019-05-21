@@ -14,7 +14,6 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, \
         SignatureVerificationError, TrustChainVerificationError, X509CertificateError
 
-
 ##############################################################################
 def pk_encrypt_string(plaintext_string, identity):
     """ Encrypt and return a base 64 encoded string for the provided identity"""
@@ -22,8 +21,7 @@ def pk_encrypt_string(plaintext_string, identity):
 
     plaintext_derived_key = Fernet.generate_key()
 
-    command = "openssl rsautl -inkey -certin -encrypt -pkcs".split()
-    command.insert(3, identity['certificate_path'])
+    command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-encrypt', '-pkcs']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate(input=plaintext_derived_key)
 
@@ -43,8 +41,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
 ##############################################################################
 
     if 'key_path' in identity:
-        command = "openssl rsautl -inkey -decrypt -pkcs".split()
-        command.insert(3, identity['key_path'])
+        command = ['openssl', 'rsautl', '-inkey', identity['key_path'], '-decrypt', '-pkcs']
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate(
             input=base64.urlsafe_b64decode(ciphertext_derived_key))
@@ -55,13 +52,12 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         # a file for pkcs15-crypt to read.  YUCK!
         with tempfile.NamedTemporaryFile(delete=False) as fname:
             fname.write(base64.urlsafe_b64decode(ciphertext_derived_key))
-        command = "pkcs15-crypt --decipher --raw --pkcs --input --pin -".split()
-        command.insert(5, fname.name)
+        command = ['pkcs15-crypt', '--decipher', '--raw', '--pkcs', '--input', fname.name]
         index = 1
         if card_slot is not None:
-            command.insert(6, "--reader")
-            command.insert(7, str(card_slot))
+            command.extend(['--reader', str(card_slot)])
             index = 0
+        command.extend(['--pin', '-'])
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         os.unlink(fname.name)
@@ -89,8 +85,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
 ##############################################################################
     stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
     if 'key_path' in identity:
-        command = 'openssl rsautl -sign -inkey'.split()
-        command.insert(4, identity['key_path'])
+        command = ['openssl', 'rsautl', '-sign', '-inkey', identity['key_path']]
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate(input=stringhash.encode('ASCII'))
         signature = base64.urlsafe_b64encode(stdout)
@@ -101,12 +96,10 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         with tempfile.NamedTemporaryFile(delete=False) as fname:
             fname.write(stringhash.encode('ASCII'))
         out = tempfile.NamedTemporaryFile(delete=False)
-        command = 'pkcs15-crypt --sign -i -o --pkcs1 --raw --pin -'.split()
-        command.insert(3, fname.name)
-        command.insert(5, out.name)
+        command = ['pkcs15-crypt', '--sign', '-i', fname.name, '-o', out.name, '--pkcs1', '--raw']
         if card_slot is not None:
-            command.insert(7, "--reader")
-            command.insert(8, str(card_slot))
+            command.extend(['--reader', str(card_slot)])
+        command.extend(['--pin', '-'])
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         out.close()
@@ -128,8 +121,7 @@ def pk_verify_signature(string, signature, identity):
     """ Compute the hash of string and verify the digital signature """
 ##############################################################################
     stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
-    command = 'openssl rsautl -inkey -certin -verify'.split()
-    command.insert(3, identity['certificate_path'])
+    command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-verify']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(signature))
 
@@ -143,9 +135,7 @@ def pk_verify_signature(string, signature, identity):
 def pk_verify_chain(identity):
     """ Verify the publickey trust chain against a CA Bundle and return True if valid"""
 ##############################################################################
-    command = 'openssl verify -CAfile'.split()
-    command.insert(3, identity['cabundle'])
-    command.insert(4, identity['certificate_path'])
+    command = ['openssl', 'verify', '-CAfile', identity['cabundle'], identity['certificate_path']]
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate()
 
@@ -205,9 +195,7 @@ def get_cert_element(identity, element):
     """ Return an arbitrary element of an x509 certificate """
 ##############################################################################
 
-    command = "openssl x509 -in -noout".split()
-    command.insert(3, identity['certificate_path'])
-    command.append("-%s" % element)
+    command = ['openssl', 'x509', '-in', identity['certificate_path'], '-noout', ("-%s" % element)]
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate()
     if proc.returncode != 0:

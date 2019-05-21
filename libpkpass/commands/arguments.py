@@ -80,6 +80,13 @@ ARGUMENTS = {
                    }
                   },
 
+    'noescrow': {'args': ['--noescrow'],
+                 'kwargs':{
+                     'action': 'store_true',
+                     'help': 'Do not use escrow functionality, ignore defaults in rc file'
+                 }
+                },
+
     'nocache': {'args': ['--nocache'],
                 'kwargs': {
                     'action': 'store_true',
