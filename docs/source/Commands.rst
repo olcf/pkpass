@@ -327,10 +327,10 @@ This unlocks a password and displays it on stdout
 .. code-block:: bash
 
     usage: pkpass.py show [-h] [-a] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                      [--certpath CERTPATH] [-i IDENTITY] [-I]
-                      [--keypath KEYPATH] [--nocache] [--nopassphrase]
-                      [--noverify] [--pwstore PWSTORE] [-r] [--stdin]
-                      [pwname]
+                          [--certpath CERTPATH] [-i IDENTITY] [-I]
+                          [--keypath KEYPATH] [--nocache] [--nopassphrase]
+                          [--noverify] [--pwstore PWSTORE] [-r] [--stdin]
+                          [pwname]
 
     
     positional arguments:
