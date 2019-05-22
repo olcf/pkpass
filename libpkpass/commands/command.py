@@ -10,7 +10,8 @@ from six import iteritems as iteritems
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
-from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError
+from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
+        PasswordIOError
 
 
 class Command(object):
@@ -113,9 +114,20 @@ class Command(object):
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
+    def safety_check(self):
+        ####################################################################
+        """ This provides a sanity check that you are the owner of a password."""
+        ####################################################################
+        try:
+            password = PasswordEntry()
+            password.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
+            return (password['metadata']['creator'] == self.args['identity'], password['metadata']['creator'])
+        except PasswordIOError:
+            return (True, None)
+
     def create_pass(self, password1, description, authorizer, recipient_list=None):
         ####################################################################
-        """ Run function for class.                                      """
+        """ This writes password data to a file.                         """
         ####################################################################
         password_metadata = {}
         password_metadata['description'] = description

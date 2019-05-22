@@ -38,6 +38,11 @@ class LegacyImportFormatError(PKPassError):
 class NotARecipientError(PKPassError):
     pass
 
+class NotThePasswordOwnerError(PKPassError):
+    def __init__(self, identity, owner):
+        self.msg = "User '%s' is not the owner of this password, not overwriting;\n\t\
+please use another password name or ask the owner (%s) to distribute to you" % (identity, owner)
+
 class NullRecipientError(PKPassError):
     def __init__(self):
         self.msg = "There is a blank Recipient in the list, please check for trailing commas"
