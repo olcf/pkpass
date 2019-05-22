@@ -43,6 +43,7 @@ class Command(object):
             'escrow_users': None,
             'min_escrow': None,
             'noverify': None,
+            'noescrow': False,
             'recovery': False
             }
         self.recipient_list = []
