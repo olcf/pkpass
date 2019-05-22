@@ -46,15 +46,18 @@ class PasswordDB(object):
     def read_password_data_from_file(self, filename):
         """ Open a password file, load passwords and read metadata               """
     ##############################################################################
-        with open(filename, 'r') as fname:
-            password_data = yaml.safe_load(fname)
-            password_entry = PasswordEntry()
-            password_entry.metadata = password_data['metadata']
-            password_entry.recipients = password_data['recipients']
-            if 'escrow' in password_data:
-                password_entry.escrow = password_data['escrow']
-        password_entry.validate()
-        return password_entry
+        try:
+            with open(filename, 'r') as fname:
+                password_data = yaml.safe_load(fname)
+                password_entry = PasswordEntry()
+                password_entry.metadata = password_data['metadata']
+                password_entry.recipients = password_data['recipients']
+                if 'escrow' in password_data:
+                    password_entry.escrow = password_data['escrow']
+            password_entry.validate()
+            return password_entry
+        except (OSError, IOError, TypeError):
+            raise PasswordIOError("Error reading '%s' perhaps a path error for the db, or malformed file" % filename)
 
     #############################################################################
     def write_password_data_to_file(self, password_data, filename, overwrite=False):
