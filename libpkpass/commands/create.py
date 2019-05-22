@@ -18,7 +18,7 @@ class Create(Command):
         """ Run function for class.                                      """
         ####################################################################
         safe, owner = self.safety_check()
-        if safe:
+        if safe or self.args['overwrite']:
             password1 = getpass.getpass("Enter password to create: ")
             password2 = getpass.getpass("Enter password to create again: ")
             if password1 != password2:
