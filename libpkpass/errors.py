@@ -8,6 +8,10 @@ class PKPassError(Exception):
     def __init__(self, arg):
         self.msg = arg
 
+class BlankPasswordError(PKPassError):
+    def __init__(self):
+        self.msg = "User Provided password is blank or only spaces"
+
 class CliArgumentError(PKPassError):
     pass
 

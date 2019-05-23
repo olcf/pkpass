@@ -63,6 +63,7 @@ class IdentityDB(object):
                                     "%s_path" % filetype: filepath}
                         self.iddb[identity['uid']] = identity
         except OSError as error:
+            print("here")
             raise FileOpenError(path, str(error.strerror))
 
     def load_certs_from_directory(self,
@@ -104,5 +105,6 @@ class IdentityDB(object):
         #######################################################################
         if os.path.isdir(path):
             self._load_from_directory(path, 'key')
-        else:
-            print("WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST OR IS NOT POPULATED")
+        # We used to print a warning on else here, but it seems unnecessary;
+        # if a user is using PIVs/Smartcards, this warning could just annoy
+        # them needlessly

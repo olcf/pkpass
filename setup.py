@@ -204,10 +204,13 @@ class verify(Command):
         for arg in args:
             users_list = []
             if arg in args_dict.keys():
-                users_list = args_dict[arg].strip().split(',')
-                for user in users_list:
-                    if not self.check_if_recipient(user.strip(), certpath):
-                        print("'%s' found in config, not in recipientsdb" % user)
+                if args_dict[arg]:
+                    users_list = args_dict[arg].strip().split(',')
+                    for user in users_list:
+                        if not self.check_if_recipient(user.strip(), certpath):
+                            print("'%s' found in config, not in recipientsdb" % user)
+                else:
+                    print("'%s' found in config, but value is empty" % arg)
 
     def check_paths(self, args_dict):
         args = ['cabundle', 'certpath', 'dstpwstore','pwstore']
@@ -216,7 +219,7 @@ class verify(Command):
                 if not os.path.exists(args_dict[arg]):
                     print("'%s' found in config, No such file or directory: %s" % 
                             (arg, args_dict[arg]))
-        
+
     def run(self):
         args = ['cabundle', 'card_slot', 'certpath',
                 'connect', 'dstpwstore', 'escrow_users',

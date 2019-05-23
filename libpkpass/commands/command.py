@@ -78,7 +78,7 @@ class Command(object):
         config_args = self._get_config_args(cli_args['config'])
         self.args.update(config_args)
 
-        fles = ['keypath', 'cabundle', 'pwstore']
+        fles = ['cabundle', 'pwstore']
         for key, value in iteritems(cli_args):
             if value is not None or key not in self.args:
                 self.args[key] = value
@@ -210,7 +210,7 @@ class Command(object):
         # we want a multi-dim of lists, this way if more combinations come up
         # that would be required in a 1 or more capacity, we just add
         # a list to this list
-        args_list = [['certpath', 'connect']]
+        args_list = [['certpath', 'connect'], ['certpath', 'keypath']]
         for arg_set in args_list:
             valid = False
             for arg in arg_set:

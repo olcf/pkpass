@@ -2,7 +2,8 @@
 import getpass
 from builtins import input
 from libpkpass.commands.command import Command
-from libpkpass.errors import CliArgumentError, PasswordMismatchError, NotThePasswordOwnerError
+from libpkpass.errors import CliArgumentError, PasswordMismatchError, NotThePasswordOwnerError,\
+        BlankPasswordError
 
 
 class Create(Command):
@@ -20,6 +21,8 @@ class Create(Command):
         safe, owner = self.safety_check()
         if safe or self.args['overwrite']:
             password1 = getpass.getpass("Enter password to create: ")
+            if password1.strip() == "":
+                raise BlankPasswordError
             password2 = getpass.getpass("Enter password to create again: ")
             if password1 != password2:
                 raise PasswordMismatchError
