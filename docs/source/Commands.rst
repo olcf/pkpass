@@ -208,11 +208,9 @@ Export allows the current user to migrate all his passwords to one file, this te
 
 Generate
 --------
-Generate allows a user to specify a password name and to have the pkpass system generate it based on a rule set
-Currently we support the rules for 'lower' 'upper' 'special' and 'length'
+Generate allows a user to specify a password name and to have the pkpass system generate it based on a regular expression
 an example rules_map could look like the following
-rules_map: '{"base":{"lower":"True","upper":"True","numbers":"True","length":21},"sec":{"lower:"False","upper":"True"}}'
-if you do not specify a length in your rules pkpass will default to 12
+rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
 
 .. code-block:: bash
 

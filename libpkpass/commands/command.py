@@ -11,7 +11,7 @@ from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
-        PasswordIOError
+        PasswordIOError, JsonArgumentError
 
 
 class Command(object):
@@ -87,6 +87,11 @@ class Command(object):
             if key in fles and not os.path.exists(self.args[key]):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
+        # json args
+        connectmap = None
+        connectmap = self._parse_json_arguments('connect')
+        self.args['rules_map'] = self._parse_json_arguments('rules_map')
+
         if self.args['escrow_users']:
             self.args['escrow_users'] = self.args['escrow_users'].split(",")
         self._validate_combinatorial_args()
@@ -102,11 +107,6 @@ class Command(object):
         self._build_recipient_list()
         self.identities.recipient_list = self.recipient_list + [self.args['identity']]
 
-        connectmap = None
-        if 'connect' in self.args and self.args['connect']:
-            connectmap = json.loads(self.args['connect'])
-        if 'rules_map' in self.args and self.args['rules_map']:
-            self.args['rules_map'] = json.loads(self.args['rules_map'])
         # If there are defined repositories of keys and certificates, load them
         self.identities.load_certs_from_directory(
             self.args['certpath'],
@@ -223,6 +223,17 @@ class Command(object):
             if not valid:
                 raise CliArgumentError(
                     "'%s' or '%s' is required" % tuple(arg_set))
+
+    def _parse_json_arguments(self, argument):
+        ##################################################################
+        """ Parses the json.loads arguments as dictionaries to use"""
+        ##################################################################
+        try:
+            if argument in self.args and self.args[argument]:
+                return json.loads(self.args[argument])
+            return None
+        except ValueError as err:
+            raise JsonArgumentError(argument, err)
 
     def _validate_identities(self):
         for recipient in self.recipient_list:

@@ -35,6 +35,10 @@ class GroupDefinitionError(PKPassError):
     def __init__(self, value):
         self.msg = "Group %s is not defined in the config" % (value)
 
+class JsonArgumentError(PKPassError):
+    def __init__(self, value, reason):
+        self.msg = "Parse error for '%s' because '%s'" %  (value, reason)
+
 class LegacyImportFormatError(PKPassError):
     def __init__(self):
         self.msg = "Passwords in import file not in key:value notation"
