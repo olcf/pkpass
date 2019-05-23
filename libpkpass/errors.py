@@ -63,6 +63,10 @@ class PasswordValidationError(PKPassError):
         self.msg = "Error validating password field: %s with value %s" % (
             field, value)
 
+class RulesMapError(PKPassError):
+    def __init__(self, reason):
+        self.msg = reason
+
 class RSAKeyError(PKPassError):
     pass
 

@@ -3,15 +3,16 @@
 
 import argparse
 import os
+import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
 import libpkpass.commands.distribute as distribute
-import libpkpass.commands.show as show
-import libpkpass.commands.clip as clip
+import libpkpass.commands.export as export
+import libpkpass.commands.generate as generate
+import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
-import libpkpass.commands.export as export
-import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.recover as recover
+import libpkpass.commands.show as show
 
 
 class Cli(object):
@@ -39,6 +40,7 @@ class Cli(object):
         create.Create(self)
         distribute.Distribute(self)
         export.Export(self)
+        generate.Generate(self)
         pkimport.Import(self)
         pklist.List(self)
         listrecipients.Listrecipients(self)

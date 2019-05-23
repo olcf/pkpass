@@ -44,7 +44,8 @@ class Command(object):
             'min_escrow': None,
             'noverify': None,
             'noescrow': False,
-            'recovery': False
+            'recovery': False,
+            'rules': 'base'
             }
         self.recipient_list = []
         self.identities = IdentityDB()
@@ -104,6 +105,8 @@ class Command(object):
         connectmap = None
         if 'connect' in self.args and self.args['connect']:
             connectmap = json.loads(self.args['connect'])
+        if 'rules_map' in self.args and self.args['rules_map']:
+            self.args['rules_map'] = json.loads(self.args['rules_map'])
         # If there are defined repositories of keys and certificates, load them
         self.identities.load_certs_from_directory(
             self.args['certpath'],

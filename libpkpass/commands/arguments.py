@@ -195,6 +195,22 @@ ARGUMENTS = {
         }
     },
 
+    'rules' :{
+        'args': ['-R', '--rules'],
+        'kwargs': {
+            'type': str,
+            'help': 'Key of rules to use from provided rules map'
+        }
+    },
+
+    'rules_map' :{
+        'args': ['--rules-map'],
+        'kwargs': {
+            'type': json.loads,
+            'help': 'Map of rules used for automated generation of passwords'
+        }
+    },
+
     'stdin': {
         'args': ['--stdin'],
         'kwargs': {
