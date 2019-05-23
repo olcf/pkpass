@@ -45,7 +45,7 @@ class Command(object):
             'noverify': None,
             'noescrow': False,
             'recovery': False,
-            'rules': 'base'
+            'rules': 'default'
             }
         self.recipient_list = []
         self.identities = IdentityDB()
