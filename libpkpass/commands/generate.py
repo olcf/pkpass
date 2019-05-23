@@ -27,7 +27,6 @@ class Generate(Command):
         safe, owner = self.safety_check()
         if safe or self.args['overwrite']:
             password = self._generate_pass()
-            print(password)
 
             description = input("Description: ")
             authorizer = input("Authorizer: ")
@@ -61,8 +60,6 @@ class Generate(Command):
                             password.append(a_char)
                 if self._rules_check(local_set, ''.join(password)):
                     break
-                else:
-                    print("PW: " + ''.join(password) + " FAILURE")
             return ''.join(password)
         except TypeError:
             raise RulesMapError("Poorly formatted Rules Map, please check it is in json format")
