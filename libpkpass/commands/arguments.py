@@ -119,15 +119,6 @@ ARGUMENTS = {
         }
     },
 
-    'nocache': {
-        'args': ['--nocache'],
-        'kwargs': {
-            'action': 'store_true',
-            'help': 'Do not use the cached certs for connectors'
-        }
-    },
-
-
     'nocrypto': {
         'args': ['--nocrypto'],
         'kwargs': {

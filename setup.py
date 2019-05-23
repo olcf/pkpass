@@ -226,10 +226,9 @@ class verify(Command):
                 'groups', 'identity', 'keypath',
                 'min_escrow', 'pwstore', 'time',
                 'users']
-        store_args = ['all', 'nocache', 'nocrypto',
-                      'nopassphrase', 'nosign', 'noverify',
-                      'overwrite', 'pwfile', 'pwname',
-                      'recovery', 'stdin']
+        store_args = ['all', 'nocrypto', 'nopassphrase',
+                      'nosign', 'noverify','overwrite',
+                      'pwfile', 'pwname', 'recovery', 'stdin']
         args_dict = {}
         with open(self.rcfile, 'r') as rcyaml:
             try:

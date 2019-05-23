@@ -109,7 +109,6 @@ class Command(object):
             self.args['cabundle'],
             connectmap,
             self.args['noverify'],
-            self.args['nocache'] if 'nocache' in self.args else False,
             escrow_users=self.args['escrow_users'])
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()

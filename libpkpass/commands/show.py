@@ -12,7 +12,7 @@ class Show(Command):
     the CLI to show passwords that have been distributed to users"""
     name = 'show'
     description = 'Display a password'
-    selected_args = ['pwname', 'pwstore', 'stdin', 'identity', 'certpath', 'keypath', 'nocache',
+    selected_args = ['pwname', 'pwstore', 'stdin', 'identity', 'certpath', 'keypath',
                      'cabundle', 'nopassphrase', 'noverify', 'card_slot', 'all', 'recovery',
                      'ignore_decrypt']
 
