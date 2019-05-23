@@ -25,25 +25,24 @@ class IdentityDB(object):
     def __str__(self):
         return "%r" % self.__dict__
 
-    def _load_certs_from_external(self, connection_map, nocache):
+    def _load_certs_from_external(self, connection_map):
         temp_dir = str(tempfile.gettempdir())
         for key, value in connection_map.items():
             dirname = os.path.join(temp_dir, str(key))
-            if nocache and os.path.exists(dirname):
-                encoded = key.encode("ASCII")
-                connector = "libpkpass.connectors." + encoded.lower()
-                connector = __import__(connector, fromlist=[encoded])
-                connector = getattr(connector, encoded)
-                connector = connector(value)
-                # connector.list_certificates() should return a dict
-                # the key being the username and the value being
-                # a list of certs
-                certs = connector.list_certificates()
-                if not os.path.exists(dirname):
-                    os.makedirs(dirname)
-                for name, certlist in certs.items():
-                    with open(os.path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
-                        tmpcert.write("\n".join(certlist))
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            encoded = key.encode("ASCII")
+            connector = "libpkpass.connectors." + encoded.lower()
+            connector = __import__(connector, fromlist=[encoded])
+            connector = getattr(connector, encoded)
+            connector = connector(value)
+            # connector.list_certificates() should return a dict
+            # the key being the username and the value being
+            # a list of certs
+            certs = connector.list_certificates()
+            for name, certlist in certs.items():
+                with open(os.path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
+                    tmpcert.write("\n".join(certlist))
 
             self._load_from_directory(dirname, 'certificate')
 
@@ -70,13 +69,12 @@ class IdentityDB(object):
                                   cabundle,
                                   connectmap=None,
                                   noverify=False,
-                                  nocache=False,
                                   escrow_users=None):
         #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
         if connectmap:
-            self._load_certs_from_external(connectmap, nocache)
+            self._load_certs_from_external(connectmap)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
         verify_list = self.recipient_list + [self.identity, 'ca']
@@ -104,5 +102,6 @@ class IdentityDB(object):
         #######################################################################
         if os.path.isdir(path):
             self._load_from_directory(path, 'key')
-        else:
-            print("WARNING: PRIVATE KEY DIRECTORY DOES NOT EXIST OR IS NOT POPULATED")
+        # We used to print a warning on else here, but it seems unnecessary;
+        # if a user is using PIVs/Smartcards, this warning could just annoy
+        # them needlessly
