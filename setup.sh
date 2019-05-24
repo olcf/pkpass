@@ -92,7 +92,15 @@ if [[ "$?" == "1" ]]; then
 fi
 
 #define a home default for passdb
-home=${PREFIX:-${HOME}/passdb}
+if [ -z ${PREFIX+x} ]; then
+    read -rp "PKPass home (defaults to ${HOME}/passdb): " home
+    home="${home:-${HOME}/passdb}"
+    home="${home/#\~/$HOME}"
+else
+    home="${PREFIX/#\~/$HOME}"
+fi
+
+home=$(sed 's:/*$::' <<< "$home")
 rcfile="$HOME/.pkpassrc"
 #check for a .pkpassrc file and ask user if they want to overwrite or skip to pyinstall
 #This is useful in the event that an error occurred during last setup
@@ -108,65 +116,65 @@ fi
 if [[ "$skip" == "n" ]]; then
     echo -e "If not using defaults for the following paths please use full filepath
     Or relative to home using ~"
-    
+
     #Cert path definition
     read -rp "Directory for certpath (defaults to ~/passdb/certs): " certpath
-    
+
     certpath="${certpath:-${home}/certs}"
     certpath="${certpath/#\~/$HOME}" 
     mkdir -p "${certpath}"
-    
+
     #Key path definition
     read -rp "Directory for keypath (defaults to ~/passdb/keys): " keypath
-    
+
     keypath="${keypath:-${home}/keys}"
     keypath="${keypath/#\~/$HOME}"
     mkdir -p "${keypath}"
-    
+
     #cabundle path definition
     read -rp "Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): " cabundle
-    
+
     cabundle="${cabundle:-${home}/cabundles/ca.bundle}"
     cabundle="${cabundle/#\~/$HOME}"
     mkdir -p "$(dirname "${cabundle}")"
     touch "${cabundle}"
-    
+
     #passwords path definition
     read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwstore
-    
+
     pwstore="${pwstore:-${home}/passwords}"
     pwstore="${pwstore/#\~/$HOME}"
     mkdir -p "${pwstore}"
-    
-    
+
+
     #list available card slots for the user
     pkcs11-tool -L
-    
+
     read -rp "Available slots listed above, which would you like to use? (defaults to 0): " cardslot
     cardslot="${cardslot:-0}"
-    
+
     read -rp "What user name would you like to use? (defaults to system user): " identity
     identity="${identity:-$(whoami)}"
-    
+
     echo -e "Escrow users is a feature of Pkpass. Escrow allows a password to be recovered by
     the majority of the escrow users in the event of an emergency."
-    
+
     escrow="$(decision "Would you like to setup a group of default escrow users?(y/n)" n)"
-    
+
     if [[ "$escrow" == "y" ]]; then
-    
+
         read -rp "Please enter a comma seperated list of usernames: " escrowusers
         escrowusers="$(csv "$escrowusers")"
         count="$(echo "$escrowusers" | sed 's/[^,]//g' | wc -c)"
-    
+
         echo -e "By Default we require 1 less user than is total in the group to unlock an escrow
         password, your list was $count total users"
         count=$((count-1))
-    
+
         read -rp "What should be the minimum number of users to unlock escrow passwords? Default($count): " minescrow
         minescrow="${minescrow:-$count}"
     fi
-    
+
     #overwrite a file .pkpassrc with defined values here
     echo -e "certpath: $certpath 
 keypath: $keypath
