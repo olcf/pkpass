@@ -17,6 +17,7 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
         clip                Copy a password to clipboard
         create              Create a new password entry and encrypt it for
                             yourself
+        delete              Delete a password in the repository
         distribute          Distribute an existing password entry to another
                             entity
         export              Export passwords that you have access to and encrypt
@@ -114,6 +115,43 @@ Create is used to create a password in the configured password repository
       --nosign              Do not digitally sign the password information that
                             you are generating
       --noverify            Do not verify certificates and signatures
+      --overwrite           Overwrite a password that already exists
+      --pwstore PWSTORE, --srcpwstore PWSTORE
+                            Path to the source password store. Defaults to
+                            "./passwords"
+      --stdin               Take all password input from stdin instead of from a
+                            user input prompt
+
+Delete
+------
+Delete a password in the repository; pkpass will ask for confirmation. A user could also just remove the file.
+This is mostly just to allow testing to be a little faster
+
+.. code-block:: bash
+
+    usage: pkpass.py delete [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
+                            [--certpath CERTPATH] [-i IDENTITY]
+                            [--keypath KEYPATH] [--nopassphrase] [--overwrite]
+                            [--pwstore PWSTORE] [--stdin]
+                            [pwname]
+
+    positional arguments:
+      pwname                Name of the password. Ex:
+                            passwords/team/infrastructure/root
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --cabundle CABUNDLE   Path to CA certificate bundle file
+      -c CARD_SLOT, --card_slot CARD_SLOT
+                            The slot number of the card that should be used
+      --certpath CERTPATH   Path to directory containing public keys. Certificates
+                            must end in '.cert'
+      -i IDENTITY, --identity IDENTITY
+                            Override identity of user running the program
+      --keypath KEYPATH     Path to directory containing private keys. Keys must
+                            end in '.key'
+      --nopassphrase, --nopin
+                            Do not prompt for a pin/passphrase
       --overwrite           Overwrite a password that already exists
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to

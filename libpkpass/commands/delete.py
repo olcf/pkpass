@@ -9,9 +9,9 @@ from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError
 
 
 class Delete(Command):
-    """This class implements the CLI functionality of creation of passwords"""
+    """This class implements the CLI functionality of deletion of passwords"""
     name = 'delete'
-    description = 'Create a new password entry and encrypt it for yourself'
+    description = 'Delete a password in the repository'
     selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath', 'nopassphrase',
                      'keypath', 'cabundle', 'card_slot']
 
