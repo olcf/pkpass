@@ -39,8 +39,7 @@ class Generate(Command):
             return re.search(regex_rule, password).group(0)
         except TypeError:
             raise RulesMapError("Poorly formatted Rules Map, please check it is in json format")
-        # This exception should become more specific
-        except:
+        except re.error:
             raise RulesMapError("Poorly formatted regex, or unsupported")
 
     def _validate_args(self):

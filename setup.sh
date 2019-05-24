@@ -92,7 +92,7 @@ if [[ "$?" == "1" ]]; then
 fi
 
 #define a home default for passdb
-home="$HOME"/passdb
+home=${PREFIX:-${HOME}/passdb}
 rcfile="$HOME/.pkpassrc"
 #check for a .pkpassrc file and ask user if they want to overwrite or skip to pyinstall
 #This is useful in the event that an error occurred during last setup
