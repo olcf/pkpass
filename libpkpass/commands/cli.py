@@ -5,6 +5,7 @@ import argparse
 import os
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
+import libpkpass.commands.delete as delete
 import libpkpass.commands.distribute as distribute
 import libpkpass.commands.export as export
 import libpkpass.commands.generate as generate
@@ -38,6 +39,7 @@ class Cli(object):
 
         clip.Clip(self)
         create.Create(self)
+        delete.Delete(self)
         distribute.Distribute(self)
         export.Export(self)
         generate.Generate(self)
