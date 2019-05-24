@@ -159,6 +159,17 @@ class Command(object):
         password.write_password_data(os.path.join(
             self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])
 
+    def delete_pass(self):
+        ###########################################################################
+        """This deletes a password that the user has created, useful for testing"""
+        ###########################################################################
+        filepath = os.path.join(self.args['pwstore'], self.args['pwname'])
+        try:
+            os.remove(filepath)
+        except OSError:
+            raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
+
+
     def _run_command_execution(self):
         ##################################################################
         """ Passes the argparse Namespace object of parsed arguments   """

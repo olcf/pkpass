@@ -1,4 +1,5 @@
 .pkpassrc
+pkpass.spec
 *pyc*
 test/pki/ca
 test/pki/intermediate
