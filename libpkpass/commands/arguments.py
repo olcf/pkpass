@@ -195,6 +195,16 @@ ARGUMENTS = {
         }
     },
 
+    'rename': {
+        'args': ['rename'],
+        'kwargs': {
+            'type': str,
+            'help': 'New name of the password.',
+            'nargs': '?',
+            'default': None
+        }
+    },
+
     'rules' :{
         'args': ['-R', '--rules'],
         'kwargs': {
