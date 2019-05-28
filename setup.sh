@@ -118,21 +118,21 @@ if [[ "$skip" == "n" ]]; then
     Or relative to home using ~"
 
     #Cert path definition
-    read -rp "Directory for certpath (defaults to ~/passdb/certs): " certpath
+    read -rp "Directory for certpath (defaults to ${home}/certs): " certpath
 
     certpath="${certpath:-${home}/certs}"
     certpath="${certpath/#\~/$HOME}" 
     mkdir -p "${certpath}"
 
     #Key path definition
-    read -rp "Directory for keypath (defaults to ~/passdb/keys): " keypath
+    read -rp "Directory for keypath (defaults to ${home}/keys): " keypath
 
     keypath="${keypath:-${home}/keys}"
     keypath="${keypath/#\~/$HOME}"
     mkdir -p "${keypath}"
 
     #cabundle path definition
-    read -rp "Path to cabundle (defaults to ~/passdb/cabundles/ca.bundle): " cabundle
+    read -rp "Path to cabundle (defaults to ${home}/cabundles/ca.bundle): " cabundle
 
     cabundle="${cabundle:-${home}/cabundles/ca.bundle}"
     cabundle="${cabundle/#\~/$HOME}"
@@ -140,7 +140,7 @@ if [[ "$skip" == "n" ]]; then
     touch "${cabundle}"
 
     #passwords path definition
-    read -rp "Directory for password store (defaults to ~/passdb/passwords): " pwstore
+    read -rp "Directory for password store (defaults to ${home}/passwords): " pwstore
 
     pwstore="${pwstore:-${home}/passwords}"
     pwstore="${pwstore/#\~/$HOME}"
