@@ -12,7 +12,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, \
-        SignatureVerificationError, TrustChainVerificationError, X509CertificateError
+        SignatureVerificationError, X509CertificateError
 
 ##############################################################################
 def pk_encrypt_string(plaintext_string, identity):
@@ -138,9 +138,6 @@ def pk_verify_chain(identity):
     command = ['openssl', 'verify', '-CAfile', identity['cabundle'], identity['certificate_path']]
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate()
-
-    if proc.returncode != 0:
-        raise TrustChainVerificationError(stdout)
 
     return stdout.decode("ASCII").rstrip() == "%s: OK" % identity['certificate_path']
 

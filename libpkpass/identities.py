@@ -15,9 +15,7 @@ class IdentityDB(object):
     def __init__(self, **kwargs):
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
-        self.identity = ""
         self.iddb = {}
-        self.recipient_list = []
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.__dict__)
@@ -67,9 +65,7 @@ class IdentityDB(object):
     def load_certs_from_directory(self,
                                   certpath,
                                   cabundle,
-                                  connectmap=None,
-                                  noverify=False,
-                                  escrow_users=None):
+                                  connectmap=None):
         #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
@@ -77,24 +73,18 @@ class IdentityDB(object):
             self._load_certs_from_external(connectmap)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
-        verify_list = self.recipient_list + [self.identity, 'ca']
-        if escrow_users:
-            verify_list += escrow_users
         for key, _ in self.iddb.items():
             self.iddb[key]['cabundle'] = cabundle
-            if key not in verify_list:
-                continue
-            elif not noverify or key in verify_list:
-                self.iddb[key]['verified'] = crypto.pk_verify_chain(self.iddb[key])
-                self.iddb[key]['fingerprint'] = crypto.get_cert_fingerprint(
-                    self.iddb[key])
-                self.iddb[key]['subject'] = crypto.get_cert_subject(self.iddb[key])
-                self.iddb[key]['issuer'] = crypto.get_cert_issuer(self.iddb[key])
-                self.iddb[key]['enddate'] = crypto.get_cert_enddate(self.iddb[key])
-                self.iddb[key]['issuerhash'] = crypto.get_cert_issuerhash(
-                    self.iddb[key])
-                self.iddb[key]['subjecthash'] = crypto.get_cert_subjecthash(
-                    self.iddb[key])
+            self.iddb[key]['verified'] = crypto.pk_verify_chain(self.iddb[key])
+            self.iddb[key]['fingerprint'] = crypto.get_cert_fingerprint(
+                self.iddb[key])
+            self.iddb[key]['subject'] = crypto.get_cert_subject(self.iddb[key])
+            self.iddb[key]['issuer'] = crypto.get_cert_issuer(self.iddb[key])
+            self.iddb[key]['enddate'] = crypto.get_cert_enddate(self.iddb[key])
+            self.iddb[key]['issuerhash'] = crypto.get_cert_issuerhash(
+                self.iddb[key])
+            self.iddb[key]['subjecthash'] = crypto.get_cert_subjecthash(
+                self.iddb[key])
 
     def load_keys_from_directory(self, path):
         #######################################################################
