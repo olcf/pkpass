@@ -26,7 +26,7 @@ class Generate(Command):
             authorizer = input("Authorizer: ")
             self.create_pass(password, description, authorizer)
         else:
-            raise NotThePasswordOwnerError(self.args['identity'], owner)
+            raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
     def _generate_pass(self):
         #######################################################################

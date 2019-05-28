@@ -169,6 +169,21 @@ class Command(object):
         except OSError:
             raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
 
+    def rename_pass(self):
+        #######################################################
+        """This renames a password that the user has created"""
+        #######################################################
+        oldpath = os.path.join(self.args['pwstore'], self.args['pwname'])
+        newpath = os.path.join(self.args['pwstore'], self.args['rename'])
+        try:
+            os.rename(oldpath, newpath)
+            password = PasswordEntry()
+            password.read_password_data(newpath)
+            password['metadata']['name'] = self.args['rename']
+            password.write_password_data(newpath)
+
+        except OSError:
+            raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
 
     def _run_command_execution(self):
         ##################################################################

@@ -29,6 +29,7 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
         listrecipients      List the recipients that pkpass knows about
         recover             Recover a password that has been distributed using
                             escrow functions
+        rename              Rename a password in the repository
         show                Display a password
 
     optional arguments:
@@ -415,6 +416,43 @@ This requires password owners to have created escrow users. Each necessary escro
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
+
+Rename
+------
+This renames a password in the given repository
+
+.. code-block:: bash
+
+    usage: pkpass.py rename [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
+                            [--certpath CERTPATH] [-i IDENTITY]
+                            [--keypath KEYPATH] [--nopassphrase] [--overwrite]
+                            [--pwstore PWSTORE] [--stdin]
+                            [pwname] [rename]
+
+    positional arguments:
+      pwname                Name of the password. Ex:
+                            passwords/team/infrastructure/root
+      rename                New name of the password.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --cabundle CABUNDLE   Path to CA certificate bundle file
+      -c CARD_SLOT, --card_slot CARD_SLOT
+                            The slot number of the card that should be used
+      --certpath CERTPATH   Path to directory containing public keys. Certificates
+                            must end in '.cert'
+      -i IDENTITY, --identity IDENTITY
+                            Override identity of user running the program
+      --keypath KEYPATH     Path to directory containing private keys. Keys must
+                            end in '.key'
+      --nopassphrase, --nopin
+                            Do not prompt for a pin/passphrase
+      --overwrite           Overwrite a password that already exists
+      --pwstore PWSTORE, --srcpwstore PWSTORE
+                            Path to the source password store. Defaults to
+                            "./passwords"
+      --stdin               Take all password input from stdin instead of from a
+                            user input prompt
 
 Show
 ----

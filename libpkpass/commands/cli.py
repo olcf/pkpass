@@ -13,6 +13,7 @@ import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
 import libpkpass.commands.recover as recover
+import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 
 
@@ -47,6 +48,7 @@ class Cli(object):
         pklist.List(self)
         listrecipients.Listrecipients(self)
         recover.Recover(self)
+        rename.Rename(self)
         show.Show(self)
 
         self.parsedargs = self.parser.parse_args()

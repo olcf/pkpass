@@ -31,7 +31,7 @@ class Create(Command):
             authorizer = input("Authorizer: ")
             self.create_pass(password1, description, authorizer)
         else:
-            raise NotThePasswordOwnerError(self.args['identity'], owner)
+            raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
     def _validate_args(self):
         for argument in ['pwname', 'keypath']:
