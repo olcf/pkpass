@@ -49,7 +49,6 @@ class Command(object):
             }
         self.recipient_list = []
         self.identities = IdentityDB()
-        self.identities.identity = self.args['identity']
         cli.register(self, self.name, self.description)
 
     def register(self, parser):
@@ -97,7 +96,8 @@ class Command(object):
         self._validate_combinatorial_args()
         self._validate_args()
 
-        if self.args['subparser_name'] in ['create', 'distribute'] and self.args['noverify'] is True:
+        verify_parsers = ['create', 'distribute', 'generate', 'import']
+        if self.args['subparser_name'] in verify_parsers:
             self.args['noverify'] = False
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
@@ -105,15 +105,12 @@ class Command(object):
 
         # Build the list of recipients that this command will act on
         self._build_recipient_list()
-        self.identities.recipient_list = self.recipient_list + [self.args['identity']]
 
         # If there are defined repositories of keys and certificates, load them
         self.identities.load_certs_from_directory(
             self.args['certpath'],
             self.args['cabundle'],
-            connectmap,
-            self.args['noverify'],
-            escrow_users=self.args['escrow_users'])
+            connectmap)
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
