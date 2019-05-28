@@ -73,9 +73,9 @@ function pyinstall(){
         pip install "${package[@]}"
 
     elif [[ "$method" == "0" ]]; then
-        sudo python -m pip install -r requirements.txt
+        sudo python -m pip install "${package[@]}"
     elif [[ "$method" == "1" ]]; then
-        python -m pip install -r requirements.txt --user
+        python -m pip install "${package[@]}" --user
     else
         invalid
     fi
