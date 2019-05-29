@@ -76,7 +76,7 @@ class PasswordEntry(object):
                 self.escrow[escrow_guid]['recipients'][escrow_user] = self._add_recipient(
                     escrow_user, split_secret[i], distributor,
                     identitydb, encryption_algorithm, passphrase, card_slot)
-            i += 1
+                i += 1
 
 
     def add_escrow(
