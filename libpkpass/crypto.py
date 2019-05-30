@@ -15,6 +15,14 @@ from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreation
         SignatureVerificationError, X509CertificateError
 
 ##############################################################################
+def handle_python_strings(string):
+    """handles py2/3 incompatiblities"""
+##############################################################################
+    if not isinstance(string, bytes):
+        string = string.encode("ASCII")
+    return string
+
+##############################################################################
 def pk_encrypt_string(plaintext_string, identity):
     """ Encrypt and return a base 64 encoded string for the provided identity"""
 ##############################################################################
@@ -32,7 +40,7 @@ def pk_encrypt_string(plaintext_string, identity):
     fern = Fernet(plaintext_derived_key)
     encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
 
-    return (encrypted_string, base64.urlsafe_b64encode(ciphertext_derived_key))
+    return (encrypted_string, base64.urlsafe_b64encode(handle_python_strings(ciphertext_derived_key)))
 
 
 ##############################################################################
@@ -40,6 +48,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
     """ Decrypt a base64 encoded string for the provided identity"""
 ##############################################################################
 
+    ciphertext_derived_key = handle_python_strings(ciphertext_derived_key) + b'==='
     if 'key_path' in identity:
         command = ['openssl', 'rsautl', '-inkey', identity['key_path'], '-decrypt', '-pkcs']
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
@@ -71,11 +80,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
 
     fern = Fernet(plaintext_derived_key)
 
-    #python2/3 stuff
-    if not isinstance(ciphertext_string, bytes):
-        ciphertext_string = ciphertext_string.encode("ASCII")
-    plaintext_string = fern.decrypt(ciphertext_string)
-
+    plaintext_string = fern.decrypt(handle_python_strings(ciphertext_string))
     return plaintext_string.decode("ASCII")
 
 
@@ -88,7 +93,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         command = ['openssl', 'rsautl', '-sign', '-inkey', identity['key_path']]
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate(input=stringhash.encode('ASCII'))
-        signature = base64.urlsafe_b64encode(stdout)
+        signature = base64.urlsafe_b64encode(handle_python_strings(stdout))
     else:
         # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
         # command line (insecure) or via stdin.  So, we have to put signature text
@@ -105,7 +110,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         out.close()
 
         with open(out.name, 'rb') as sigfile:
-            signature = base64.urlsafe_b64encode(sigfile.read())
+            signature = base64.urlsafe_b64encode(handle_python_strings(sigfile.read() + b'==='))
 
         os.unlink(fname.name)
         os.unlink(out.name)
@@ -123,7 +128,7 @@ def pk_verify_signature(string, signature, identity):
     stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
     command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-verify']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(signature))
+    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature) + b'==='))
 
     if proc.returncode != 0:
         raise SignatureVerificationError(stdout)
@@ -211,7 +216,7 @@ def sk_encrypt_string(plaintext_string, key):
 
     fern = Fernet(hash_password(key))
     encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
-    return base64.urlsafe_b64encode(encrypted_string)
+    return base64.urlsafe_b64encode(handle_python_strings(encrypted_string) + b'===')
 
 
 ##############################################################################
@@ -220,11 +225,9 @@ def sk_decrypt_string(ciphertext_string, key):
 ##############################################################################
 
     fern = Fernet(hash_password(key))
-    #python2/3 stuff
-    if not isinstance(ciphertext_string, bytes):
-        ciphertext_string = ciphertext_string.encode("ASCII")
+    ciphertext_string = handle_python_strings(ciphertext_string)
     try:
-        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(ciphertext_string))
+        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(handle_python_strings(ciphertext_string) + b'==='))
         return plaintext_string.decode("ASCII")
     except InvalidToken:
         raise DecryptionError("Incorrect Password")
@@ -237,4 +240,4 @@ def hash_password(password):
     password = b"%s" % password
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
                      iterations=100000, backend=default_backend())
-    return base64.urlsafe_b64encode(kdf.derive(password))
+    return base64.urlsafe_b64encode(handle_python_strings(kdf.derive(password)) + b'===')
