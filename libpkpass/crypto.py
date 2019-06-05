@@ -62,10 +62,8 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         with tempfile.NamedTemporaryFile(delete=False) as fname:
             fname.write(base64.urlsafe_b64decode(ciphertext_derived_key))
         command = ['pkcs15-crypt', '--decipher', '--raw', '--pkcs', '--input', fname.name]
-        index = 1
         if card_slot is not None:
             command.extend(['--reader', str(card_slot)])
-            index = 0
         command.extend(['--pin', '-'])
         #subprocess.DEVNULL doesn't exist in python2 so...
         with open(os.devnull, 'w') as devnull:
@@ -73,7 +71,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         os.unlink(fname.name)
         try:
-            plaintext_derived_key = stdout.splitlines()[index]
+            plaintext_derived_key = stdout
         except IndexError:
             raise DecryptionError(stdout)
 
