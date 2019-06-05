@@ -48,7 +48,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
     """ Decrypt a base64 encoded string for the provided identity"""
 ##############################################################################
 
-    ciphertext_derived_key = handle_python_strings(ciphertext_derived_key) + b'==='
+    ciphertext_derived_key = handle_python_strings(ciphertext_derived_key)
     if 'key_path' in identity:
         command = ['openssl', 'rsautl', '-inkey', identity['key_path'], '-decrypt', '-pkcs']
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
@@ -67,7 +67,9 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
             command.extend(['--reader', str(card_slot)])
             index = 0
         command.extend(['--pin', '-'])
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        #subprocess.DEVNULL doesn't exist in python2 so...
+        with open(os.devnull, 'w') as devnull:
+            proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=devnull)
         stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         os.unlink(fname.name)
         try:
@@ -110,7 +112,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         out.close()
 
         with open(out.name, 'rb') as sigfile:
-            signature = base64.urlsafe_b64encode(handle_python_strings(sigfile.read() + b'==='))
+            signature = base64.urlsafe_b64encode(handle_python_strings(sigfile.read()))
 
         os.unlink(fname.name)
         os.unlink(out.name)
@@ -128,7 +130,7 @@ def pk_verify_signature(string, signature, identity):
     stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
     command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-verify']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature) + b'==='))
+    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature)))
 
     if proc.returncode != 0:
         raise SignatureVerificationError(stdout)
@@ -216,7 +218,7 @@ def sk_encrypt_string(plaintext_string, key):
 
     fern = Fernet(hash_password(key))
     encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
-    return base64.urlsafe_b64encode(handle_python_strings(encrypted_string) + b'===')
+    return base64.urlsafe_b64encode(handle_python_strings(encrypted_string))
 
 
 ##############################################################################
@@ -227,7 +229,7 @@ def sk_decrypt_string(ciphertext_string, key):
     fern = Fernet(hash_password(key))
     ciphertext_string = handle_python_strings(ciphertext_string)
     try:
-        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(handle_python_strings(ciphertext_string) + b'==='))
+        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(handle_python_strings(ciphertext_string)))
         return plaintext_string.decode("ASCII")
     except InvalidToken:
         raise DecryptionError("Incorrect Password")
@@ -240,4 +242,4 @@ def hash_password(password):
     password = b"%s" % password
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
                      iterations=100000, backend=default_backend())
-    return base64.urlsafe_b64encode(handle_python_strings(kdf.derive(password)) + b'===')
+    return base64.urlsafe_b64encode(handle_python_strings(kdf.derive(password)))
