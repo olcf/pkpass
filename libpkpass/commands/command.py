@@ -269,6 +269,8 @@ class Command(object):
             raise CliArgumentError(
                 "Error: Your user '%s' is not in the recipient database" %
                 self.args['identity'])
+        else:
+            self.identities.verify_identity(self.args['identity'])
 
     def _print_debug(self):
         print(self.recipient_list)

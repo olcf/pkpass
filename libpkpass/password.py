@@ -112,7 +112,7 @@ class PasswordEntry(object):
             self.recipients[recipient] = self._add_recipient(recipient, secret, distributor,
                                                              identitydb, encryption_algorithm, passphrase,
                                                              card_slot)
-        if escrow_users is not None:
+        if escrow_users:
             escrow_users_swap = list((set(escrow_users) - set(recipients)))
             if (len(escrow_users) > 3) and (len(escrow_users_swap) < 3):
                 print("warning: recipient users overlapped with escrow users too much, not enough escrow")
