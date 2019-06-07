@@ -53,7 +53,7 @@ class Distribute(Command):
             self.args['pwstore'], self.args['pwname']))
 
     def _validate_args(self):
-        for argument in ['keypath']:
+        for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)

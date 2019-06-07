@@ -112,7 +112,7 @@ class PasswordEntry(object):
             self.recipients[recipient] = self._add_recipient(recipient, secret, distributor,
                                                              identitydb, encryption_algorithm, passphrase,
                                                              card_slot)
-        if escrow_users is not None:
+        if escrow_users:
             escrow_users_swap = list((set(escrow_users) - set(recipients)))
             if (len(escrow_users) > 3) and (len(escrow_users_swap) < 3):
                 print("warning: recipient users overlapped with escrow users too much, not enough escrow")
@@ -149,7 +149,6 @@ class PasswordEntry(object):
         """Add recipient or sharer to list"""
         #######################################################################
         try:
-            #identitydb.verify_identity(recipient)
             if encryption_algorithm == 'rsautl':
                 (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
                     secret, identitydb.iddb[recipient])
@@ -199,10 +198,11 @@ class PasswordEntry(object):
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
                 self.metadata['name'])
 
-    def verify_entry(self, uid=None, identitydb=None):
+    def verify_entry(self, uid=None, iddb=None):
         #######################################################################
         """ Check to see if all signatures and user certificates are okay for the user accessing this password entry """
         #######################################################################
+        identitydb = iddb.iddb
         recipient_entry = self.recipients[uid].copy()
         distributor = recipient_entry['distributor']
         signature = recipient_entry.pop('signature')
