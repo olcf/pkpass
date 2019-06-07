@@ -73,7 +73,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         os.unlink(fname.name)
         try:
-            plaintext_derived_key = stdout.splitlines()[index]
+            plaintext_derived_key = stdout
         except IndexError:
             raise DecryptionError(stdout)
 

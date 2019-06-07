@@ -10,7 +10,7 @@ class Distribute(Command):
     name = 'distribute'
     description = 'Distribute an existing password entry to another entity'
     selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'min_escrow', 'escrow_users',
-                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'noverify', 'nosign', 'card_slot',
+                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'nosign', 'card_slot',
                      'noescrow']
 
     def _run_command_execution(self):

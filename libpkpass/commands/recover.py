@@ -10,7 +10,7 @@ class Recover(Command):
     name = 'recover'
     description = 'Recover a password that has been distributed using escrow functions'
     selected_args = ['pwstore', 'identity', 'certpath', 'keypath', 'cabundle',
-                     'noverify', 'nosign', 'escrow_users', 'min_escrow']
+                     'nosign', 'escrow_users', 'min_escrow']
 
     def _run_command_execution(self):
         ####################################################################

@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import tempfile
 import libpkpass.crypto as crypto
-from libpkpass.errors import FileOpenError
+from libpkpass.errors import FileOpenError, CliArgumentError
 
 class IdentityDB(object):
     ##########################################################################
@@ -15,6 +15,7 @@ class IdentityDB(object):
     def __init__(self, **kwargs):
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
+        self.cabundle = ""
         self.iddb = {}
 
     def __repr__(self):
@@ -64,7 +65,7 @@ class IdentityDB(object):
 
     def load_certs_from_directory(self,
                                   certpath,
-                                  cabundle,
+                                  verify_on_load=False,
                                   connectmap=None):
         #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
@@ -73,18 +74,29 @@ class IdentityDB(object):
             self._load_certs_from_external(connectmap)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
-        for key, _ in self.iddb.items():
-            self.iddb[key]['cabundle'] = cabundle
-            self.iddb[key]['verified'] = crypto.pk_verify_chain(self.iddb[key])
-            self.iddb[key]['fingerprint'] = crypto.get_cert_fingerprint(
-                self.iddb[key])
-            self.iddb[key]['subject'] = crypto.get_cert_subject(self.iddb[key])
-            self.iddb[key]['issuer'] = crypto.get_cert_issuer(self.iddb[key])
-            self.iddb[key]['enddate'] = crypto.get_cert_enddate(self.iddb[key])
-            self.iddb[key]['issuerhash'] = crypto.get_cert_issuerhash(
-                self.iddb[key])
-            self.iddb[key]['subjecthash'] = crypto.get_cert_subjecthash(
-                self.iddb[key])
+        if verify_on_load:
+            for key, _ in self.iddb.items():
+                self.verify_identity(key)
+
+    def verify_identity(self, identity):
+        #######################################################################
+        """ Read in all rsa keys from directory and name them as found """
+        #######################################################################
+        try:
+            self.iddb[identity]['cabundle'] = self.cabundle
+            self.iddb[identity]['verified'] = crypto.pk_verify_chain(self.iddb[identity])
+            self.iddb[identity]['fingerprint'] = crypto.get_cert_fingerprint(
+                self.iddb[identity])
+            self.iddb[identity]['subject'] = crypto.get_cert_subject(self.iddb[identity])
+            self.iddb[identity]['issuer'] = crypto.get_cert_issuer(self.iddb[identity])
+            self.iddb[identity]['enddate'] = crypto.get_cert_enddate(self.iddb[identity])
+            self.iddb[identity]['issuerhash'] = crypto.get_cert_issuerhash(
+                self.iddb[identity])
+            self.iddb[identity]['subjecthash'] = crypto.get_cert_subjecthash(
+                self.iddb[identity])
+        except KeyError:
+            raise CliArgumentError(
+                "Error: Recipient '%s' is not in the recipient database" % identity)
 
     def load_keys_from_directory(self, path):
         #######################################################################

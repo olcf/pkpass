@@ -12,7 +12,7 @@ class Export(Command):
     name = 'export'
     description = 'Export passwords that you have access to and encrypt with aes'
     selected_args = ['pwfile', 'stdin', 'identity', 'certpath', 'nopassphrase',
-                     'cabundle', 'noverify', 'dstpwstore', 'card_slot', 'nocrypto']
+                     'cabundle', 'dstpwstore', 'card_slot', 'nocrypto']
 
     def _run_command_execution(self):
         ####################################################################
