@@ -149,7 +149,6 @@ class PasswordEntry(object):
         """Add recipient or sharer to list"""
         #######################################################################
         try:
-            #identitydb.verify_identity(recipient)
             if encryption_algorithm == 'rsautl':
                 (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
                     secret, identitydb.iddb[recipient])
@@ -210,7 +209,6 @@ class PasswordEntry(object):
         message = self._create_signable_string(recipient_entry)
         sig_ok = crypto.pk_verify_signature(
             message, signature, identitydb[distributor])
-        iddb.verify_identity(distributor)
         return {'distributor': distributor,
                 'sigOK': sig_ok,
                 'certOK': identitydb[distributor]['verified']}
