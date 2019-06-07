@@ -258,7 +258,6 @@ class Command(object):
             raise JsonArgumentError(argument, err)
 
     def _validate_identities(self):
-#        self.identities.verify_identity(self.args['identity'])
         for recipient in self.recipient_list:
             self.identities.verify_identity(recipient)
             if recipient not in self.identities.iddb.keys():
