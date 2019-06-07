@@ -82,22 +82,13 @@ class PasswordEntry(object):
     def add_escrow(
             self,
             secret=None,
-            recipients=None,
             escrow_users=None,
             minimum=None,
             pwstore=None):
         #######################################################################
         """ Add escrow users to the recipient list of this password object"""
         #######################################################################
-        escrow_users = list((set(escrow_users) - set(recipients)))
-        if (len(escrow_users) > 3) and (len(escrow_users) < 3):
-            print("warning: recipient users overlapped with escrow users too much, not enough escrow")
-
-        #escrow_users may now be none after the set operations
-        if escrow_users is None:
-            escrow_users = []
-        else:
-            split_secret = pk_split_secret(secret, escrow_users, minimum)
+        split_secret = pk_split_secret(secret, escrow_users, minimum)
         return (self.read_escrow(os.path.join(pwstore, self.metadata['name'])), split_secret)
 
     def add_recipients(
@@ -122,9 +113,14 @@ class PasswordEntry(object):
                                                              identitydb, encryption_algorithm, passphrase,
                                                              card_slot)
         if escrow_users is not None:
+            escrow_users_swap = list((set(escrow_users) - set(recipients)))
+            if (len(escrow_users) > 3) and (len(escrow_users_swap) < 3):
+                print("warning: recipient users overlapped with escrow users too much, not enough escrow")
+                return
+            #escrow_users may now be none after the set operations
+            escrow_users = escrow_users_swap
             escrow_map, split_secret = self.add_escrow(
                 secret=secret,
-                recipients=recipients,
                 escrow_users=escrow_users,
                 minimum=minimum,
                 pwstore=pwstore)
@@ -153,6 +149,7 @@ class PasswordEntry(object):
         """Add recipient or sharer to list"""
         #######################################################################
         try:
+            #identitydb.verify_identity(recipient)
             if encryption_algorithm == 'rsautl':
                 (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
                     secret, identitydb.iddb[recipient])

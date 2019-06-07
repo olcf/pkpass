@@ -15,7 +15,7 @@ class Import(Command):
     name = 'import'
     description = 'Import passwords that you have saved to a file'
     selected_args = ['pwfile', 'stdin', 'identity', 'certpath', 'nopassphrase',
-                     'cabundle', 'noverify', 'dstpwstore', 'card_slot', 'nocrypto',]
+                     'cabundle', 'dstpwstore', 'card_slot', 'nocrypto',]
 
     def _run_command_execution(self):
         ####################################################################

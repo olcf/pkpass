@@ -87,18 +87,15 @@ class Command(object):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
         # json args
-        connectmap = None
         connectmap = self._parse_json_arguments('connect')
-        self.args['rules_map'] = self._parse_json_arguments('rules_map')
 
-        if self.args['escrow_users']:
-            self.args['escrow_users'] = self.args['escrow_users'].split(",")
+        self.args['escrow_users'] = self.args['escrow_users'].split(",") if self.args['escrow_users'] else []
         self._validate_combinatorial_args()
         self._validate_args()
 
-        verify_parsers = ['create', 'distribute', 'generate', 'import']
-        if self.args['subparser_name'] in verify_parsers:
-            self.args['noverify'] = False
+        # currently only listrecipients needs to verify on load; making it a list though
+        # for future development expansion
+        verify_on_load = self.args['subparser_name'] in ['listrecipients']
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
@@ -107,10 +104,11 @@ class Command(object):
         self._build_recipient_list()
 
         # If there are defined repositories of keys and certificates, load them
+        self.identities.cabundle = self.args['cabundle']
         self.identities.load_certs_from_directory(
             self.args['certpath'],
-            self.args['cabundle'],
-            connectmap)
+            verify_on_load=verify_on_load,
+            connectmap=connectmap)
         self.identities.load_keys_from_directory(self.args['keypath'])
         self._validate_identities()
 
@@ -190,11 +188,12 @@ class Command(object):
 
     def _build_recipient_list(self):
         try:
+            self.recipient_list.extend(self.args['escrow_users'])
             if 'groups' in self.args and self.args['groups'] is not None:
                 self.recipient_list += self._parse_group_membership()
             if 'users' in self.args and self.args['users'] is not None:
                 self.recipient_list += self.args['users'].split(',')
-            self.recipient_list = [x.strip() for x in self.recipient_list]
+            self.recipient_list = [x.strip() for x in list(set(self.recipient_list))]
             for user in self.recipient_list:
                 if str(user) == '':
                     raise NullRecipientError
@@ -260,6 +259,7 @@ class Command(object):
 
     def _validate_identities(self):
         for recipient in self.recipient_list:
+            self.identities.verify_identity(recipient)
             if recipient not in self.identities.iddb.keys():
                 raise CliArgumentError(
                     "Error: Recipient '%s' is not in the recipient database" %

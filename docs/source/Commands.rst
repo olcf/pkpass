@@ -45,8 +45,8 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
 
     usage: pkpass.py clip [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                           [--certpath CERTPATH] [-i IDENTITY] [--keypath KEYPATH]
-                          [--nocache] [--nopassphrase] [--noverify]
-                          [--pwstore PWSTORE] [--stdin] [-t TIME]
+                          [--nopassphrase] [--noverify] [--pwstore PWSTORE]
+                          [--stdin] [-t TIME]
                           [pwname]
 
     positional arguments:
@@ -64,7 +64,6 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
-      --nocache             Do not use the cached certs for connectors
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --noverify            Do not verify certificates and signatures
@@ -84,7 +83,7 @@ Create is used to create a password in the configured password repository
     usage: pkpass.py create [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [-e ESCROW_USERS] [-i IDENTITY]
                             [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
-                            [--nopassphrase] [--nosign] [--noverify] [--overwrite]
+                            [--nopassphrase] [--nosign] [--overwrite]
                             [--pwstore PWSTORE] [--stdin]
                             [pwname]
 
@@ -115,7 +114,6 @@ Create is used to create a password in the configured password repository
                             Do not prompt for a pin/passphrase
       --nosign              Do not digitally sign the password information that
                             you are generating
-      --noverify            Do not verify certificates and signatures
       --overwrite           Overwrite a password that already exists
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
@@ -170,8 +168,8 @@ Distribute takes a pre-existing password in the password repository and grants p
                                 [--certpath CERTPATH] [-e ESCROW_USERS]
                                 [-g GROUPS] [-i IDENTITY] [--keypath KEYPATH]
                                 [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
-                                [--nosign] [--noverify] [--pwstore PWSTORE]
-                                [--stdin] [-u USERS]
+                                [--nosign] [--pwstore PWSTORE] [--stdin]
+                                [-u USERS]
                                 [pwname]
 
     positional arguments:
@@ -203,7 +201,6 @@ Distribute takes a pre-existing password in the password repository and grants p
                             Do not prompt for a pin/passphrase
       --nosign              Do not digitally sign the password information that
                             you are generating
-      --noverify            Do not verify certificates and signatures
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
@@ -220,8 +217,7 @@ Export allows the current user to migrate all his passwords to one file, this te
 
     usage: pkpass.py export [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--dstpwstore DSTPWSTORE]
-                            [-i IDENTITY] [--nocrypto] [--nopassphrase]
-                            [--noverify] [--stdin]
+                            [-i IDENTITY] [--nocrypto] [--nopassphrase] [--stdin]
                             [pwfile]
 
     positional arguments:
@@ -241,7 +237,6 @@ Export allows the current user to migrate all his passwords to one file, this te
       --nocrypto            Do not use a password for import/export files
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
-      --noverify            Do not verify certificates and signatures
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
 
@@ -257,8 +252,8 @@ rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
                               [--certpath CERTPATH] [-e ESCROW_USERS]
                               [-i IDENTITY] [--keypath KEYPATH] [-m MIN_ESCROW]
                               [--noescrow] [--nopassphrase] [--nosign]
-                              [--noverify] [--overwrite] [--pwstore PWSTORE]
-                              [-R RULES] [--rules-map RULES_MAP] [--stdin]
+                              [--overwrite] [--pwstore PWSTORE] [-R RULES]
+                              [--rules-map RULES_MAP] [--stdin]
                               [pwname]
 
     positional arguments:
@@ -288,7 +283,6 @@ rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
                             Do not prompt for a pin/passphrase
       --nosign              Do not digitally sign the password information that
                             you are generating
-      --noverify            Do not verify certificates and signatures
       --overwrite           Overwrite a password that already exists
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
@@ -301,6 +295,7 @@ rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
 
+
 Import
 ------
 Import allows a user to take an exported password file and import them into a new smart card
@@ -309,8 +304,7 @@ Import allows a user to take an exported password file and import them into a ne
 
     usage: pkpass.py import [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--dstpwstore DSTPWSTORE]
-                            [-i IDENTITY] [--nocrypto] [--nopassphrase]
-                            [--noverify] [--stdin]
+                            [-i IDENTITY] [--nocrypto] [--nopassphrase] [--stdin]
                             [pwfile]
 
     positional arguments:
@@ -330,9 +324,9 @@ Import allows a user to take an exported password file and import them into a ne
       --nocrypto            Do not use a password for import/export files
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
-      --noverify            Do not verify certificates and signatures
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+
 
 List
 ----
@@ -341,8 +335,7 @@ List shows all passwords available to a given user
 .. code-block:: bash
 
     usage: pkpass.py list [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                          [-i IDENTITY] [--nocache] [--noverify]
-                          [--pwstore PWSTORE] [-r] [--stdin]
+                          [-i IDENTITY] [--pwstore PWSTORE] [-r] [--stdin]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -351,8 +344,6 @@ List shows all passwords available to a given user
                             must end in '.cert'
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
-      --nocache             Do not use the cached certs for connectors
-      --noverify            Do not verify certificates and signatures
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
@@ -369,8 +360,7 @@ List the recipients that pkpass knows about
 .. code-block:: bash
 
     usage: pkpass.py listrecipients [-h] [--cabundle CABUNDLE]
-                                    [--certpath CERTPATH] [-i IDENTITY]
-                                    [--noverify] [--stdin]
+                                    [--certpath CERTPATH] [-i IDENTITY] [--stdin]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -379,9 +369,9 @@ List the recipients that pkpass knows about
                             must end in '.cert'
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
-      --noverify            Do not verify certificates and signatures
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+
 
 Recover
 -------
@@ -392,8 +382,7 @@ This requires password owners to have created escrow users. Each necessary escro
 
     usage: pkpass.py recover [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
                              [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
-                             [-m MIN_ESCROW] [--nosign] [--noverify]
-                             [--pwstore PWSTORE]
+                             [-m MIN_ESCROW] [--nosign] [--pwstore PWSTORE]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -412,10 +401,10 @@ This requires password owners to have created escrow users. Each necessary escro
                             password
       --nosign              Do not digitally sign the password information that
                             you are generating
-      --noverify            Do not verify certificates and signatures
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
+
 
 Rename
 ------
@@ -454,6 +443,7 @@ This renames a password in the given repository
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
 
+
 Show
 ----
 This unlocks a password and displays it on stdout
@@ -462,10 +452,9 @@ This unlocks a password and displays it on stdout
 
     usage: pkpass.py show [-h] [-a] [--cabundle CABUNDLE] [-c CARD_SLOT]
                           [--certpath CERTPATH] [-i IDENTITY] [-I]
-                          [--keypath KEYPATH] [--nocache] [--nopassphrase]
-                          [--noverify] [--pwstore PWSTORE] [-r] [--stdin]
+                          [--keypath KEYPATH] [--nopassphrase] [--noverify]
+                          [--pwstore PWSTORE] [-r] [--stdin]
                           [pwname]
-
 
     positional arguments:
       pwname                Name of the password. Ex:
@@ -484,7 +473,6 @@ This unlocks a password and displays it on stdout
       -I, --ignore-decrypt  Ignore decryption errors during show all process
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
-      --nocache             Do not use the cached certs for connectors
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --noverify            Do not verify certificates and signatures

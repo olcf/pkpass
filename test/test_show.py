@@ -74,7 +74,7 @@ class ShowErrors(unittest.TestCase):
             show.Show(cli.Cli())
         except KeyError as error:
             if str(error) == "'pwname'":
-                ret = str(error) 
+                ret = str(error)
         self.assertEqual(ret, "'pwname'")
 
 

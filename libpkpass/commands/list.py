@@ -12,7 +12,7 @@ class List(Command):
     """This class implements the cli list"""
     name = 'list'
     description = 'List passwords you have access to'
-    selected_args = ['pwstore', 'stdin', 'identity', 'recovery', 'certpath', 'cabundle', 'noverify']
+    selected_args = ['pwstore', 'stdin', 'identity', 'recovery', 'certpath', 'cabundle']
 
     def _run_command_execution(self):
         ####################################################################
