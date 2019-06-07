@@ -199,16 +199,18 @@ class PasswordEntry(object):
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
                 self.metadata['name'])
 
-    def verify_entry(self, uid=None, identitydb=None):
+    def verify_entry(self, uid=None, iddb=None):
         #######################################################################
         """ Check to see if all signatures and user certificates are okay for the user accessing this password entry """
         #######################################################################
+        identitydb = iddb.iddb
         recipient_entry = self.recipients[uid].copy()
         distributor = recipient_entry['distributor']
         signature = recipient_entry.pop('signature')
         message = self._create_signable_string(recipient_entry)
         sig_ok = crypto.pk_verify_signature(
             message, signature, identitydb[distributor])
+        iddb.verify_identity(distributor)
         return {'distributor': distributor,
                 'sigOK': sig_ok,
                 'certOK': identitydb[distributor]['verified']}

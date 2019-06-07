@@ -33,7 +33,7 @@ class Clip(Command):
 
         if not self.args['noverify']:
             result = password.verify_entry(
-                myidentity['uid'], self.identities.iddb)
+                myidentity['uid'], self.identities)
             if not result['sigOK']:
                 print("Warning:  Could not verify that '%s' correctly signed your password entry." %
                       result['distributor'])

@@ -82,7 +82,7 @@ class Show(Command):
             identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
         if not self.args['noverify']:
             result = password.verify_entry(
-                myidentity['uid'], self.identities.iddb)
+                myidentity['uid'], self.identities)
             if not result['sigOK']:
                 print("warning: could not verify that '%s' correctly signed your password entry." %
                       result['distributor'])
