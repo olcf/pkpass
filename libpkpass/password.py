@@ -113,12 +113,10 @@ class PasswordEntry(object):
                                                              identitydb, encryption_algorithm, passphrase,
                                                              card_slot)
         if escrow_users:
-            escrow_users_swap = list((set(escrow_users) - set(recipients)))
-            if (len(escrow_users) > 3) and (len(escrow_users_swap) < 3):
+            #escrow_users may now be none after the set operations
+            if (len(escrow_users) > 3) and (len(list((set(escrow_users) - set(recipients)))) < 3):
                 print("warning: recipient users overlapped with escrow users too much, not enough escrow")
                 return
-            #escrow_users may now be none after the set operations
-            escrow_users = escrow_users_swap
             escrow_map, split_secret = self.add_escrow(
                 secret=secret,
                 escrow_users=escrow_users,
