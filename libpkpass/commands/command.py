@@ -67,6 +67,14 @@ class Command(object):
         self._run_command_setup(parsedargs)
         self._run_command_execution()
 
+    def _convert_strings_to_list(self, argname):
+        ##################################################################
+        """ convert argparsed strings to lists for an argument """
+        ##################################################################
+        if argname in self.args:
+            self.args[argname] = self.args[argname].split(",") if self.args[argname] else []
+            self.args[argname] = [arg.strip() for arg in self.args[argname] if arg.strip()]
+
     def _run_command_setup(self, parsedargs):
         ##################################################################
         """ Passes the argparse Namespace object of parsed arguments   """
@@ -89,7 +97,11 @@ class Command(object):
         # json args
         connectmap = self._parse_json_arguments('connect')
 
-        self.args['escrow_users'] = self.args['escrow_users'].split(",") if self.args['escrow_users'] else []
+#        self.args['escrow_users'] = self.args['escrow_users'].split(",") if self.args['escrow_users'] else []
+#        self.args['escrow_users'] = [escrow_user.strip() for escrow_user in self.args['escrow_users'] if escrow_user.strip()]
+        self._convert_strings_to_list('groups')
+        self._convert_strings_to_list('users')
+        self._convert_strings_to_list('escrow_users')
         self._validate_combinatorial_args()
         self._validate_args()
 
@@ -189,10 +201,10 @@ class Command(object):
     def _build_recipient_list(self):
         try:
             self.recipient_list.extend(self.args['escrow_users'])
-            if 'groups' in self.args and self.args['groups'] is not None:
+            if 'groups' in self.args and self.args['groups']:
                 self.recipient_list += self._parse_group_membership()
-            if 'users' in self.args and self.args['users'] is not None:
-                self.recipient_list += self.args['users'].split(',')
+            if 'users' in self.args and self.args['users']:
+                self.recipient_list += self.args['users']
             self.recipient_list = [x.strip() for x in list(set(self.recipient_list))]
             for user in self.recipient_list:
                 if str(user) == '':
@@ -203,8 +215,8 @@ class Command(object):
     def _parse_group_membership(self):
         member_list = []
         try:
-            for group in self.args['groups'].split(','):
-                member_list += self.args[group.strip()].split(',')
+            for group in self.args['groups']:
+                member_list += [user.strip() for user in self.args[group.strip()].split(",") if user.strip()]
             return member_list
         except KeyError as err:
             raise GroupDefinitionError(str(err))
