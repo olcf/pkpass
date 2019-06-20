@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 """This module tests the rename module"""
 
+from __future__ import absolute_import
 import unittest
 import argparse
 import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.rename as rename
 from libpkpass.errors import DecryptionError, CliArgumentError
-
-BADPIN = "Error decrypting password named 'test'.  Perhaps a bad pin/passphrase?"
-
+from .basetest.basetest import CONFIG, BADPIN
 
 class RenameTests(unittest.TestCase):
     """This class tests the rename class"""
@@ -20,7 +19,7 @@ class RenameTests(unittest.TestCase):
                                                 all=None,
                                                 pwname='test',
                                                 rename='retest',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_safe_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -37,7 +36,7 @@ class RenameTests(unittest.TestCase):
                                                 all=None,
                                                 pwname='test',
                                                 rename='retest',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_recipient_not_in_database(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -55,7 +54,7 @@ class RenameTests(unittest.TestCase):
                                                 pwname='test',
                                                 rename='retest',
                                                 overwrite="true",
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_rename_decryption_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -72,7 +71,7 @@ class RenameTests(unittest.TestCase):
                                                 all=True,
                                                 pwname='test',
                                                 overwrite="true",
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_rename_cli_error(self, subparser_name):
         """test decryption functionality"""
         ret = False

@@ -7,8 +7,7 @@ import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.delete as delete
 from libpkpass.errors import DecryptionError, CliArgumentError
-
-BADPIN = "Error decrypting password named 'test'.  Perhaps a bad pin/passphrase?"
+from .basetest.basetest import CONFIG, BADPIN
 
 class DeleteTests(unittest.TestCase):
     """This class tests the delete class"""
@@ -17,7 +16,7 @@ class DeleteTests(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='delete', identity='r1',
                                                 nopassphrase="true",
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_safe_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -32,7 +31,7 @@ class DeleteTests(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='delete', identity='bleh',
                                                 nopassphrase="true",
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_recipient_not_in_database(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -48,7 +47,7 @@ class DeleteTests(unittest.TestCase):
                                                 nopassphrase="true",
                                                 pwname='test',
                                                 overwrite="true",
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_delete_decryption_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -63,7 +62,7 @@ class DeleteTests(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='delete', identity='r1',
                                                 nopassphrase="true",
                                                 overwrite="true",
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_delete_cli_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
