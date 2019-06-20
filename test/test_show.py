@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 """This module tests the show module"""
 
+from __future__ import absolute_import
 import unittest
 import argparse
 import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.show as show
 from libpkpass.errors import DecryptionError, CliArgumentError
-
-BADPIN = "Error decrypting password named 'test'.  Perhaps a bad pin/passphrase?"
-
+from .basetest.basetest import CONFIG, BADPIN
 
 class ShowErrors(unittest.TestCase):
     """This class tests the show class"""
@@ -19,7 +18,7 @@ class ShowErrors(unittest.TestCase):
                                                 nopassphrase="true",
                                                 all=None,
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_decryption_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -35,7 +34,7 @@ class ShowErrors(unittest.TestCase):
                                                 nopassphrase="true",
                                                 all=None,
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_recipient_not_in_database(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -51,7 +50,7 @@ class ShowErrors(unittest.TestCase):
                                                 nopassphrase="true",
                                                 all=True,
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_showall_decryption_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -66,7 +65,7 @@ class ShowErrors(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='show', identity='r1',
                                                 nopassphrase="true",
                                                 all=None,
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_show_nopass_error(self, subparser_name):
         """test decryption functionality"""
         ret = False

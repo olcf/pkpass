@@ -1,31 +1,17 @@
 #!/usr/bin/env python
 """This module tests the list module"""
 
+from __future__ import absolute_import
 import unittest
 import argparse
-import sys
-from contextlib import contextmanager
-# Python2/3 issues
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.list as pklist
 from libpkpass.errors import CliArgumentError
+from .basetest.basetest import CONFIG, captured_output
 
-PASSWORD_LIST = "Passwordsfor'r1':test/passwords/test:distributor:ginsburgnmname:test"
-
-@contextmanager
-def captured_output():
-    new_out, new_err = StringIO(), StringIO()
-    old_out, old_err = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = new_out, new_err
-        yield sys.stdout, sys.stderr
-    finally:
-        sys.stdout, sys.stderr = old_out, old_err
+PASSWORD_LIST_0 = "Passwordsfor'r2':{}"
+PASSWORD_LIST_1 = "Passwordsfor'r1':test/passwords/test:distributor:ginsburgnmname:test"
 
 class ListTests(unittest.TestCase):
     """This class tests the list class"""
@@ -34,7 +20,7 @@ class ListTests(unittest.TestCase):
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='list', identity='bleh',
                                                 nopassphrase="true",
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_recipient_not_in_database(self, subparser_name):
         """test bad recipient functionality"""
         ret = False
@@ -46,16 +32,31 @@ class ListTests(unittest.TestCase):
         self.assertTrue(ret)
 
     @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='list', identity='r1',
+                return_value=argparse.Namespace(subparser_name='list', identity='r2',
                                                 nopassphrase="true",
-                                                config='./test/.test_config'))
-    def test_list(self, subparser_name):
+                                                config=CONFIG))
+    def test_list_none(self, subparser_name):
         """test list functionality"""
         ret = False
         with captured_output() as (out, _):
             pklist.List(cli.Cli())
         output = "".join(out.getvalue().strip().split())
-        if output == PASSWORD_LIST:
+        if output == PASSWORD_LIST_0:
+            ret = True
+        self.assertTrue(ret)
+
+
+    @mock.patch('argparse.ArgumentParser.parse_args',
+                return_value=argparse.Namespace(subparser_name='list', identity='r1',
+                                                nopassphrase="true",
+                                                config=CONFIG))
+    def test_list_one(self, subparser_name):
+        """test list functionality"""
+        ret = False
+        with captured_output() as (out, _):
+            pklist.List(cli.Cli())
+        output = "".join(out.getvalue().strip().split())
+        if output == PASSWORD_LIST_1:
             ret = True
         self.assertTrue(ret)
 

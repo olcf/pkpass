@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 """This module tests the distribute module"""
 
+from __future__ import absolute_import
 import unittest
 import argparse
 import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.distribute as distribute
 from libpkpass.errors import DecryptionError, CliArgumentError
-
-BADPIN = "Error decrypting password named 'test'.  Perhaps a bad pin/passphrase?"
-
+from .basetest.basetest import CONFIG, BADPIN
 
 class DistributeTests(unittest.TestCase):
     """This class tests the distribute class"""
@@ -19,7 +18,7 @@ class DistributeTests(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='distribute', identity='bleh',
                                                 nopassphrase="true",
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_recipient_not_in_database(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -34,7 +33,7 @@ class DistributeTests(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='distribute', identity='r1',
                                                 nopassphrase="true",
                                                 pwname='test',
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_distribute_decrypt_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
@@ -49,7 +48,7 @@ class DistributeTests(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='distribute', identity='r1',
                                                 nopassphrase="true",
                                                 pwname=None,
-                                                config='./test/.test_config'))
+                                                config=CONFIG))
     def test_distribute_cli_error(self, subparser_name):
         """test decryption functionality"""
         ret = False
