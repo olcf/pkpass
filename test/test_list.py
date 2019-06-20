@@ -3,15 +3,29 @@
 
 import unittest
 import argparse
+import sys
+from contextlib import contextmanager
+# Python2/3 issues
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.list as pklist
-from libpkpass.errors import DecryptionError, CliArgumentError
+from libpkpass.errors import CliArgumentError
 
+PASSWORD_LIST = "Passwordsfor'r1':test/passwords/test:distributor:ginsburgnmname:test"
 
-class MockDevice():
-    """Send stdout here"""
-    def write(self, s): pass
+@contextmanager
+def captured_output():
+    new_out, new_err = StringIO(), StringIO()
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
 
 class ListTests(unittest.TestCase):
     """This class tests the list class"""
@@ -38,13 +52,11 @@ class ListTests(unittest.TestCase):
     def test_list(self, subparser_name):
         """test list functionality"""
         ret = False
-        try:
-            #this is not a good test
-            with mock.patch('sys.stdout', new=MockDevice()):
-                pklist.List(cli.Cli())
+        with captured_output() as (out, _):
+            pklist.List(cli.Cli())
+        output = "".join(out.getvalue().strip().split())
+        if output == PASSWORD_LIST:
             ret = True
-        except Exception:
-            ret = False
         self.assertTrue(ret)
 
 if __name__ == '__main__':
