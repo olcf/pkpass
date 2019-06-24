@@ -115,7 +115,7 @@ class PasswordEntry(object):
         if escrow_users:
             #escrow_users may now be none after the set operations
             if (len(escrow_users) > 3) and (len(list((set(escrow_users) - set(recipients)))) < 3):
-                print("warning: recipient users overlapped with escrow users too much, not enough escrow")
+                print("warning: min_escrow requirement not met after removing password recipients from escrow user list")
                 return
             escrow_map, split_secret = self.add_escrow(
                 secret=secret,
