@@ -24,7 +24,7 @@ class Show(Command):
         password = PasswordEntry()
         myidentity = self.identities.iddb[self.args['identity']]
 
-        if self.args['all'] and self.args['pwname'] is None:
+        if self.args['all']:
             try:
                 self._walk_dir(self.args['pwstore'], password, myidentity, self.args['ignore_decrypt'])
             except DecryptionError as err:
@@ -39,16 +39,17 @@ class Show(Command):
         # os.walk returns root, dirs, and files we just need files
         for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
-                try:
-                    self._decrypt_wrapper(
-                        root, password, myidentity, pwname)
-                except DecryptionError as err:
-                    if ignore_decrypt:
-                        print(err.msg)
+                if self.args['pwname'] is None or self.args['pwname'].upper() in pwname.upper():
+                    try:
+                        self._decrypt_wrapper(
+                            root, password, myidentity, pwname)
+                    except DecryptionError as err:
+                        if ignore_decrypt:
+                            print(err.msg)
+                            continue
+                        raise
+                    except NotARecipientError:
                         continue
-                    raise
-                except NotARecipientError:
-                    continue
 
     def _handle_escrow_show(self, password, myidentity):
         ####################################################################
