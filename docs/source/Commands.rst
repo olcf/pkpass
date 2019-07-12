@@ -462,7 +462,9 @@ This unlocks a password and displays it on stdout
 
     optional arguments:
       -h, --help            show this help message and exit
-      -a, --all             Show all available password to the given user
+      -a, --all             Show all available password to the given user, if a
+                            pwname is supplied filtering will be done case-
+                            insensitivey based on the filename
       --cabundle CABUNDLE   Path to CA certificate bundle file
       -c CARD_SLOT, --card_slot CARD_SLOT
                             The slot number of the card that should be used
