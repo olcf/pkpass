@@ -10,7 +10,7 @@ ARGUMENTS = {
     'all': {
         'args': ['-a', '--all'],
         'kwargs': {
-            'help': "Show all available password to the given user",
+            'help': "Show all available password to the given user, if a pwname is supplied filtering will be done case-insensitivey based on the filename",
             'action': "store_true"
         }
     },
