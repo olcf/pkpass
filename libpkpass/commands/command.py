@@ -48,6 +48,7 @@ class Command(object):
             'rules': 'default'
             }
         self.recipient_list = []
+        self.escrow_and_recipient_list = []
         self.identities = IdentityDB()
         cli.register(self, self.name, self.description)
 
@@ -200,13 +201,13 @@ class Command(object):
 
     def _build_recipient_list(self):
         try:
-            self.recipient_list.extend(self.args['escrow_users'])
             if 'groups' in self.args and self.args['groups']:
                 self.recipient_list += self._parse_group_membership()
             if 'users' in self.args and self.args['users']:
                 self.recipient_list += self.args['users']
             self.recipient_list = [x.strip() for x in list(set(self.recipient_list))]
-            for user in self.recipient_list:
+            self.escrow_and_recipient_list = self.recipient_list + self.args['escrow_users']
+            for user in self.escrow_and_recipient_list:
                 if str(user) == '':
                     raise NullRecipientError
         except KeyError:  # If this is a command with no users, don't worry about it
@@ -270,7 +271,7 @@ class Command(object):
             raise JsonArgumentError(argument, err)
 
     def _validate_identities(self):
-        for recipient in self.recipient_list:
+        for recipient in self.escrow_and_recipient_list:
             self.identities.verify_identity(recipient)
             if recipient not in self.identities.iddb.keys():
                 raise CliArgumentError(
