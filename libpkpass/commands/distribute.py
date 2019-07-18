@@ -29,7 +29,6 @@ class Distribute(Command):
             passphrase=self.passphrase,
             card_slot=self.args['card_slot'])
 
-        print(self.recipient_list)
         password.add_recipients(secret=plaintext_pw,
                                 distributor=self.args['identity'],
                                 recipients=self.recipient_list,
