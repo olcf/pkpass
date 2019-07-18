@@ -36,7 +36,8 @@ class Distribute(Command):
                     break
         plaintext_pw = password.decrypt_entry(
             self.identities.iddb[self.args['identity']],
-            passphrase=self.passphrase)
+            passphrase=self.passphrase,
+            card_slot=self.args['card_slot'])
 
         password.add_recipients(secret=plaintext_pw,
                                 distributor=self.args['identity'],
