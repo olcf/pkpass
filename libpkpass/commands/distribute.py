@@ -21,32 +21,21 @@ class Distribute(Command):
         password = PasswordEntry()
         password.read_password_data(os.path.join(
             self.args['pwstore'], self.args['pwname']))
-        if self.args['noescrow']:
-            self.args['min_escrow'] = None
-            self.args['escrow_users'] = None
-        else:
-            escrow_map = password.read_escrow(self.args['pwname'])
-            # needless computation if escrow already exists. password only changes on create
-            # and create will wipe escrow users; so distribute only needs to happen if the
-            # users do not already exist in a group
-            for _, value in escrow_map.items():
-                if set(value['recipients'].keys()) == set(self.args['escrow_users']):
-                    self.args['escrow_users'] = None
-                    self.args['min_escrow'] = 0
-                    break
+        # we shouldn't modify escrow on distribute
+        self.args['min_escrow'] = None
+        self.args['escrow_users'] = None
         plaintext_pw = password.decrypt_entry(
             self.identities.iddb[self.args['identity']],
             passphrase=self.passphrase,
             card_slot=self.args['card_slot'])
 
+        print(self.recipient_list)
         password.add_recipients(secret=plaintext_pw,
                                 distributor=self.args['identity'],
                                 recipients=self.recipient_list,
                                 identitydb=self.identities,
                                 passphrase=self.passphrase,
                                 card_slot=self.args['card_slot'],
-                                minimum=self.args['min_escrow'],
-                                escrow_users=self.args['escrow_users'],
                                 pwstore=self.args['pwstore']
                                )
 
