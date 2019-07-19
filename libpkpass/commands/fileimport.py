@@ -47,7 +47,7 @@ class Import(Command):
 
     def _flat_file(self, passwords):
         """This function handles the simple key:value pair"""
-        print("INFO: Flat password file detected, using 'imported' as description\
+        print("INFO: Flat password file detected, using 'imported' as description \
 you can manually change the description in the file if you would like")
         db_len = len(passwords)
         i = 1
