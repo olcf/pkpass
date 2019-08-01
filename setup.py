@@ -199,7 +199,7 @@ class verify(Command):
                     return True
         return False
 
-    def check_users(self, args_dict, certpath):
+    def check_users(self, args_dict, certpath, valid):
         args = ['escrow_users', 'groups', 'identity','users']
         for arg in args:
             users_list = []
@@ -208,25 +208,32 @@ class verify(Command):
                     users_list = args_dict[arg].strip().split(',')
                     for user in users_list:
                         if not self.check_if_recipient(user.strip(), certpath):
+                            valid = False
                             print("'%s' found in config, not in recipientsdb" % user)
                 else:
+                    valid = False
                     print("'%s' found in config, but value is empty" % arg)
+        return valid
 
-    def check_paths(self, args_dict):
+    def check_paths(self, args_dict, valid):
         args = ['cabundle', 'certpath', 'dstpwstore','pwstore']
         for arg in args:
             if arg in args_dict.keys():
                 if not os.path.exists(args_dict[arg]):
+                    valid = False
                     print("'%s' found in config, No such file or directory: %s" % 
                             (arg, args_dict[arg]))
+        return valid
 
     def run(self):
+        valid = True
         args = ['cabundle', 'card_slot', 'certpath',
                 'connect', 'dstpwstore', 'escrow_users',
                 'groups', 'identity', 'keypath',
                 'min_escrow', 'pwstore', 'time',
-                'users']
-        store_args = ['all', 'nocrypto', 'nopassphrase',
+                'rules', 'rules_map', 'users']
+        store_args = ['all', 'ignore_decrypt', 'long_escrow',
+                      'noescrow', 'nocrypto', 'nopassphrase',
                       'nosign', 'noverify','overwrite',
                       'pwfile', 'pwname', 'recovery', 'stdin']
         args_dict = {}
@@ -234,20 +241,25 @@ class verify(Command):
             try:
                 args_dict = yaml.safe_load(rcyaml)
             except yaml.YAMLError as err:
+                valid = False
                 print(err)
         for arg in store_args:
             if arg in args_dict.keys():
+                valid = False
                 print("'%s' found in rc file, this will be ignored" % arg)
 
         for arg in args_dict.keys():
             if arg not in args and arg not in store_args:
+                valid = False
                 print("'%s' found in rc file, does not appear to be valid argument\
 (It may be a user defined group)" % arg)
 
         if 'certpath' in args_dict.keys():
-            self.check_users(args_dict, args_dict['certpath'])
+            valid = self.check_users(args_dict, args_dict['certpath'], valid)
 
-        self.check_paths(args_dict)
+        valid = self.check_paths(args_dict, valid)
+        if valid:
+            print("Config Valid")
 
 setup(
     name=NAME,
