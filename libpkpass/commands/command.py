@@ -7,6 +7,7 @@ import json
 import os
 import yaml
 from six import iteritems as iteritems
+from six import string_types
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
@@ -75,6 +76,10 @@ class Command(object):
         if argname in self.args:
             self.args[argname] = self.args[argname].split(",") if self.args[argname] else []
             self.args[argname] = [arg.strip() for arg in self.args[argname] if arg.strip()]
+        elif isinstance(argname, string_types):
+            argname = argname.split(",") if argname else []
+            return [arg.strip() for arg in argname if arg.strip()]
+        return None
 
     def _run_command_setup(self, parsedargs):
         ##################################################################
@@ -98,8 +103,6 @@ class Command(object):
         # json args
         connectmap = self._parse_json_arguments('connect')
 
-#        self.args['escrow_users'] = self.args['escrow_users'].split(",") if self.args['escrow_users'] else []
-#        self.args['escrow_users'] = [escrow_user.strip() for escrow_user in self.args['escrow_users'] if escrow_user.strip()]
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')
         self._convert_strings_to_list('escrow_users')
@@ -270,8 +273,10 @@ class Command(object):
         except ValueError as err:
             raise JsonArgumentError(argument, err)
 
-    def _validate_identities(self):
-        for recipient in self.escrow_and_recipient_list:
+    def _validate_identities(self, swap_list=None):
+        if not swap_list:
+            swap_list = self.escrow_and_recipient_list
+        for recipient in swap_list:
             self.identities.verify_identity(recipient)
             if recipient not in self.identities.iddb.keys():
                 raise CliArgumentError(

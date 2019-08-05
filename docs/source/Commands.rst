@@ -6,13 +6,13 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
 
     python pkpass.py -h
     usage: pkpass.py [-h] [--config CONFIG]
-                     {clip,create,distribute,export,import,list,listrecipients,recover,show}
+                     {clip,create,delete,distribute,export,generate,import,list,listrecipients,recover,rename,show,update}
                      ...
 
     Public Key Password Manager
 
     positional arguments:
-      {clip,create,distribute,export,import,list,listrecipients,recover,show}
+      {clip,create,delete,distribute,export,generate,import,list,listrecipients,recover,rename,show,update}
                             sub-commands
         clip                Copy a password to clipboard
         create              Create a new password entry and encrypt it for
@@ -31,11 +31,13 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
                             escrow functions
         rename              Rename a password in the repository
         show                Display a password
+        update              Change a password value and redistribute to recipients
 
     optional arguments:
       -h, --help            show this help message and exit
       --config CONFIG       Path to a PKPass configuration file. Defaults to
                             '~/.pkpassrc'
+
 
 Clip
 ----
@@ -483,5 +485,52 @@ This unlocks a password and displays it on stdout
                             "./passwords"
       -r, --recovery        Work with passwords distributed through escrow
                             functionality
+      --stdin               Take all password input from stdin instead of from a
+                            user input prompt
+
+Update
+------
+This changes a password value and redistributes the password to the recipients
+
+.. code-block:: bash
+
+    usage: pkpass.py update [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
+                            [--certpath CERTPATH] [-e ESCROW_USERS] [-i IDENTITY]
+                            [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
+                            [--nopassphrase] [--nosign] [--overwrite]
+                            [--pwstore PWSTORE] [--stdin]
+                            [pwname]
+
+    positional arguments:
+      pwname                Name of the password. Ex:
+                            passwords/team/infrastructure/root
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --cabundle CABUNDLE   Path to CA certificate bundle file
+      -c CARD_SLOT, --card_slot CARD_SLOT
+                            The slot number of the card that should be used
+      --certpath CERTPATH   Path to directory containing public keys. Certificates
+                            must end in '.cert'
+      -e ESCROW_USERS, --escrow_users ESCROW_USERS
+                            Escrow users list is a comma sepearated list of
+                            recovery users that each get part of a key
+      -i IDENTITY, --identity IDENTITY
+                            Override identity of user running the program
+      --keypath KEYPATH     Path to directory containing private keys. Keys must
+                            end in '.key'
+      -m MIN_ESCROW, --min_escrow MIN_ESCROW
+                            Minimum number of users required to unlock escrowed
+                            password
+      --noescrow            Do not use escrow functionality, ignore defaults in rc
+                            file
+      --nopassphrase, --nopin
+                            Do not prompt for a pin/passphrase
+      --nosign              Do not digitally sign the password information that
+                            you are generating
+      --overwrite           Overwrite a password that already exists
+      --pwstore PWSTORE, --srcpwstore PWSTORE
+                            Path to the source password store. Defaults to
+                            "./passwords"
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
