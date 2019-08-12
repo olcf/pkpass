@@ -24,7 +24,7 @@ VERSION = None
 REQUIRED = [
     'asn1crypto==0.24.0',
     'cffi==1.11.4',
-    'cryptography==2.1.4',
+    'cryptography>=2.3',
     'enum34==1.1.6',
     'future==0.17.1',
     'idna==2.6',
@@ -33,7 +33,7 @@ REQUIRED = [
     'pbr==5.1.1',
     'pycparser==2.18',
     'pyperclip==1.6.0',
-    'PyYAML==3.12',
+    'PyYAML>=4.2b1',
     'six==1.11.0',
     'utilitybelt==0.2.6'
 ]
