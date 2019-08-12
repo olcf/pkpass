@@ -286,4 +286,7 @@ setup(
         'rcfile': RCFile,
         'verify': verify,
         },
+    scripts=[
+        'bin/pkpass'
+        ]
     )
