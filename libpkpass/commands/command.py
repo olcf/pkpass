@@ -111,7 +111,7 @@ class Command(object):
 
         # currently only listrecipients needs to verify on load; making it a list though
         # for future development expansion
-        verify_on_load = self.args['subparser_name'] in ['listrecipients']
+        verify_on_load = self.args['subparser_name'] in ['listrecipients', 'import']
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
