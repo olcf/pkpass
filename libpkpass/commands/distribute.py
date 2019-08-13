@@ -12,7 +12,7 @@ from libpkpass.errors import CliArgumentError
 class Distribute(Command):
     """This Class implements the CLI functionality for ditribution"""
     name = 'distribute'
-    description = 'Distribute an existing password entry to another entity'
+    description = 'Distribute existing password entry/ies to another entity [matching uses python fnmatch]'
     selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'min_escrow', 'escrow_users',
                      'certpath', 'cabundle', 'keypath', 'nopassphrase', 'nosign', 'card_slot', 'noescrow']
 
