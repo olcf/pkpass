@@ -165,6 +165,8 @@ Distribute
 Distribute takes a pre-existing password in the password repository and grants permission to selected users to be able to unlock it
 This function resolves filename matching via python's fnmatch module, depending on the string you may need to pass the value through in single quotes
 
+This function will confirm password list is valid even if only one password matches
+
 .. code-block:: bash
 
     usage: pkpass.py distribute [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
