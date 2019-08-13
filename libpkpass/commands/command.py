@@ -294,7 +294,7 @@ class Command(object):
         print(self.recipient_list)
         print(self.identities.iddb.keys())
 
-    def progress_bar(self, value, endvalue, bar_length=20):
+    def progress_bar(self, value, endvalue, bar_length=50):
         percent = float(value) / endvalue
         arrow = '-' * int(round(percent * bar_length)-1) + '>'
         spaces = ' ' * (bar_length - len(arrow))

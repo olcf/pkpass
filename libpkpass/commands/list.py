@@ -1,7 +1,6 @@
 """This Module allows for the listing of users passwords"""
 
 from __future__ import print_function
-import os
 import yaml
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
@@ -20,10 +19,7 @@ class List(Command):
         ####################################################################
 
         passworddb = PasswordDB()
-        for path, _, files in os.walk(self.args['pwstore']):
-            for passwordname in files:
-                passwordpath = os.path.join(path, passwordname)
-                passworddb.load_password_data(passwordpath)
+        passworddb.load_from_directory(self.args['pwstore'])
 
         result = {}
         for pwname, passwordentry in passworddb.pwdb.items():
