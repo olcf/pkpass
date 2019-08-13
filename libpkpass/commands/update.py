@@ -36,7 +36,7 @@ class Update(Command):
             print("The following list of users are the current distribution list:")
             print(", ".join(sort(self.recipient_list)))
             correct_distribution = input("Is this list correct? (y/N) ")
-            if correct_distribution.lower()[0] == 'n':
+            if not correct_distribution or correct_distribution.lower()[0] == 'n':
                 self.recipient_list = input("Please enter a comma delimited list: ")
                 self.recipient_list = list(set(self._convert_strings_to_list(self.recipient_list)))
                 print(self.recipient_list)

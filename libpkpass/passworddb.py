@@ -34,6 +34,15 @@ class PasswordDB(object):
                     password_id)
         return self.pwdb[password_id]
 
+    #############################################################################
+    def load_from_directory(self, pwstore):
+        """ Load all passwords from directory """
+    #############################################################################
+        for path, _, files in os.walk(pwstore):
+            for passwordname in files:
+                passwordpath = os.path.join(path, passwordname)
+                self.load_password_data(passwordpath)
+
     ##############################################################################
     def save_password_data(self, password_id, overwrite=False):
         """ Store a password to wherever it may be stored                        """
