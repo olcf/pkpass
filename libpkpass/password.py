@@ -181,7 +181,7 @@ class PasswordEntry(object):
             recipient_entry = self.recipients[identity['uid']]
         except KeyError:
             raise NotARecipientError(
-                "Identity '%s' is not on the recipient list for password '%s" %
+                "Identity '%s' is not on the recipient list for password '%s'" %
                 (identity['uid'], self.metadata['name']))
 
         try:
