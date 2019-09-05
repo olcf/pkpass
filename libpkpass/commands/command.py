@@ -154,8 +154,7 @@ class Command(object):
                                 )
         pass_entry['recipients'][self.args['identity']] = swap_pass['recipients'][self.args['identity']]
         pass_entry.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
-                                       overwrite=self.args['overwrite'],
-                                       identity=self.args['identity'])
+                                       overwrite=self.args['overwrite'])
 
     def create_pass(self, password1, description, authorizer, recipient_list=None):
         ####################################################################
@@ -186,8 +185,7 @@ class Command(object):
                                )
 
         password.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
-                                     overwrite=self.args['overwrite'],
-                                     identity=self.args['identity'])
+                                     overwrite=self.args['overwrite'])
 
     def create_or_update_pass(self, password1, description, authorizer, recipient_list=None):
         ####################################################################
