@@ -10,11 +10,11 @@ from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOErro
 import libpkpass.crypto as crypto
 
 
+#######################################################################
 class PasswordEntry(object):
-    ##########################################################################
     """ Password entry object.  Contains information about a password and related
         metadata, as well as a list of individually encrypted strings          """
-    ##########################################################################
+##########################################################################
 
     def __init__(self, **kwargs):
 
@@ -29,10 +29,16 @@ class PasswordEntry(object):
         self.recipients = {}
         self.escrow = {}
 
+    ####################################################################
     def __getitem__(self, key):
+        """Grab items like with dictionaries"""
+    ####################################################################
         return getattr(self, key)
 
+    ####################################################################
     def read_escrow(self, filename):
+        """Read values from escrow section"""
+    ####################################################################
         try:
             with open(filename, 'r') as fname:
                 password_data = yaml.safe_load(fname)
@@ -43,6 +49,7 @@ class PasswordEntry(object):
             #we actually don't care here.. file might not exist yet
             return {}
 
+    #######################################################################
     def process_escrow_map(
             self,
             escrow_map,
@@ -55,7 +62,6 @@ class PasswordEntry(object):
             card_slot=None,
             escrow_users=None,
             minimum=None):
-        #######################################################################
         """Process the escrow user map into escrow users"""
         #######################################################################
         escrow_guid = str(uuid.uuid1()).replace('-', '')
@@ -79,18 +85,19 @@ class PasswordEntry(object):
                 i += 1
 
 
+    #######################################################################
     def add_escrow(
             self,
             secret=None,
             escrow_users=None,
             minimum=None,
             pwstore=None):
-        #######################################################################
         """ Add escrow users to the recipient list of this password object"""
-        #######################################################################
+    #######################################################################
         split_secret = pk_split_secret(secret, escrow_users, minimum)
         return (self.read_escrow(os.path.join(pwstore, self.metadata['name'])), split_secret)
 
+    #######################################################################
     def add_recipients(
             self,
             secret=None,
@@ -103,9 +110,8 @@ class PasswordEntry(object):
             escrow_users=None,
             minimum=None,
             pwstore=None):
-        #######################################################################
         """ Add recipients to the recipient list of this password object"""
-        #######################################################################
+    #######################################################################
         if recipients is None:
             recipients = []
         for recipient in recipients:
@@ -134,6 +140,7 @@ class PasswordEntry(object):
                 escrow_users=escrow_users,
                 minimum=minimum)
 
+    #######################################################################
     def _add_recipient(
             self,
             recipient,
@@ -143,9 +150,8 @@ class PasswordEntry(object):
             encryption_algorithm='rsautl',
             passphrase=None,
             card_slot=None):
-        #######################################################################
         """Add recipient or sharer to list"""
-        #######################################################################
+    #######################################################################
         try:
             if encryption_algorithm == 'rsautl':
                 (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
@@ -173,10 +179,10 @@ class PasswordEntry(object):
                 "Identity '%s' is not on the recipient list for password '%s'" %
                 (recipient, self.metadata['name']))
 
+    #######################################################################
     def decrypt_entry(self, identity=None, passphrase=None, card_slot=None):
-        #######################################################################
         """ Decrypt this password entry for a particular identity (usually the user) """
-        #######################################################################
+    #######################################################################
         try:
             recipient_entry = self.recipients[identity['uid']]
         except KeyError:
@@ -196,10 +202,10 @@ class PasswordEntry(object):
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
                 self.metadata['name'])
 
+    #######################################################################
     def verify_entry(self, uid=None, iddb=None):
-        #######################################################################
         """ Check to see if all signatures and user certificates are okay for the user accessing this password entry """
-        #######################################################################
+    #######################################################################
         identitydb = iddb.iddb
         recipient_entry = self.recipients[uid].copy()
         distributor = recipient_entry['distributor']
@@ -212,10 +218,10 @@ class PasswordEntry(object):
                 'sigOK': sig_ok,
                 'certOK': identitydb[distributor]['verified']}
 
+    #######################################################################
     def _create_signable_string(self, recipient_entry):
-        #######################################################################
         """ Helper function to create a string out of the information this PasswordEntry contains        """
-        #######################################################################
+    #######################################################################
         message = ""
         for key in sorted(recipient_entry.keys()):
             if key == 'timestamp':
@@ -227,20 +233,28 @@ class PasswordEntry(object):
                 message = message + str(key) + str(recipient_entry[key])
         return message
 
+    #######################################################################
     def todict(self):
         """Returns a dictionary"""
+    #######################################################################
         return vars(self)
 
+    #######################################################################
     def validate(self):
         """This function validates a password object"""
+    #######################################################################
         # for field in ['field1', 'field2']:
         #  if weird: raise PasswordValidationError(field, value)
         return True
 
+    #######################################################################
     def __repr__(self):
+    #######################################################################
         return "%s(%r)" % (self.__class__, self.__dict__)
 
+    #######################################################################
     def __str__(self):
+    #######################################################################
         return "%r" % self.__dict__
 
     ##########################################################################

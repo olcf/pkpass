@@ -13,7 +13,6 @@ from .basetest.basetest import CONFIG, BADPIN
 class RenameTests(unittest.TestCase):
     """This class tests the rename class"""
 
-<<<<<<< HEAD:test/test_rename.py
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='rename', identity='r1',
                                                 nopassphrase="true",
@@ -26,26 +25,9 @@ class RenameTests(unittest.TestCase):
         ret = False
         try:
             rename.Rename(cli.Cli())
-        except KeyError as error:
-            if str(error) == "'overwrite'":
-                ret = True
+        except DecryptionError:
+            ret = True
         self.assertTrue(ret)
-=======
-    # @mock.patch('argparse.ArgumentParser.parse_args',
-    #             return_value=argparse.Namespace(subparser_name='delete', identity='r1',
-    #                                             nopassphrase="true",
-    #                                             pwname='test',
-    #                                             config=CONFIG))
-    # def test_safe_error(self, subparser_name):
-    #     """test decryption functionality"""
-    #     ret = False
-    #     try:
-    #         delete.Delete(cli.Cli())
-    #     except KeyError as error:
-    #         if str(error) == "'overwrite'":
-    #             ret = True
-    #     self.assertTrue(ret)
->>>>>>> fix overwritting issues with import and create:test/test_delete.py
 
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='rename', identity='bleh',
@@ -64,7 +46,6 @@ class RenameTests(unittest.TestCase):
                 ret = True
         self.assertTrue(ret)
 
-<<<<<<< HEAD:test/test_rename.py
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='rename', identity='r1',
                                                 nopassphrase="true",
@@ -82,23 +63,6 @@ class RenameTests(unittest.TestCase):
             if error.msg == BADPIN:
                 ret = True
         self.assertTrue(ret)
-=======
-    # @mock.patch('argparse.ArgumentParser.parse_args',
-    #             return_value=argparse.Namespace(subparser_name='delete', identity='r1',
-    #                                             nopassphrase="true",
-    #                                             pwname='test',
-    #                                             overwrite="true",
-    #                                             config=CONFIG))
-    # def test_delete_decryption_error(self, subparser_name):
-    #     """test decryption functionality"""
-    #     ret = False
-    #     try:
-    #         delete.Delete(cli.Cli())
-    #     except DecryptionError as error:
-    #         if error.msg == BADPIN:
-    #             ret = True
-    #     self.assertTrue(ret)
->>>>>>> fix overwritting issues with import and create:test/test_delete.py
 
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='rename', identity='r1',
