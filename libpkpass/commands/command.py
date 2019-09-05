@@ -12,7 +12,7 @@ from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
-        PasswordIOError, JsonArgumentError
+        PasswordIOError, JsonArgumentError, NotThePasswordOwnerError
 
 
 class Command(object):
@@ -45,6 +45,7 @@ class Command(object):
             'min_escrow': None,
             'noverify': None,
             'noescrow': False,
+            'overwrite': False,
             'recovery': False,
             'rules': 'default'
             }
@@ -135,9 +136,26 @@ class Command(object):
         try:
             password = PasswordEntry()
             password.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
-            return (password['metadata']['creator'] == self.args['identity'], password['metadata']['creator'])
+            return (self.args['identity'] in password['recipients'].keys(), password['metadata']['creator'])
         except PasswordIOError:
             return (True, None)
+
+    def update_pass(self, pass_value):
+        pass_entry = PasswordEntry()
+        pass_entry.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
+        swap_pass = PasswordEntry()
+        swap_pass.add_recipients(secret=pass_value,
+                                 distributor=self.args['identity'],
+                                 recipients=[self.args['identity']],
+                                 identitydb=self.identities,
+                                 passphrase=self.passphrase,
+                                 card_slot=self.args['card_slot'],
+                                 pwstore=self.args['pwstore']
+                                )
+        pass_entry['recipients'][self.args['identity']] = swap_pass['recipients'][self.args['identity']]
+        pass_entry.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
+                                       overwrite=self.args['overwrite'],
+                                       identity=self.args['identity'])
 
     def create_pass(self, password1, description, authorizer, recipient_list=None):
         ####################################################################
@@ -167,8 +185,23 @@ class Command(object):
                                 pwstore=self.args['pwstore']
                                )
 
-        password.write_password_data(os.path.join(
-            self.args['pwstore'], self.args['pwname']), overwrite=self.args['overwrite'])
+        password.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
+                                     overwrite=self.args['overwrite'],
+                                     identity=self.args['identity'])
+
+    def create_or_update_pass(self, password1, description, authorizer, recipient_list=None):
+        ####################################################################
+        """ This creates new or updates existing passwords """
+        ####################################################################
+        safe, owner = self.safety_check()
+        if safe or self.args['overwrite']:
+            if owner and owner != self.args['identity']:
+                self.update_pass(password1)
+            else:
+                self.create_pass(password1, description, authorizer, recipient_list)
+        else:
+            raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
+
 
     def delete_pass(self):
         ###########################################################################

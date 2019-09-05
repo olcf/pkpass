@@ -2,8 +2,7 @@
 import getpass
 from builtins import input
 from libpkpass.commands.command import Command
-from libpkpass.errors import CliArgumentError, PasswordMismatchError, NotThePasswordOwnerError,\
-        BlankPasswordError
+from libpkpass.errors import CliArgumentError, PasswordMismatchError, BlankPasswordError
 
 
 class Create(Command):
@@ -18,20 +17,16 @@ class Create(Command):
         ####################################################################
         """ Run function for class.                                      """
         ####################################################################
-        safe, owner = self.safety_check()
-        if safe or self.args['overwrite']:
-            password1 = getpass.getpass("Enter password to create: ")
-            if password1.strip() == "":
-                raise BlankPasswordError
-            password2 = getpass.getpass("Enter password to create again: ")
-            if password1 != password2:
-                raise PasswordMismatchError
+        password1 = getpass.getpass("Enter password to create: ")
+        if password1.strip() == "":
+            raise BlankPasswordError
+        password2 = getpass.getpass("Enter password to create again: ")
+        if password1 != password2:
+            raise PasswordMismatchError
 
-            description = input("Description: ")
-            authorizer = input("Authorizer: ")
-            self.create_pass(password1, description, authorizer)
-        else:
-            raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
+        description = input("Description: ")
+        authorizer = input("Authorizer: ")
+        self.create_or_update_pass(password1, description, authorizer)
 
     def _validate_args(self):
         for argument in ['pwname', 'keypath']:

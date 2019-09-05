@@ -262,22 +262,20 @@ class PasswordEntry(object):
         except (yaml.scanner.ScannerError, yaml.parser.ParserError) as error:
             raise YamlFormatError(str(error.problem_mark), error.problem)
 
-    ##########################################################################
+    ############################################################################################
     def write_password_data(self, filename, overwrite=False, encrypted_export=False, password=None):
-        """ Write password data and metadata to the appropriate password file """
-    ##########################################################################
+        """Write password data to a password file """
+    ############################################################################################
         self.validate()
-        iscwd = os.path.basename(filename) == filename
-        passdata = {key: value for key, value in self.todict().items() if value}
-        open_mode = 'w+'
-        if password is not None:
-            passdata = {self['metadata']['name']: passdata}
-            open_mode = 'a'
+        # check if the file is in the base password directory
+        incwd = os.path.basename(filename) == filename
+        # if not ensure path exists
         try:
-            if not iscwd and not os.path.isdir(os.path.dirname(filename)):
+            if not incwd and not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            with open(filename, open_mode) as fname:
-                if encrypted_export and password:
+            passdata = {key: value for key, value in self.todict().items() if value}
+            with open(filename, 'w') as fname:
+                if encrypted_export:
                     encrypted = crypto.sk_encrypt_string(
                         yaml.safe_dump(passdata, default_flow_style=False),
                         password)
