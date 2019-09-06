@@ -50,6 +50,9 @@ class Update(Command):
             if password1 != password2:
                 raise PasswordMismatchError
 
+            # This is due to a poor naming convention; we don't want to go through the
+            # create or update, because we are not updating a single record in the yaml
+            # we are burning it to the ground and redoing the entire thing
             self.create_pass(password1,
                              password['metadata']['description'],
                              password['metadata']['authorizer'],

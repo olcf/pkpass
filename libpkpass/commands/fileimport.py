@@ -40,10 +40,11 @@ class Import(Command):
         """This function handles the contents of a file"""
         try:
             self._yaml_file(yaml.safe_load(string))
-        except yaml.scanner.ScannerError:
-            self._flat_file(string.strip().split("\n"))
         except TypeError:
-            raise LegacyImportFormatError
+            try:
+                self._flat_file(string.strip().split("\n"))
+            except TypeError:
+                raise LegacyImportFormatError
 
     def _flat_file(self, passwords):
         """This function handles the simple key:value pair"""
@@ -56,8 +57,7 @@ you can manually change the description in the file if you would like")
             fname = psplit[0].strip()
             pvalue = psplit[1].strip()
             self.args['pwname'] = fname
-            self.args['overwrite'] = False
-            self.create_pass(pvalue, "imported", self.args['identity'])
+            self.create_or_update_pass(pvalue, "imported", self.args['identity'])
             self.progress_bar(i, db_len)
             i += 1
         print("")
@@ -84,7 +84,7 @@ you can manually change the description in the file if you would like")
 
             description = passwords[password]['metadata']['description']
             authorizer = passwords[password]['metadata']['authorizer']
-            self.create_pass(plaintext_str, description, authorizer, plist)
+            self.create_or_update_pass(plaintext_str, description, authorizer, plist)
             self.progress_bar(i, db_len)
             i += 1
         print("")
