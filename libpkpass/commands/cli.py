@@ -3,6 +3,8 @@
 
 import argparse
 import os
+# hack dependent import
+import sys
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
 import libpkpass.commands.delete as delete
@@ -52,6 +54,12 @@ class Cli(object):
         rename.Rename(self)
         show.Show(self)
         update.Update(self)
+
+        # Hack fix for no arguments; an interpreter is in the works for the default argument,
+        # So I don't care enough to do this well; but basically argparse is broken in python3
+        # so here we a-goooo
+        if len(sys.argv) == 1:
+            sys.argv.append("-h")
 
         self.parsedargs = self.parser.parse_args()
         self.actions[self.parsedargs.subparser_name].run(self.parsedargs)
