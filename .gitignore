@@ -4,7 +4,7 @@ pkpass.spec
 test/pki/ca
 test/pki/intermediate
 test/scratch/*
-venv/*
+venv*
 .tox/*
 .coverage
 build/*
@@ -13,3 +13,4 @@ pkpass.egg-info/*
 !libpkpass/connectors/connectorinterface.py
 libpkpass/connectors/*
 docs/build/*
+.eggs/*
