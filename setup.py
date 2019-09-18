@@ -3,7 +3,6 @@
 # $ pip install twine
 
 from __future__ import print_function
-import yaml
 import io
 import os
 import sys
@@ -22,20 +21,13 @@ AUTHOR = 'Noah Ginsburg'
 VERSION = None
 
 REQUIRED = [
-    'asn1crypto==0.24.0',
-    'cffi==1.11.4',
     'cryptography>=2.3',
-    'enum34==1.1.6',
-    'future==0.17.1',
-    'idna==2.6',
-    'ipaddress==1.0.19',
-    'nginsecretsharing==0.3.0',
-    'pbr==5.1.1',
-    'pycparser==2.18',
-    'pyperclip==1.6.0',
-    'PyYAML>=4.2b1',
-    'six==1.11.0',
-    'utilitybelt==0.2.6'
+    'exrex>=0.10.5',
+    'future>=0.17.1',
+    'nginsecretsharing>=0.3.0',
+    'pbr>=5.4.3',
+    'pyperclip>=1.6.0',
+    'PyYAML>=4.2b1'
 ]
 
 EXTRAS = {
@@ -226,6 +218,7 @@ class verify(Command):
         return valid
 
     def run(self):
+        import yaml
         valid = True
         args = ['cabundle', 'card_slot', 'certpath',
                 'connect', 'dstpwstore', 'escrow_users',
