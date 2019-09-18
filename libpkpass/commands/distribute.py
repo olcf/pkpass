@@ -1,6 +1,10 @@
 """This Modules allows for distributing created passwords to other users"""
+from __future__ import print_function
+import fnmatch
 import os
+from builtins import input
 from libpkpass.commands.command import Command
+from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
 
@@ -8,38 +12,56 @@ from libpkpass.errors import CliArgumentError
 class Distribute(Command):
     """This Class implements the CLI functionality for ditribution"""
     name = 'distribute'
-    description = 'Distribute an existing password entry to another entity'
+    description = 'Distribute existing password entry/ies to another entity [matching uses python fnmatch]'
     selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'min_escrow', 'escrow_users',
-                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'nosign', 'card_slot',
-                     'noescrow']
+                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'nosign', 'card_slot', 'noescrow']
 
     def _run_command_execution(self):
         ####################################################################
         """ Run function for class.                                      """
         ####################################################################
+        passworddb = PasswordDB()
+        passworddb.load_from_directory(self.args['pwstore'])
+        password_list = [key for key, _ in passworddb.pwdb.items()
+                         if fnmatch.fnmatch(key, os.path.join(self.args['pwstore'], self.args['pwname']))]
+        filtered_pdb = {k: passworddb.pwdb[k] for k in password_list
+                        if self.args['identity'] in passworddb.pwdb[k].recipients.keys()}
+        print("The following password files have matched:")
+        print(*filtered_pdb.keys(), sep="\n")
+        correct_distribution = input("Is this list correct? (y/N) ")
+        if correct_distribution and correct_distribution.lower()[0] == 'y':
+            passworddb.pwdb = filtered_pdb
+            db_len = len(passworddb.pwdb.keys())
+            i = 0
+            self.progress_bar(i, db_len)
+            for dist_pass, _ in passworddb.pwdb.items():
+                password = PasswordEntry()
+                password.read_password_data(dist_pass)
+                if self.args['identity'] in password.recipients.keys():
+                    # we shouldn't modify escrow on distribute
+                    self.args['min_escrow'] = None
+                    self.args['escrow_users'] = None
+                    plaintext_pw = password.decrypt_entry(
+                        self.identities.iddb[self.args['identity']],
+                        passphrase=self.passphrase,
+                        card_slot=self.args['card_slot'])
 
-        password = PasswordEntry()
-        password.read_password_data(os.path.join(
-            self.args['pwstore'], self.args['pwname']))
-        # we shouldn't modify escrow on distribute
-        self.args['min_escrow'] = None
-        self.args['escrow_users'] = None
-        plaintext_pw = password.decrypt_entry(
-            self.identities.iddb[self.args['identity']],
-            passphrase=self.passphrase,
-            card_slot=self.args['card_slot'])
+                    password.add_recipients(secret=plaintext_pw,
+                                            distributor=self.args['identity'],
+                                            recipients=self.recipient_list,
+                                            identitydb=self.identities,
+                                            passphrase=self.passphrase,
+                                            card_slot=self.args['card_slot'],
+                                            pwstore=self.args['pwstore']
+                                           )
 
-        password.add_recipients(secret=plaintext_pw,
-                                distributor=self.args['identity'],
-                                recipients=self.recipient_list,
-                                identitydb=self.identities,
-                                passphrase=self.passphrase,
-                                card_slot=self.args['card_slot'],
-                                pwstore=self.args['pwstore']
-                               )
-
-        password.write_password_data(os.path.join(
-            self.args['pwstore'], self.args['pwname']))
+                    password.write_password_data(dist_pass)
+                    i += 1
+                    self.progress_bar(i, db_len)
+            # format the progress bar appropriately after the loop
+            print("")
+        else:
+            print("Exiting due to wrong password list")
 
     def _validate_args(self):
         for argument in ['pwname', 'keypath']:

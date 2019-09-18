@@ -36,7 +36,7 @@ class Update(Command):
             print("The following list of users are the current distribution list:")
             print(", ".join(sort(self.recipient_list)))
             correct_distribution = input("Is this list correct? (y/N) ")
-            if correct_distribution.lower()[0] == 'n':
+            if not correct_distribution or correct_distribution.lower()[0] == 'n':
                 self.recipient_list = input("Please enter a comma delimited list: ")
                 self.recipient_list = list(set(self._convert_strings_to_list(self.recipient_list)))
                 print(self.recipient_list)
@@ -50,6 +50,9 @@ class Update(Command):
             if password1 != password2:
                 raise PasswordMismatchError
 
+            # This is due to a poor naming convention; we don't want to go through the
+            # create or update, because we are not updating a single record in the yaml
+            # we are burning it to the ground and redoing the entire thing
             self.create_pass(password1,
                              password['metadata']['description'],
                              password['metadata']['authorizer'],

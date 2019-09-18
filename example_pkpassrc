@@ -1,0 +1,85 @@
+# I was not positive how exactly to group these arguments, the name groups make sense
+# to me at the time of writing this.
+
+###################################################################################
+#                                  Data Stores                                    #
+###################################################################################
+# cabundle is used to validate certificates
+
+cabundle: /home/username/path/to/cabundle
+
+# certpath and keypath together make up the recipients database
+
+certpath: /home/username/path/to/certificates
+keypath: /home/username/path/to/keys
+
+# pwstore is which the passwords will be saved
+
+pwstore: /home/n0g/passdb/passwords/base
+
+
+###################################################################################
+#                               System Resources                                  #
+###################################################################################
+# card_slot is the pkcs library card to be used, if not specified it will be 0
+
+card_slot: 1
+
+# identity is the active user of pkpass, defaults to system username
+
+identity: nginsburg
+
+# time is use in the clipboard functionality to decide how long to keep a password in the
+# clipboard
+
+time: 30
+
+
+###################################################################################
+#                              Password Modifications                             #
+###################################################################################
+# Escrow is a feature that allows someone to shard shares of passwords to a group of individuals
+# none of these shards by themselves will reveal the password, however, enough parts of the shards
+# together allow for recovery of said password.
+# escrow_users are the group of users that you shard passwords to
+# min_escrow is the minimum number of escrow_users needed to recover the password
+
+escrow_users: bob, alice, jim
+min_escrow: 2
+
+
+# Pkpass supports the ability to generate passwords based on a user-defined regular expression
+# rules_map is used in pkpass's generation functionality, if you ask for a generated password
+# it will by default look at 'default'; if you define in your rc file a value for 'rules'
+# the new default will be that key
+
+rules_map: '{
+    "default": "[^\\s]{20}",
+    "different_pattern": "([a-z]|[A-Z]|[0-9]){15}",
+}'
+rules: different_pattern
+
+
+###################################################################################
+#                            Custom PkPass functionality                          #
+###################################################################################
+# You can custom define groups in this file as well, is this example mitm
+# consists of users bob, alice, eve, chuck and you could distribute a password
+# to this group with `pkpass.py distribute -g mitm`
+
+mitm: bob, alice, eve, chuck
+
+# pkpass supports allowing plugins to connect out to external services for certificates
+# connect defines an arbitrary json that will be used for a given connector
+# The root name will need to match the python connector that is placed in libpkpass/connectors/
+# The names of the keys under 'ExampleConnector' should match what the connector library is expecting
+# there are not global defined keys to use. Consult the library you are importing for what the keys should be
+
+connect: '{
+    "ExampleConnector":{
+        "url_arg": "https://example.com",
+        "id_arg": "567",
+        "key_arg": "super_secret_key",
+        "arbitrary_list_arg":["26994"]
+    }
+}'

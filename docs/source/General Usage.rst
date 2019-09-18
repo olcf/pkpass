@@ -12,7 +12,13 @@ Run ./pkpass.py with the '-h' flag for a list of options as well as syntax.  Som
 
     .. code-block:: bash
 
-       ./pkpass.py distribute -u foo,bar security-team/rootpw
+       ./pkpass.py distribute security-team/rootpw -u foo,bar
+
+  - Distribute the security team passwords to the group secadmins
+
+    .. code-block:: bash
+
+       ./pkpass.py distribute 'security-team/*' -g secadmins
 
   - List the names of all passwords that have been distributed to you:
 

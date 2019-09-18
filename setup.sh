@@ -156,6 +156,14 @@ if [[ "$skip" == "n" ]]; then
     read -rp "What user name would you like to use? (defaults to system user): " identity
     identity="${identity:-$(whoami)}"
 
+    #overwrite a file .pkpassrc with defined values here
+    echo -e "certpath: $certpath
+keypath: $keypath
+cabundle: $cabundle
+pwstore: $pwstore
+card_slot: $cardslot
+identity: $identity" > "$rcfile"
+
     echo -e "Escrow users is a feature of Pkpass. Escrow allows a password to be recovered by
     the majority of the escrow users in the event of an emergency."
 
@@ -173,17 +181,12 @@ if [[ "$skip" == "n" ]]; then
 
         read -rp "What should be the minimum number of users to unlock escrow passwords? Default($count): " minescrow
         minescrow="${minescrow:-$count}"
+        # append to rc file
+    echo -e "escrow_users: $escrowusers
+min_escrow: $minescrow" >> "$rcfile"
+
     fi
 
-    #overwrite a file .pkpassrc with defined values here
-    echo -e "certpath: $certpath 
-keypath: $keypath
-cabundle: $cabundle
-pwstore: $pwstore
-card_slot: $cardslot
-identity: $identity
-escrow_users: $escrowusers
-min_escrow: $minescrow" > "$rcfile"
 
 fi
 

@@ -21,13 +21,13 @@ AUTHOR = 'Noah Ginsburg'
 VERSION = None
 
 REQUIRED = [
-    'cryptography==2.1.4',
+    'cryptography>=2.3',
     'exrex>=0.10.5',
-    'future==0.17.1',
-    'nginsecretsharing==0.3.0',
-    'pbr==5.1.1',
-    'pyperclip==1.6.0',
-    'PyYAML==3.12',
+    'future>=0.17.1',
+    'nginsecretsharing>=0.3.0',
+    'pbr>=5.4.3',
+    'pyperclip>=1.6.0',
+    'PyYAML>=4.2b1'
 ]
 
 EXTRAS = {

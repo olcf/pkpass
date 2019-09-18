@@ -22,6 +22,16 @@ The password management solution provides:
 
 Passwords that are created are distributed to recipients by public key encryption.  The x509 certificate of the intended recipient is used to create an encrypted copy of the distributed password that is then saved in a password-specific git repository.  Multiple encrypted copies of the secret are created, one for each user.  End users then check out the git repo and are able to read passwords using their PIV/Smartcard credential to decrypt.
 
+Install
+-------
+
+### MacOs:
+
+`brew install olcf/tap/pkpass`
+
+### Linux:
+
+Currently I do not have a package process done for any linux distro, you'll need to pull from the repo and run setup
 
 x509 Certificate Repository
 -------

@@ -34,17 +34,18 @@ class Export(Command):
         self._iterate_pdb(myidentity, passworddb, crypt_pass)
 
     def _iterate_pdb(self, myidentity, passworddb, crypt_pass=False):
+        """ Iterate through the passwords that we can decrypt """
         uid = myidentity['uid']
-        db_len = len(passworddb.pwdb.items())
+        all_passwords = {k:v for (k, v) in passworddb.pwdb.items() if uid in v.recipients.keys()}
         i = 1
-        for _, password in passworddb.pwdb.items():
+        for _, password in all_passwords.items():
             plaintext_pw = password.decrypt_entry(
                 identity=myidentity,
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"])
-            password['recipients'][uid]['encrypted_secret'] = plaintext_pw.encode("ASCII")
+            password.recipients[uid]['encrypted_secret'] = plaintext_pw.encode("ASCII")
             password.write_password_data(self.args['pwfile'], False, not self.args['nocrypto'], crypt_pass)
-            self.progress_bar(i, db_len)
+            self.progress_bar(i, len(all_passwords))
             i += 1
         print("")
 

@@ -25,9 +25,8 @@ class RenameTests(unittest.TestCase):
         ret = False
         try:
             rename.Rename(cli.Cli())
-        except KeyError as error:
-            if str(error) == "'overwrite'":
-                ret = True
+        except DecryptionError:
+            ret = True
         self.assertTrue(ret)
 
     @mock.patch('argparse.ArgumentParser.parse_args',

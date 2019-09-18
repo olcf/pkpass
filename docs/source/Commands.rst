@@ -18,8 +18,8 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
         create              Create a new password entry and encrypt it for
                             yourself
         delete              Delete a password in the repository
-        distribute          Distribute an existing password entry to another
-                            entity
+        distribute          Distribute existing password entry/ies to another
+                            entity [matching uses python fnmatch]
         export              Export passwords that you have access to and encrypt
                             with aes
         generate            Generate a new password entry and encrypt it for
@@ -163,6 +163,9 @@ This is mostly just to allow testing to be a little faster
 Distribute
 ----------
 Distribute takes a pre-existing password in the password repository and grants permission to selected users to be able to unlock it
+This function resolves filename matching via python's fnmatch module, depending on the string you may need to pass the value through in single quotes
+
+This function will confirm password list is valid even if only one password matches
 
 .. code-block:: bash
 
