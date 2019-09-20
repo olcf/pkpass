@@ -77,9 +77,6 @@ class RSAKeyError(PKPassError):
 class SignatureCreationError(PKPassError):
     pass
 
-class SignatureVerificationError(PKPassError):
-    pass
-
 class TrustChainVerificationError(PKPassError):
     pass
 

@@ -11,8 +11,7 @@ from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, \
-        SignatureVerificationError, X509CertificateError
+from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, X509CertificateError
 
 ##############################################################################
 def handle_python_strings(string):
@@ -129,9 +128,6 @@ def pk_verify_signature(string, signature, identity):
     command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-verify']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature)))
-
-    if proc.returncode != 0:
-        raise SignatureVerificationError(stdout)
 
     return stdout.decode("ASCII") == stringhash
 
