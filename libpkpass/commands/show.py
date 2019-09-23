@@ -58,8 +58,8 @@ class Show(Command):
         myescrow = []
         if password.escrow:
             for key, value in password['escrow'].items():
-                if myidentity['uid'] in value.keys():
-                    myescrow.append([value[myidentity['uid']], key])
+                if myidentity['uid'] in value['recipients'].keys():
+                    myescrow.append([value['recipients'][myidentity['uid']], key])
         return myescrow
 
     def _decrypt_wrapper(self, directory, password, myidentity, pwname):
