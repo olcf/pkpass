@@ -20,19 +20,8 @@ EMAIL = 'ginsburgnm@gmail.com'
 AUTHOR = 'Noah Ginsburg'
 VERSION = None
 
-REQUIRED = [
-    'cryptography>=2.3',
-    'exrex>=0.10.5',
-    'future>=0.17.1',
-    'nginsecretsharing>=0.3.0',
-    'pbr>=5.4.3',
-    'pyperclip>=1.6.0',
-    'PyYAML>=4.2b1'
-]
-
-EXTRAS = {
-    'testing': ['mock']
-}
+with io.open('requirements.txt') as requirements_file:
+    REQUIRED = requirements_file.read().splitlines()
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -100,7 +89,7 @@ class RCFile(Command):
         self.home = os.path.expanduser("~") #pylint: attribute-defined-outside-init
 
     def user_input(self, prompt, default):
-        u_input = raw_input(prompt).strip()
+        u_input = input(prompt).strip()
         return u_input if u_input else default
 
     def directory_creation(self, user_prompt, default):
@@ -170,7 +159,7 @@ min_escrow: %s""" % (certs, keys, cabundle, passwords, card_slot, identity, escr
 
         self.finish_run()
 
-class verify(Command):
+class Verify(Command):
     """Verify the RC file is still valid
     use this with:
         python setup.py verify -r "/path/to/.pkpassrc" """
@@ -185,14 +174,14 @@ class verify(Command):
 
     def check_if_recipient(self, user, certpath):
         for fname in os.listdir(certpath):
-            if fname.endswith(tuple(['.crt','.cert'])):
+            if fname.endswith(tuple(['.crt', '.cert'])):
                 uid = fname.split('.')[0]
                 if uid == user:
                     return True
         return False
 
     def check_users(self, args_dict, certpath, valid):
-        args = ['escrow_users', 'groups', 'identity','users']
+        args = ['escrow_users', 'groups', 'identity', 'users']
         for arg in args:
             users_list = []
             if arg in args_dict.keys():
@@ -208,13 +197,13 @@ class verify(Command):
         return valid
 
     def check_paths(self, args_dict, valid):
-        args = ['cabundle', 'certpath', 'dstpwstore','pwstore']
+        args = ['cabundle', 'certpath', 'dstpwstore', 'pwstore']
         for arg in args:
             if arg in args_dict.keys():
                 if not os.path.exists(args_dict[arg]):
                     valid = False
-                    print("'%s' found in config, No such file or directory: %s" % 
-                            (arg, args_dict[arg]))
+                    print("'%s' found in config, No such file or directory: %s" %
+                          (arg, args_dict[arg]))
         return valid
 
     def run(self):
@@ -227,7 +216,7 @@ class verify(Command):
                 'rules', 'rules_map', 'users']
         store_args = ['all', 'ignore_decrypt', 'long_escrow',
                       'noescrow', 'nocrypto', 'nopassphrase',
-                      'nosign', 'noverify','overwrite',
+                      'nosign', 'noverify', 'overwrite',
                       'pwfile', 'pwname', 'recovery', 'stdin']
         args_dict = {}
         with open(self.rcfile, 'r') as rcyaml:
@@ -265,19 +254,20 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     install_requires=REQUIRED,
-    extras_require=EXTRAS,
     include_package_data=True,
     license='GPLV3',
     classifiers=[
         'License :: OSI Approved :: GNU GENERAL PUBLIC LICENSE V3 (GPLV3)',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         ],
     cmdclass={
         'upload': UploadCommand,
         'rcfile': RCFile,
-        'verify': verify,
+        'verify': Verify,
         },
     scripts=[
         'bin/pkpass'
