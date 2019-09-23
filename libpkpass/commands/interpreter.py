@@ -60,7 +60,7 @@ class Interactive(Cmd):
 Type ? to list commands"""
     prompt = 'pkpass> '
 ####################################################################
-
+    # This needs to look very similar to cli but not the same, which is frustrating
     ####################################################################
     def __init__(self, args, recipients_database):
     ####################################################################
@@ -95,7 +95,9 @@ Type ? to list commands"""
 
         # Hold onto args passed on the command line
         self.pre_args = args
+        # manually remove interpreter from command line so that argparse doesn't try to use it
         sys.argv.remove('interpreter')
+        # change our cwd so users can tab complete
         self._change_pwstore()
 
         # We basically need to grab the first argument and ditch it
@@ -113,6 +115,8 @@ Type ? to list commands"""
     def _reload_config(self):
         """Change affected globals in interpreter"""
     ####################################################################
+        # We still need to be able to reload other things like recipients
+        # database
         config = self.pre_args['config']
         try:
             with open(config, 'r') as fname:
@@ -161,7 +165,7 @@ Type ? to list commands"""
         return path_arg
 
     ####################################################################
-    def _autocomplete_file_path(self, _, line, begidx, endidx):
+    def autocomplete_file_path(self, _, line, begidx, endidx):
         """ File path autocompletion, used with the cmd module complete_* series functions"""
     ####################################################################
         before_arg = line.rfind(" ", 0, begidx)
@@ -231,7 +235,7 @@ def add_dynamic_function(module_name, class_name):
     ##################################################
     def complete_fn(self, text, line, begidx, endidx):
     ##################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
+        return self.autocomplete_file_path(text, line, begidx, endidx)
 
     setattr(Interactive, fn_name, do_fn)
     setattr(Interactive, complete_name, complete_fn)
