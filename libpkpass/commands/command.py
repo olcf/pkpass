@@ -6,7 +6,7 @@ import getpass
 import json
 import os
 import yaml
-from six import iteritems as iteritems
+from six import iteritems
 from six import string_types
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
@@ -26,7 +26,7 @@ class Command(object):
     selected_args = None
     passphrase = None
 
-    def __init__(self, cli):
+    def __init__(self, cli, iddb=None):
         ##################################################################
         """ Intialization function for class. Register with argparse   """
         ##################################################################
@@ -51,7 +51,8 @@ class Command(object):
             }
         self.recipient_list = []
         self.escrow_and_recipient_list = []
-        self.identities = IdentityDB()
+        self.iddbcached = iddb is not None
+        self.identities = iddb if iddb else IdentityDB()
         cli.register(self, self.name, self.description)
 
     def register(self, parser):
@@ -110,9 +111,7 @@ class Command(object):
         self._validate_combinatorial_args()
         self._validate_args()
 
-        # currently only listrecipients needs to verify on load; making it a list though
-        # for future development expansion
-        verify_on_load = self.args['subparser_name'] in ['listrecipients', 'import']
+        verify_on_load = self.args['subparser_name'] in ['listrecipients', 'import', 'interpreter']
 
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
@@ -121,13 +120,14 @@ class Command(object):
         self._build_recipient_list()
 
         # If there are defined repositories of keys and certificates, load them
-        self.identities.cabundle = self.args['cabundle']
-        self.identities.load_certs_from_directory(
-            self.args['certpath'],
-            verify_on_load=verify_on_load,
-            connectmap=connectmap)
-        self.identities.load_keys_from_directory(self.args['keypath'])
-        self._validate_identities()
+        if not self.iddbcached:
+            self.identities.cabundle = self.args['cabundle']
+            self.identities.load_certs_from_directory(
+                self.args['certpath'],
+                verify_on_load=verify_on_load,
+                connectmap=connectmap)
+            self.identities.load_keys_from_directory(self.args['keypath'])
+            self._validate_identities()
 
     def safety_check(self):
         ####################################################################
@@ -286,7 +286,7 @@ class Command(object):
         for arg_set in args_list:
             valid = False
             for arg in arg_set:
-                if arg in self.args and self.args[arg] != None:
+                if arg in self.args and self.args[arg] is not None:
                     valid = True
                     break
             if not valid:
@@ -314,12 +314,12 @@ class Command(object):
                     "Error: Recipient '%s' is not in the recipient database" %
                     recipient)
 
-        if self.args['identity'] not in self.identities.iddb.keys():
+        if self.args['identity'] in self.identities.iddb.keys():
+            self.identities.verify_identity(self.args['identity'])
+        else:
             raise CliArgumentError(
                 "Error: Your user '%s' is not in the recipient database" %
                 self.args['identity'])
-        else:
-            self.identities.verify_identity(self.args['identity'])
 
     def _print_debug(self):
         print(self.recipient_list)

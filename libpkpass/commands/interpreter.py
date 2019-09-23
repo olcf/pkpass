@@ -1,6 +1,6 @@
 """This module allows for opening a PkPass interactive interpreter"""
 # Look, I know what I did; I'm sorry about the following file.
-# I pray that there exists a better why to do this. This file
+# I pray that there exists a better way to do this. This file
 # Should be burned to the ground and never spoken of again.
 # You know it, I know it, everybody knows it.
 
@@ -11,6 +11,7 @@ import sys
 import glob
 import subprocess
 from cmd import Cmd
+from inspect import getmembers, isclass
 import yaml
 from libpkpass.commands.command import Command
 import libpkpass.commands.clip as clip
@@ -39,7 +40,7 @@ class Interpreter(Command):
 
     ####################################################################
     def _run_command_execution(self):
-        """ Run function for class.                                      """
+        """ Run function for class. """
     ####################################################################
         Interactive(self.args, self.identities).cmdloop()
 
@@ -47,6 +48,10 @@ class Interpreter(Command):
     def _validate_args(self):
     ####################################################################
         pass
+
+# This is to keep argparse from sys.exiting all over the place
+def pkparse_error(message):
+    raise PKPassError(message)
 
 ####################################################################
 class Interactive(Cmd):
@@ -57,7 +62,7 @@ Type ? to list commands"""
 ####################################################################
 
     ####################################################################
-    def __init__(self, args, recipents_database):
+    def __init__(self, args, recipients_database):
     ####################################################################
         Cmd.__init__(self)
         # Hash of registered subparser actions, mapping string to actual subparser
@@ -71,6 +76,8 @@ Type ? to list commands"""
             default=os.path.join(home, '.pkpassrc'))
         self.subparsers = self.parser.add_subparsers(
             help='sub-commands', dest='subparser_name')
+        self.recipients_database = recipients_database
+        self.parser.error = pkparse_error
 
         clip.Clip(self)
         create.Create(self)
@@ -179,12 +186,10 @@ Type ? to list commands"""
               % line)
         return False
 
-
     ####################################################################
     def do_exit(self, _):
         """Exit the application"""
     ####################################################################
-        print("Bye")
         return True
 
     ####################################################################
@@ -194,221 +199,47 @@ Type ? to list commands"""
         try:
             subprocess.call([os.environ['EDITOR'], self.pre_args['config']])
             return False
-        except PKPassError as err:
-            print(err)
+        except (IOError, SystemExit):
             return False
 
-    ####################################################################
-    def do_clip(self, _):
-        """Copy a password to the clipboard"""
-    ####################################################################
+##############################################################################
+def add_dynamic_function(module_name, class_name):
+    """This allows repetitive do_* and complete_* functions to be condensed"""
+##############################################################################
+    swap_name = module_name
+    if "pk" in module_name:
+        swap_name = module_name[2:]
+    fn_name = "do_" + swap_name
+    complete_name = "complete_" + swap_name
+
+    ############################################
+    def do_fn(self, _):
+        """Use -h or --help for information"""
+    ############################################
         try:
-            pkpass_command = clip.Clip(self)
-            self.parsedargs = self.parser.parse_args()
-            self.parsedargs.subparser_name = 'clip'
-            dummy = pkpass_command.run(self.parsedargs)
+            pk_class = [o for o in getmembers(globals()[module_name], isclass)
+                        if str(o[0]) == class_name][0][1]
+            pk_class(self, iddb=self.recipients_database)
+            self.actions[swap_name].run(self.parser.parse_args())
             return False
         except PKPassError as err:
             print(err)
             return False
+        except SystemExit:
+            return False
 
-    ####################################################################
-    def complete_clip(self, text, line, begidx, endidx):
-    ####################################################################
+    ##################################################
+    def complete_fn(self, text, line, begidx, endidx):
+    ##################################################
         return self._autocomplete_file_path(text, line, begidx, endidx)
 
-    ####################################################################
-    def do_create(self, _):
-        """Create a password"""
-    ####################################################################
-        try:
-            create.Create(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['create'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err.msg)
-            return False
+    setattr(Interactive, fn_name, do_fn)
+    setattr(Interactive, complete_name, complete_fn)
 
-    ####################################################################
-    def complete_create(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_delete(self, _):
-        """Delete a password"""
-    ####################################################################
-        try:
-            delete.Delete(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['delete'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_delete(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_distribute(self, _):
-        """Distribute a password"""
-    ####################################################################
-        try:
-            distribute.Distribute(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['distribute'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_distribute(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_export(self, _):
-        """Export passwords to file"""
-    ####################################################################
-        try:
-            export.Export(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['export'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def do_list(self, _):
-        """List available passwords"""
-    ####################################################################
-        try:
-            pklist.List(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['list'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def do_listrecipients(self, _):
-        """List recipients database"""
-    ####################################################################
-        try:
-            listrecipients.Listrecipients(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['listrecipients'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def do_import(self, _):
-        """Create passwords from an import file"""
-    ####################################################################
-        try:
-            pkimport.Import(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['import'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def do_generate(self, _):
-        """Generate a password"""
-    ####################################################################
-        try:
-            generate.Generate(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['generate'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_generate(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_recover(self, _):
-        """Recover a password"""
-    ####################################################################
-        try:
-            recover.Recover(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['recover'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_recover(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_rename(self, _):
-        """Rename a password"""
-    ####################################################################
-        try:
-            rename.Rename(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['rename'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_rename(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_show(self, _):
-        """Show the value of a password"""
-    ####################################################################
-        try:
-            show.Show(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['show'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_show(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
-
-    ####################################################################
-    def do_update(self, _):
-        """Update a password value and distribute"""
-    ####################################################################
-        try:
-            update.Update(self)
-            self.parsedargs = self.parser.parse_args()
-            self.actions['update'].run(self.parsedargs)
-            return False
-        except PKPassError as err:
-            print(err)
-            return False
-
-    ####################################################################
-    def complete_update(self, text, line, begidx, endidx):
-    ####################################################################
-        return self._autocomplete_file_path(text, line, begidx, endidx)
+for command in [('clip', 'Clip'), ('create', 'Create'), ('delete', 'Delete'),
+                ('distribute', 'Distribute'), ('export', 'Export'),
+                ('generate', 'Generate'), ('pkimport', 'Import'),
+                ('pklist', 'List'), ('listrecipients', 'Listrecipients'),
+                ('recover', 'Recover'), ('rename', 'Rename'),
+                ('show', 'Show'), ('update', 'Update')]:
+    add_dynamic_function(command[0], command[1])
