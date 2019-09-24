@@ -16,14 +16,15 @@ The bash script ``./setup.sh`` obviously will only work on systems with bash suc
 The python script ``./setup.py`` *should* run on all systems.
 
 * bash:  
-    This script will walk you through a full installation including setting up venvs if you need that.  
+    This is a wrapper script for ``./setup.py`` it serves the function of installing pkpass in a python3 virtualenv  
 
 * python:  
     | This will run through specific commands  
-    | ``python setup.py rcfile`` will create an rcfile  
-    | ``python setup.py install`` will run the installation on a system level  
-    | ``python setup.py install --user`` will run the installation on a user level  
-    | ``python setup.py verify -r "/path/to/.pkpassrc"`` will do basic linting of the pkpassrc file
+    | ``./setup.py rcfile`` will create an rcfile  
+    | ``./setup.py install`` will run the installation on a system level  
+    | ``./setup.py install --user`` will run the installation on a user level  
+    | ``./setup.py verify -r "/path/to/.pkpassrc"`` will do basic linting of the pkpassrc file  
+    | ``./setup.py verify`` will do basic linting on a pkpassrc file located at ``~/.pkpassrc``  
     | if you need the -h flag may help.  
 
 In both cases, these files can install dependencies and create a .pkpassrc file for you
