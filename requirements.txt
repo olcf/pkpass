@@ -1,7 +1,7 @@
 cryptography>=2.3
 exrex>=0.10.5
 future>=0.17.1
-mock>=2.0.0
 nginsecretsharing>=0.3.0
 pyperclip>=1.6.0
 PyYAML>=4.2b1
+setuptools>=41.2.0
