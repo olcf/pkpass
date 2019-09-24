@@ -4,7 +4,7 @@ Development and Testing
 Testing Scripts
 ---------------
 Currently there exists a shell script ``./test/pki/generatepki.sh`` that will generate certificates for a developer to use for unittests
-After running this script, you can run tox or the ``./unittest.sh`` file; note that ``./unittest.sh`` does not test multiple versions of
+After running this script, you can run tox or the ``python -m unittest discover`` note that ``python -m unittest discover`` does not test multiple versions of
 python like tox does
 
 Plugin Behavior - Connectors
