@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """This Module handles the escrow functions i.e. creating shares and recovery"""
 
-from nginsecretsharing import PlaintextToHexSecretSharer as ptohss
+from pyseltongue import PlaintextToHexSecretSharer as ptohss
 from .errors import EscrowError
 
 ##############################################################################
