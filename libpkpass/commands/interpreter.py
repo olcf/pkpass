@@ -34,8 +34,8 @@ class Interpreter(Command):
     """This class implements a skeleton to call the interpreter"""
     name = 'interpreter'
     description = 'Interactive mode for pkpass'
-    selected_args = ['cabundle', 'card_slot', 'certpath', 'connect', 'escrow_users', 'min_escrow',
-                     'groups', 'identity', 'keypath', 'pwstore']
+    selected_args = Command.selected_args + ['card_slot', 'connect', 'escrow_users', 'min_escrow',
+                                             'groups', 'keypath', 'pwstore']
 ####################################################################
 
     ####################################################################

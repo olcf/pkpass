@@ -9,8 +9,7 @@ class Recover(Command):
     """This class implements the CLI functionality of recovery for passwords"""
     name = 'recover'
     description = 'Recover a password that has been distributed using escrow functions'
-    selected_args = ['pwstore', 'identity', 'certpath', 'keypath', 'cabundle',
-                     'nosign', 'escrow_users', 'min_escrow']
+    selected_args = Command.selected_args + ['pwstore', 'keypath', 'nosign', 'escrow_users', 'min_escrow']
 
     def _run_command_execution(self):
         ####################################################################

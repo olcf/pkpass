@@ -13,8 +13,9 @@ class Distribute(Command):
     """This Class implements the CLI functionality for ditribution"""
     name = 'distribute'
     description = 'Distribute existing password entry/ies to another entity [matching uses python fnmatch]'
-    selected_args = ['pwname', 'pwstore', 'users', 'groups', 'stdin', 'identity', 'min_escrow', 'escrow_users',
-                     'certpath', 'cabundle', 'keypath', 'nopassphrase', 'nosign', 'card_slot', 'noescrow']
+    selected_args = Command.selected_args + ['pwname', 'pwstore', 'users', 'groups', 'stdin',
+                                             'min_escrow', 'escrow_users', 'keypath', 'nopassphrase',
+                                             'nosign', 'card_slot', 'noescrow']
 
     def _run_command_execution(self):
         ####################################################################

@@ -41,6 +41,33 @@ def pk_encrypt_string(plaintext_string, identity):
 
     return (encrypted_string, base64.urlsafe_b64encode(handle_python_strings(ciphertext_derived_key)))
 
+##############################################################################
+def print_card_info(card_slot, identity, verbosity):
+    """Inform the user what card is selected"""
+##############################################################################
+    if 'key_path' not in identity:
+        command = ['pkcs11-tool', '-L']
+        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        stdout, _ = proc.communicate()
+        out_list = handle_python_strings(stdout).split(b'Slot')
+        if verbosity > 1:
+            print_all_slots(stdout)
+        for out in out_list[1:]:
+            stripped = out.decode("ASCII").strip()
+            if int(stripped[0]) == int(card_slot):
+                verbosity = verbosity + 1 if verbosity < 2 else 2
+                stripped = ("\n").join(stripped.split('\n')[:verbosity])
+                print("Using Slot %s" % stripped)
+
+##############################################################################
+def print_all_slots(slot_info):
+    """Print all slots and cards available"""
+##############################################################################
+    _, columns = os.popen('stty size', 'r').read().split()
+    col_multiplier = int(columns) // 4
+    print("#" * col_multiplier)
+    print(handle_python_strings(slot_info).decode("ASCII").strip())
+    print("#" * col_multiplier + "\n")
 
 ##############################################################################
 def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None):

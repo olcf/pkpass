@@ -14,8 +14,8 @@ class Import(Command):
     """This Class implements the cli functionality of import"""
     name = 'import'
     description = 'Import passwords that you have saved to a file'
-    selected_args = ['pwfile', 'stdin', 'identity', 'certpath', 'nopassphrase',
-                     'cabundle', 'dstpwstore', 'card_slot', 'nocrypto',]
+    selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase', 'dstpwstore',
+                                             'card_slot', 'nocrypto',]
 
     def _run_command_execution(self):
         ####################################################################

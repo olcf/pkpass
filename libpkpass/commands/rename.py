@@ -12,8 +12,8 @@ class Rename(Command):
     """This class implements the CLI functionality of deletion of passwords"""
     name = 'rename'
     description = 'Rename a password in the repository'
-    selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath', 'nopassphrase',
-                     'keypath', 'cabundle', 'card_slot', 'rename']
+    selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'nopassphrase',
+                                             'keypath', 'card_slot', 'rename']
 
     ####################################################################
     def _run_command_execution(self):

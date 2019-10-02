@@ -9,7 +9,7 @@ class Listrecipients(Command):
     """This class implements the cli functionality to list recipients"""
     name = 'listrecipients'
     description = 'List the recipients that pkpass knows about'
-    selected_args = ['stdin', 'identity', 'certpath', 'cabundle']
+    selected_args = Command.selected_args + ['stdin']
 
     def _run_command_execution(self):
         ####################################################################

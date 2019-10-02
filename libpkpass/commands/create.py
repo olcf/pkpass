@@ -9,9 +9,9 @@ class Create(Command):
     """This class implements the CLI functionality of creation of passwords"""
     name = 'create'
     description = 'Create a new password entry and encrypt it for yourself'
-    selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath',
-                     'keypath', 'cabundle', 'nopassphrase', 'nosign', 'card_slot',
-                     'escrow_users', 'min_escrow', 'noescrow']
+    selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath',
+                                             'nopassphrase', 'nosign', 'card_slot', 'escrow_users',
+                                             'min_escrow', 'noescrow']
 
     def _run_command_execution(self):
         ####################################################################
