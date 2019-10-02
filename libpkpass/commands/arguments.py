@@ -63,6 +63,14 @@ ARGUMENTS = {
         },
     },
 
+    'filter': {
+        'args': ['-f', '--filter'],
+        'kwargs': {
+            'help': "Reduce output of commands to matching items",
+            'type': str
+        },
+    },
+
     'groups': {
         'args': ['-g', '--groups'],
         'kwargs': {

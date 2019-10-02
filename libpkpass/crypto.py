@@ -6,6 +6,7 @@ import base64
 import tempfile
 import os
 import hashlib
+import shutil
 from subprocess import Popen, PIPE, STDOUT
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
@@ -63,11 +64,10 @@ def print_card_info(card_slot, identity, verbosity):
 def print_all_slots(slot_info):
     """Print all slots and cards available"""
 ##############################################################################
-    _, columns = os.popen('stty size', 'r').read().split()
-    col_multiplier = int(columns) // 4
-    print("#" * col_multiplier)
+    columns = int(shutil.get_terminal_size().columns) // 4
+    print("#" * columns)
     print(handle_python_strings(slot_info).decode("ASCII").strip())
-    print("#" * col_multiplier + "\n")
+    print("#" * columns + "\n")
 
 ##############################################################################
 def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None):

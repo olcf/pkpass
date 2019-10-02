@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
 import libpkpass.commands.delete as delete
@@ -62,6 +63,7 @@ class Cli():
         self.subparsers = self.parser.add_subparsers(
             help='sub-commands', dest='subparser_name')
 
+        card.Card(self)
         clip.Clip(self)
         create.Create(self)
         delete.Delete(self)
