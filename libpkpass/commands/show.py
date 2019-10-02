@@ -6,20 +6,20 @@ from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError, DecryptionError
 
-
+####################################################################
 class Show(Command):
     """This class is used as a command object and parses information passed through
     the CLI to show passwords that have been distributed to users"""
+####################################################################
     name = 'show'
     description = 'Display a password'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'stdin', 'keypath', 'nopassphrase',
                                              'noverify', 'card_slot', 'all', 'recovery', 'ignore_decrypt']
 
+    ####################################################################
     def _run_command_execution(self):
-        ####################################################################
-        """ Run function for class.                                      """
-        ####################################################################
-
+        """ Run function for class.                                  """
+    ####################################################################
         password = PasswordEntry()
         myidentity = self.identities.iddb[self.args['identity']]
 
@@ -32,9 +32,12 @@ class Show(Command):
             raise PasswordIOError("No password supplied")
         else:
             self._decrypt_wrapper(
-                self.args['pwstore'], password, myidentity, self.args['pwname'])
+                self._resolve_directory_path(), password, myidentity, self.args['pwname'])
 
+    ####################################################################
     def _walk_dir(self, directory, password, myidentity, ignore_decrypt=False):
+        """Walk our directory searching for passwords"""
+    ####################################################################
         # os.walk returns root, dirs, and files we just need files
         for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
@@ -50,10 +53,21 @@ class Show(Command):
                     except NotARecipientError:
                         continue
 
+    ####################################################################
+    def _resolve_directory_path(self):
+        """This handles how a user inputs the pwname"""
+    ####################################################################
+        pwstore_pass = os.path.join(self.args['pwstore'], self.args['pwname'])
+        pwd = os.getcwd()
+        pwd_pass = os.path.join(pwd, self.args['pwname'])
+        if not os.path.exists(pwstore_pass) and os.path.exists(pwd_pass):
+            return pwd
+        return self.args['pwstore']
+
+    ####################################################################
     def _handle_escrow_show(self, password, myidentity):
-        ####################################################################
         """This populates the user's escrow as passwords"""
-        ####################################################################
+    ####################################################################
         myescrow = []
         if password.escrow:
             for key, value in password['escrow'].items():
@@ -61,7 +75,10 @@ class Show(Command):
                     myescrow.append([value['recipients'][myidentity['uid']], key])
         return myescrow
 
+    ####################################################################
     def _decrypt_wrapper(self, directory, password, myidentity, pwname):
+        """Decide whether to decrypt normally or for escrow"""
+    ####################################################################
         password.read_password_data(os.path.join(directory, pwname))
         myescrow = []
         if self.args['recovery']:
@@ -74,10 +91,10 @@ class Show(Command):
         else:
             self._decrypt_password_entry(password, myidentity)
 
+    ####################################################################
     def _decrypt_password_entry(self, password, myidentity):
-        ####################################################################
         """This decrypts a given password entry"""
-        ####################################################################
+    ####################################################################
         plaintext_pw = password.decrypt_entry(
             identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
         if not self.args['noverify']:
@@ -92,7 +109,9 @@ class Show(Command):
 
         print(("%s: %s") % (password.metadata['name'], plaintext_pw))
 
+    ####################################################################
     def _validate_args(self):
+    ####################################################################
         for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
