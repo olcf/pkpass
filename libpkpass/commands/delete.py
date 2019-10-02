@@ -10,8 +10,7 @@ class Delete(Command):
     """This class implements the CLI functionality of deletion of passwords"""
     name = 'delete'
     description = 'Delete a password in the repository'
-    selected_args = ['pwname', 'pwstore', 'overwrite', 'stdin', 'identity', 'certpath',
-                     'keypath', 'cabundle', 'card_slot']
+    selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath', 'card_slot']
 
     def _run_command_execution(self):
         ####################################################################

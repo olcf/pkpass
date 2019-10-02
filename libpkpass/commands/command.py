@@ -11,6 +11,7 @@ from six import string_types
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
+from libpkpass.crypto import print_card_info
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
         PasswordIOError, JsonArgumentError, NotThePasswordOwnerError
 
@@ -23,7 +24,7 @@ class Command(object):
 
     name = None
     description = None
-    selected_args = None
+    selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath']
     passphrase = None
 
     def __init__(self, cli, iddb=None):
@@ -47,7 +48,8 @@ class Command(object):
             'noescrow': False,
             'overwrite': False,
             'recovery': False,
-            'rules': 'default'
+            'rules': 'default',
+            'verbosity': 0
             }
         self.recipient_list = []
         self.escrow_and_recipient_list = []
@@ -113,9 +115,6 @@ class Command(object):
 
         verify_on_load = self.args['subparser_name'] in ['listrecipients', 'import', 'interpreter']
 
-        if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
-            self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
-
         # Build the list of recipients that this command will act on
         self._build_recipient_list()
 
@@ -128,6 +127,15 @@ class Command(object):
                 connectmap=connectmap)
             self.identities.load_keys_from_directory(self.args['keypath'])
             self._validate_identities()
+
+        self.args['card_slot'] = self.args['card_slot'] if self.args['card_slot'] else 0
+        if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
+            if self.args['verbosity'] != -1:
+                print_card_info(self.args['card_slot'],
+                                self.identities.iddb[self.args['identity']],
+                                self.args['verbosity'])
+            self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
+
 
     def safety_check(self):
         ####################################################################

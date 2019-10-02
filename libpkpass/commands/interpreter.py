@@ -14,6 +14,7 @@ from cmd import Cmd
 from inspect import getmembers, isclass
 import yaml
 from libpkpass.commands.command import Command
+import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
 import libpkpass.commands.delete as delete
@@ -34,8 +35,8 @@ class Interpreter(Command):
     """This class implements a skeleton to call the interpreter"""
     name = 'interpreter'
     description = 'Interactive mode for pkpass'
-    selected_args = ['cabundle', 'card_slot', 'certpath', 'connect', 'escrow_users', 'min_escrow',
-                     'groups', 'identity', 'keypath', 'pwstore']
+    selected_args = Command.selected_args + ['card_slot', 'connect', 'escrow_users', 'min_escrow',
+                                             'groups', 'keypath', 'pwstore']
 ####################################################################
 
     ####################################################################
@@ -79,6 +80,7 @@ Type ? to list commands"""
         self.recipients_database = recipients_database
         self.parser.error = pkparse_error
 
+        card.Card(self)
         clip.Clip(self)
         create.Create(self)
         delete.Delete(self)
@@ -240,7 +242,7 @@ def add_dynamic_function(module_name, class_name):
     setattr(Interactive, fn_name, do_fn)
     setattr(Interactive, complete_name, complete_fn)
 
-for command in [('clip', 'Clip'), ('create', 'Create'), ('delete', 'Delete'),
+for command in [('card', 'Card'), ('clip', 'Clip'), ('create', 'Create'), ('delete', 'Delete'),
                 ('distribute', 'Distribute'), ('export', 'Export'),
                 ('generate', 'Generate'), ('pkimport', 'Import'),
                 ('pklist', 'List'), ('listrecipients', 'Listrecipients'),

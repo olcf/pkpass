@@ -63,6 +63,14 @@ ARGUMENTS = {
         },
     },
 
+    'filter': {
+        'args': ['-f', '--filter'],
+        'kwargs': {
+            'help': "Reduce output of commands to matching items",
+            'type': str
+        },
+    },
+
     'groups': {
         'args': ['-g', '--groups'],
         'kwargs': {
@@ -187,6 +195,17 @@ ARGUMENTS = {
         }
     },
 
+    'quiet': {
+        'args': ['-q', '--quiet'],
+        'kwargs': {
+            'action': 'store_const',
+            'const': -1,
+            'default': 0,
+            'dest': 'verbosity',
+            'help': 'quiet output (show errors only)'
+        }
+    },
+
     'recovery': {
         'args': ['-r', '--recovery'],
         'kwargs': {
@@ -244,4 +263,14 @@ ARGUMENTS = {
             'help': 'Comma seperated list of recipients'
         }
     },
+
+    'verbosity': {
+        'args': ['-v', '--verbose'],
+        'kwargs': {
+            'action': 'count',
+            'dest': 'verbosity',
+            'default': 0,
+            'help': 'verbose output (repeat for increased verbosity)'
+        }
+    }
 }
