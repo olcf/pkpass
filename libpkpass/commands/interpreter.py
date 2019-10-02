@@ -43,7 +43,7 @@ class Interpreter(Command):
     def _run_command_execution(self):
         """ Run function for class. """
     ####################################################################
-        Interactive(self.args, self.identities).cmdloop()
+        Interactive(self.args, self.identities).cmdloop_with_keyboard_interrupt()
 
     ####################################################################
     def _validate_args(self):
@@ -104,6 +104,24 @@ Type ? to list commands"""
 
         # We basically need to grab the first argument and ditch it
         self.parsedargs = {}
+
+
+    ####################################################################
+    def cmdloop_with_keyboard_interrupt(self):
+        """handle keyboard interrupts"""
+    ####################################################################
+        breaker = False
+        first = True
+        while breaker is not True:
+            try:
+                if first:
+                    self.cmdloop()
+                else:
+                    self.cmdloop(intro='')
+                breaker = True
+            except KeyboardInterrupt:
+                first = False
+                sys.stdout.write('\n')
 
     ####################################################################
     def _change_pwstore(self):
