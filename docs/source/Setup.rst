@@ -1,5 +1,7 @@
 Setup
 =====
+Brew install is available via:
+  | ``brew install olcf/tap/pkpass``
 
 You may clone the pkpass.py tool like this:
   | ``git clone https://github.com/olcf/pkpass.git``
