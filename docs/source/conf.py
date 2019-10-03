@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+"""Configuration file for RTD"""
 # Configuration file for the Sphinx documentation builder.
 #
 # This file does only contain a selection of the most common options. For a
@@ -12,7 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -22,11 +22,17 @@
 project = u'PkPass'
 author = u'Noah Ginsburg, Ryan Adamson'
 
-# The short X.Y version
-version = u'2.1.5'
-# The full version, including alpha/beta/rc tags
-release = u'2.1.5'
+HERE = os.path.abspath(os.path.dirname(__file__))
+THERE = os.path.join(HERE, "..", "..")
 
+VERSION = None
+with open(os.path.join(THERE, 'VERSION')) as version_file:
+    VERSION = version_file.read().strip()
+
+# The short X.Y version
+version = VERSION
+# The full version, including alpha/beta/rc tags
+release = VERSION
 
 # -- General configuration ---------------------------------------------------
 
