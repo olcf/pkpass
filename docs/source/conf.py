@@ -23,9 +23,9 @@ project = u'PkPass'
 author = u'Noah Ginsburg, Ryan Adamson'
 
 # The short X.Y version
-version = u'1.0.3'
+version = u'2.1.5'
 # The full version, including alpha/beta/rc tags
-release = u'1.0.3'
+release = u'2.1.5'
 
 
 # -- General configuration ---------------------------------------------------
