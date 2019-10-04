@@ -1,4 +1,4 @@
-colorama>=0.4.1
+colored>=1.4.0
 cryptography>=2.3
 exrex>=0.10.5
 future>=0.17.1
