@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 import os
+from colorama import Fore
+from libpkpass.util import color_prepare
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError, DecryptionError
@@ -107,7 +109,7 @@ class Show(Command):
                 print("Warning: could not verify the certificate authenticity of user '%s'." %
                       result['distributor'])
 
-        print(("%s: %s") % (password.metadata['name'], plaintext_pw))
+        print(("%s: %s") % (color_prepare(password.metadata['name'], Fore.GREEN, self.args['color']), plaintext_pw))
 
     ####################################################################
     def _validate_args(self):

@@ -1,7 +1,8 @@
 """This Module allows for the listing of users passwords"""
 
 from __future__ import print_function
-import yaml
+from colorama import Fore
+from libpkpass.util import color_prepare
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError
@@ -45,7 +46,11 @@ class List(Command):
             result = {k:v for k, v in result.items() if self.args['filter'] in k}
 
         print("Passwords for '%s':" % self.args['identity'])
-        print("\n%s" % yaml.dump(result, default_flow_style=False))
+        for key, value in result.items():
+            print("%s\n  distributor: %s\n  name: %s" %
+                  (color_prepare(key + ":", Fore.GREEN, self.args['color']),
+                   value['distributor'], value['name']))
+        # print("\n%s" % yaml.dump(result, default_flow_style=False))
 
     def _validate_args(self):
         for argument in ['keypath']:

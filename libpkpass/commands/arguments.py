@@ -39,6 +39,14 @@ ARGUMENTS = {
         }
     },
 
+    'color': {
+        'args': ['--color'],
+        'kwargs': {
+            'type': str,
+            'help': "Disable color or not, accepts true/false"
+        }
+    },
+
     'connect': {
         'args': ['--connect'],
         'kwargs': {
