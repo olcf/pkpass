@@ -3,6 +3,7 @@ from __future__ import print_function
 import fnmatch
 import os
 from builtins import input
+import libpkpass.util as util
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
@@ -23,10 +24,11 @@ class Distribute(Command):
         ####################################################################
         passworddb = PasswordDB()
         passworddb.load_from_directory(self.args['pwstore'])
-        password_list = [key for key, _ in passworddb.pwdb.items()
-                         if fnmatch.fnmatch(key, os.path.join(self.args['pwstore'], self.args['pwname']))]
-        filtered_pdb = {k: passworddb.pwdb[k] for k in password_list
-                        if self.args['identity'] in passworddb.pwdb[k].recipients.keys()}
+        filtered_pdb = util.dictionary_filter(
+            os.path.join(self.args['pwstore'], self.args['pwname']),
+            passworddb.pwdb,
+            [self.args['identity'], 'recipients']
+        )
         print("The following password files have matched:")
         print(*filtered_pdb.keys(), sep="\n")
         correct_distribution = input("Is this list correct? (y/N) ")

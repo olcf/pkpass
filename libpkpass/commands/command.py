@@ -49,7 +49,7 @@ class Command(object):
             'overwrite': False,
             'recovery': False,
             'rules': 'default',
-            'verbosity': 0
+            'verbosity': 0,
             }
         self.recipient_list = []
         self.escrow_and_recipient_list = []
@@ -94,7 +94,7 @@ class Command(object):
         # configuration files and merge the two with cli taking priority
         cli_args = vars(parsedargs)
 
-        config_args = self._get_config_args(cli_args['config'])
+        config_args = self._get_config_args(cli_args['config'], cli_args)
         self.args.update(config_args)
 
         fles = ['cabundle', 'pwstore']
@@ -265,7 +265,7 @@ class Command(object):
         except KeyError as err:
             raise GroupDefinitionError(str(err))
 
-    def _get_config_args(self, config):
+    def _get_config_args(self, config, cli_args):
         try:
             with open(config, 'r') as fname:
                 config_args = yaml.safe_load(fname)
@@ -273,7 +273,8 @@ class Command(object):
                 config_args = {}
             return config_args
         except IOError:
-            print("No .pkpassrc file found, consider running ./setup.sh")
+            if cli_args['verbosity'] != -1:
+                print("INFO: No .pkpassrc file found")
             return {}
 
     def _validate_args(self):

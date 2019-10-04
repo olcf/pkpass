@@ -4,7 +4,7 @@
 from __future__ import print_function
 import argparse
 import os
-import sys
+import libpkpass.util as util
 import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
@@ -21,26 +21,6 @@ import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
 
-####################################################################
-def set_default_subparser(self, name, args=None, positional_args=0):
-    """Set default subparser to interpreter"""
-####################################################################
-    subparser_found = False
-    for arg in sys.argv[1:]:
-        if arg in ['-h', '--help']:
-            break
-    else:
-        for action in self._subparsers._actions:
-            if not isinstance(action, argparse._SubParsersAction):
-                continue
-            for _ in sys.argv[1:]:
-                subparser_found = True
-        if not subparser_found:
-            if args is None:
-                sys.argv.insert(len(sys.argv) - positional_args, name)
-            else:
-                args.insert(len(args) - positional_args, name)
-
 ##############################################################################
 class Cli():
     """ Class for parsing command line.  Observes subclasses of Command to Register
@@ -56,10 +36,12 @@ class Cli():
         home = os.path.expanduser("~")
         self.parser = argparse.ArgumentParser(
             description='Public Key Password Manager')
-        self.parser.set_default_subparser = set_default_subparser
+        self.parser.set_default_subparser = util.set_default_subparser
         self.parser.add_argument(
             '--config', type=str, help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
             default=os.path.join(home, '.pkpassrc'))
+        self.parser.add_argument(
+            '--version', action='store_true', help='Show the version of PkPass and exit')
         self.subparsers = self.parser.add_subparsers(
             help='sub-commands', dest='subparser_name')
 
@@ -81,7 +63,10 @@ class Cli():
 
         self.parser.set_default_subparser(self.parser, name='interpreter')
         self.parsedargs = self.parser.parse_args()
-        self.actions[self.parsedargs.subparser_name].run(self.parsedargs)
+        if 'version' in self.parsedargs and self.parsedargs.version:
+            print(util.show_version())
+        else:
+            self.actions[self.parsedargs.subparser_name].run(self.parsedargs)
 
     ####################################################################
     def register(self, command_obj, command_name, command_description):

@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from colorama import Fore
-from libpkpass.util import color_prepare
+from libpkpass.util import color_prepare, dictionary_filter
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError
@@ -43,7 +43,7 @@ class List(Command):
                 }
 
         if 'filter' in self.args and self.args['filter']:
-            result = {k:v for k, v in result.items() if self.args['filter'] in k}
+            result = dictionary_filter(self.args['filter'], result)
 
         print("Passwords for '%s':" % self.args['identity'])
         for key, value in result.items():

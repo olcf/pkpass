@@ -15,7 +15,8 @@ class Card(Command):
     ####################################################################
         print_card_info(self.args['card_slot'],
                         self.args['identity'],
-                        2)
+                        2,
+                        self.args['color'])
 
     ####################################################################
     def _validate_args(self):
