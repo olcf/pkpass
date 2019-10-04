@@ -30,7 +30,7 @@ class IdentityDB(object):
             dirname = os.path.join(temp_dir, str(key))
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-            encoded = key.encode("ASCII")
+            encoded = key
             connector = "libpkpass.connectors." + encoded.lower()
             connector = __import__(connector, fromlist=[encoded])
             connector = getattr(connector, encoded)

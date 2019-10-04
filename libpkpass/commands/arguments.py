@@ -264,6 +264,14 @@ ARGUMENTS = {
         }
     },
 
+    'theme_map': {
+        'args': ['--theme-map'],
+        'kwargs': {
+            'type': json.loads,
+            'help': 'Map of colors to use for colorized output'
+        }
+    },
+
     'users': {
         'args': ['-u', '--users'],
         'kwargs': {

@@ -7,9 +7,22 @@ import argparse
 from colorama import Fore
 
 ####################################################################
-def color_prepare(string, color, colorize):
+def color_prepare(string, color_type, colorize, theme_map=None):
 ####################################################################
-    return "%s%s%s" % (color, string, Fore.RESET) if colorize else string
+    if theme_map is None:
+        theme_map = {}
+    color_defaults = {
+        "info": "CYAN",
+        "warning": "YELLOW",
+        "debug": "RED",
+        "first_level": "MAGENTA",
+        "second_level": "GREEN"
+    }
+    # print(Fore.color_defaults['CYAN'])
+    # print(Fore.__getattribute__('CYAN'))
+    color = theme_map[color_type] if color_type in theme_map else color_defaults[color_type]
+
+    return "%s%s%s" % (Fore.__getattribute__(color), string, Fore.RESET) if colorize else string
 
 ####################################################################
 def set_default_subparser(self, name, args=None, positional_args=0):
