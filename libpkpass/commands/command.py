@@ -86,6 +86,13 @@ class Command(object):
             return [arg.strip() for arg in argname if arg.strip()]
         return None
 
+    def _handle_boolean_args(self, argname, default):
+        if argname in self.args and self.args[argname]:
+            if isinstance(self.args[argname], string_types):
+                return self.args['color'].upper() == 'TRUE'
+            return self.args['color']
+        return default
+
     def _run_command_setup(self, parsedargs):
         ##################################################################
         """ Passes the argparse Namespace object of parsed arguments   """
@@ -108,7 +115,9 @@ class Command(object):
         # json args
         connectmap = self._parse_json_arguments('connect')
 
-        self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
+
+        # self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
+        self.args['color'] = self._handle_boolean_args('color', True)
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')
         self._convert_strings_to_list('escrow_users')
@@ -279,7 +288,7 @@ class Command(object):
             if cli_args['verbosity'] != -1:
                 print("INFO: No .pkpassrc file found")
             return {}
-        except yaml.parser.ParserError as error:
+        except yaml.parser.ParserError:
             raise ConfigParseError("Parsing error with config file, please check syntax")
 
     def _validate_args(self):
