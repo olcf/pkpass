@@ -114,11 +114,9 @@ class Command(object):
         # json args
         connectmap = self._parse_json_arguments('connect')
 
-        print(type(self.args['color']))
 
         # self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
         self.args['color'] = self._handle_boolean_args('color')
-        print(self.args['color'])
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')
         self._convert_strings_to_list('escrow_users')
