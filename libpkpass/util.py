@@ -4,7 +4,8 @@ import sys
 import re
 import fnmatch
 import argparse
-from colorama import Fore
+# from colored import fore, style
+from colored import fg, attr
 
 ####################################################################
 def color_prepare(string, color_type, colorize, theme_map=None):
@@ -12,17 +13,17 @@ def color_prepare(string, color_type, colorize, theme_map=None):
     if theme_map is None:
         theme_map = {}
     color_defaults = {
-        "info": "CYAN",
-        "warning": "YELLOW",
-        "debug": "RED",
-        "first_level": "MAGENTA",
-        "second_level": "GREEN"
+        "info": "cyan",
+        "warning": "yellow",
+        "debug": "red",
+        "first_level": "magenta",
+        "second_level": "green"
     }
-    # print(Fore.color_defaults['CYAN'])
-    # print(Fore.__getattribute__('CYAN'))
-    color = theme_map[color_type] if color_type in theme_map else color_defaults[color_type]
+    color = theme_map[color_type].lower() if (color_type in theme_map) else color_defaults[color_type]
+    if color in fg.__dict__:
+        return "%s%s%s" % (fg(color), string, attr('reset')) if colorize else string
+    return "%s%s%s" % (fg(color_defaults[color_type]), string, attr('reset')) if colorize else string
 
-    return "%s%s%s" % (Fore.__getattribute__(color), string, Fore.RESET) if colorize else string
 
 ####################################################################
 def set_default_subparser(self, name, args=None, positional_args=0):
