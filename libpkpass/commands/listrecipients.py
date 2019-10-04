@@ -1,6 +1,8 @@
 """This Module allows for the listing of recipients"""
 
 from __future__ import print_function
+from colorama import Fore
+from libpkpass.util import color_prepare
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
 
@@ -39,15 +41,11 @@ class Listrecipients(Command):
     def _print_identity(self, key):
         """Print off identity"""
     ####################################################################
-        print("%s:\n\tVerified: %s\n\tSubject: %s\n\tSubject Hash: %s\n\tIssuer: %s\n\tIssuer Hash: %s\n\tFingerprint: %s\n\tExpires: %s\n" % (
-            self.identities.iddb[key]['uid'],
-            self.identities.iddb[key]['verified'],
-            self.identities.iddb[key]['subject'],
-            self.identities.iddb[key]['subjecthash'],
-            self.identities.iddb[key]['issuer'],
-            self.identities.iddb[key]['issuerhash'],
-            self.identities.iddb[key]['fingerprint'],
-            self.identities.iddb[key]['enddate']))
+        print("%s" % (color_prepare(self.identities.iddb[key]['uid'] + ":", Fore.MAGENTA, self.args['color'])))
+        for info in ['verified', 'subject', 'subjecthash', 'issuer', 'issuerhash', 'fingerprint', 'enddate']:
+            print("\t%s %s" %
+                  (color_prepare(info + ":", Fore.GREEN, self.args['color']),
+                   self.identities.iddb[key][info]))
 
     ####################################################################
     def _validate_args(self):
@@ -59,7 +57,7 @@ class Listrecipients(Command):
                     "'%s' is a required argument" % argument)
 
     ####################################################################
-    def _validate_identities(self):
+    def _validate_identities(self, _=None):
         """ Ensure identities are appropriate for this command       """
     ####################################################################
         return

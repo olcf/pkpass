@@ -10,7 +10,7 @@ import libpkpass.commands.list as pklist
 from libpkpass.errors import CliArgumentError
 from .basetest.basetest import CONFIG, captured_output
 
-PASSWORD_LIST_0 = "Passwordsfor'r2':{}"
+PASSWORD_LIST_0 = "Passwordsfor'r2':"
 PASSWORD_LIST_1 = "Passwordsfor'r1':test/passwords/test:distributor:ginsburgnmname:test"
 
 class ListTests(unittest.TestCase):
@@ -20,7 +20,8 @@ class ListTests(unittest.TestCase):
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='list', identity='bleh',
                                                 nopassphrase="true",
-                                                config=CONFIG))
+                                                config=CONFIG,
+                                                color="false"))
     def test_recipient_not_in_database(self, subparser_name):
         """test bad recipient functionality"""
         ret = False
@@ -34,7 +35,8 @@ class ListTests(unittest.TestCase):
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='list', identity='r2',
                                                 nopassphrase="true",
-                                                config=CONFIG))
+                                                config=CONFIG,
+                                                color="false"))
     def test_list_none(self, subparser_name):
         """test list functionality"""
         ret = False
@@ -49,7 +51,8 @@ class ListTests(unittest.TestCase):
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='list', identity='r1',
                                                 nopassphrase="true",
-                                                config=CONFIG))
+                                                config=CONFIG,
+                                                color="false"))
     def test_list_one(self, subparser_name):
         """test list functionality"""
         ret = False

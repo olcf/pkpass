@@ -16,21 +16,21 @@ from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError
         PasswordIOError, JsonArgumentError, NotThePasswordOwnerError
 
 
+##########################################################################
 class Command(object):
-    ##########################################################################
     """ Base class for all commands.  Auotmatically registers with cli subparser
     and provides run execution for itself.                                     """
-    ##########################################################################
+##########################################################################
 
     name = None
     description = None
-    selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath']
+    selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath', 'color']
     passphrase = None
 
+    ##################################################################
     def __init__(self, cli, iddb=None):
-        ##################################################################
         """ Intialization function for class. Register with argparse   """
-        ##################################################################
+    ##################################################################
         self.cli = cli
         #default certpath to none because connect string is allowed
         self.args = {
@@ -57,10 +57,10 @@ class Command(object):
         self.identities = iddb if iddb else IdentityDB()
         cli.register(self, self.name, self.description)
 
+    ##################################################################
     def register(self, parser):
-        ####################################################################
         """ Registration function for class. Register with argparse      """
-        ####################################################################
+    ##################################################################
         for arg in sorted(self.selected_args):
             parser.add_argument(
                 *arguments[arg]['args'],
@@ -106,7 +106,7 @@ class Command(object):
 
         # json args
         connectmap = self._parse_json_arguments('connect')
-
+        self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')
         self._convert_strings_to_list('escrow_users')
@@ -133,7 +133,8 @@ class Command(object):
             if self.args['verbosity'] != -1:
                 print_card_info(self.args['card_slot'],
                                 self.identities.iddb[self.args['identity']],
-                                self.args['verbosity'])
+                                self.args['verbosity'],
+                                self.args['color'])
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
 
