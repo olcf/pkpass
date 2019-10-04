@@ -12,7 +12,6 @@ from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from colorama import Fore
 from libpkpass.util import color_prepare
 from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, X509CertificateError
 
@@ -45,7 +44,7 @@ def pk_encrypt_string(plaintext_string, identity):
     return (encrypted_string, base64.urlsafe_b64encode(handle_python_strings(ciphertext_derived_key)))
 
 ##############################################################################
-def print_card_info(card_slot, identity, verbosity, color):
+def print_card_info(card_slot, identity, verbosity, color, theme_map):
     """Inform the user what card is selected"""
 ##############################################################################
     if 'key_path' not in identity:
@@ -54,23 +53,23 @@ def print_card_info(card_slot, identity, verbosity, color):
         stdout, _ = proc.communicate()
         out_list = handle_python_strings(stdout).split(b'Slot')
         if verbosity > 1:
-            print_all_slots(stdout, color)
+            print_all_slots(stdout, color, theme_map)
         for out in out_list[1:]:
             stripped = out.decode("ASCII").strip()
             if int(stripped[0]) == int(card_slot):
                 verbosity = verbosity + 1 if verbosity < 2 else 2
                 stripped = ("\n").join(stripped.split('\n')[:verbosity])
                 stripped = "Using Slot" + stripped
-                print("%s" % (color_prepare(stripped, Fore.CYAN, color)))
+                print("%s" % (color_prepare(stripped, "info", color, theme_map)))
 
 ##############################################################################
-def print_all_slots(slot_info, color):
+def print_all_slots(slot_info, color, theme_map):
     """Print all slots and cards available"""
 ##############################################################################
     columns = int(shutil.get_terminal_size().columns) // 4
-    print(color_prepare("#" * columns, Fore.RED, color))
+    print(color_prepare("#" * columns, "debug", color, theme_map))
     print(handle_python_strings(slot_info).decode("ASCII").strip())
-    print(color_prepare("#" * columns, Fore.RED, color))
+    print(color_prepare("#" * columns, "debug", color, theme_map))
 
 ##############################################################################
 def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None):

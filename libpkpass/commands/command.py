@@ -13,7 +13,7 @@ from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
 from libpkpass.crypto import print_card_info
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
-        PasswordIOError, JsonArgumentError, NotThePasswordOwnerError
+        PasswordIOError, JsonArgumentError, NotThePasswordOwnerError, ConfigParseError
 
 
 ##########################################################################
@@ -24,7 +24,7 @@ class Command(object):
 
     name = None
     description = None
-    selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath', 'color']
+    selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath', 'color', 'theme_map']
     passphrase = None
 
     ##################################################################
@@ -49,6 +49,7 @@ class Command(object):
             'overwrite': False,
             'recovery': False,
             'rules': 'default',
+            'theme_map': None,
             'verbosity': 0,
             }
         self.recipient_list = []
@@ -106,6 +107,7 @@ class Command(object):
 
         # json args
         connectmap = self._parse_json_arguments('connect')
+
         self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')
@@ -134,7 +136,8 @@ class Command(object):
                 print_card_info(self.args['card_slot'],
                                 self.identities.iddb[self.args['identity']],
                                 self.args['verbosity'],
-                                self.args['color'])
+                                self.args['color'],
+                                self.args['theme_map'])
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
 
@@ -276,6 +279,8 @@ class Command(object):
             if cli_args['verbosity'] != -1:
                 print("INFO: No .pkpassrc file found")
             return {}
+        except yaml.parser.ParserError as error:
+            raise ConfigParseError("Parsing error with config file, please check syntax")
 
     def _validate_args(self):
         raise NotImplementedError
@@ -309,6 +314,8 @@ class Command(object):
         ##################################################################
         try:
             if argument in self.args and self.args[argument]:
+                if isinstance(self.args[argument], dict):
+                    return self.args[argument]
                 return json.loads(self.args[argument])
             return None
         except ValueError as err:

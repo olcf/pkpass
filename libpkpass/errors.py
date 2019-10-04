@@ -15,6 +15,9 @@ class BlankPasswordError(PKPassError):
 class CliArgumentError(PKPassError):
     pass
 
+class ConfigParseError(PKPassError):
+    pass
+
 class DecryptionError(PKPassError):
     pass
 

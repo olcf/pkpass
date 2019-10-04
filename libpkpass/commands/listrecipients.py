@@ -1,7 +1,6 @@
 """This Module allows for the listing of recipients"""
 
 from __future__ import print_function
-from colorama import Fore
 import libpkpass.util as util
 from libpkpass.util import color_prepare
 from libpkpass.commands.command import Command
@@ -42,10 +41,13 @@ class Listrecipients(Command):
     def _print_identity(self, key):
         """Print off identity"""
     ####################################################################
-        print("%s" % (color_prepare(self.identities.iddb[key]['uid'] + ":", Fore.MAGENTA, self.args['color'])))
+        print("%s" % (color_prepare(self.identities.iddb[key]['uid'] + ":",
+                                    "first_level",
+                                    self.args['color'],
+                                    self.args['theme_map'])))
         for info in ['verified', 'subject', 'subjecthash', 'issuer', 'issuerhash', 'fingerprint', 'enddate']:
             print("\t%s %s" %
-                  (color_prepare(info + ":", Fore.GREEN, self.args['color']),
+                  (color_prepare(info + ":", "second_level", self.args['color'], self.args['theme_map']),
                    self.identities.iddb[key][info]))
 
     ####################################################################
