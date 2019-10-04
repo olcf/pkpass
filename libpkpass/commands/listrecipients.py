@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from colorama import Fore
+import libpkpass.util as util
 from libpkpass.util import color_prepare
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
@@ -31,7 +32,7 @@ class Listrecipients(Command):
 
         # we don't want to overwrite iddb because of the interpreter
         if 'filter' in self.args and self.args['filter']:
-            tempiddb = {k:v for k, v in self.identities.iddb.items() if self.args['filter'] in k}
+            tempiddb = util.dictionary_filter(self.args['filter'], self.identities.iddb)
         else:
             tempiddb = self.identities.iddb
         for key, _ in tempiddb.items():

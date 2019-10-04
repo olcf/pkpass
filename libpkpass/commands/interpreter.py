@@ -14,6 +14,7 @@ from cmd import Cmd
 from inspect import getmembers, isclass
 import yaml
 from libpkpass.commands.command import Command
+import libpkpass.util as util
 import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
@@ -29,6 +30,8 @@ import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
 from libpkpass.errors import PKPassError
+
+VERSION = util.show_version()
 
 ####################################################################
 class Interpreter(Command):
@@ -57,8 +60,8 @@ def pkparse_error(message):
 ####################################################################
 class Interactive(Cmd):
     """This class implements the interactive interpreter functionality"""
-    intro = """Welcome to PKPass(Public Key Based Password Manager)!
-Type ? to list commands"""
+    intro = """Welcome to PKPass(Public Key Based Password Manager) v%s!
+Type ? to list commands""" % VERSION
     prompt = 'pkpass> '
 ####################################################################
     # This needs to look very similar to cli but not the same, which is frustrating
@@ -215,6 +218,12 @@ Type ? to list commands"""
         """Exit the application"""
     ####################################################################
         return True
+
+    ####################################################################
+    def do_version(self, _):
+        """Print the version of PkPass"""
+    ####################################################################
+        print(VERSION)
 
     ####################################################################
     def do_edit(self, _):

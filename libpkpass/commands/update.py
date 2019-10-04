@@ -4,16 +4,12 @@ from __future__ import print_function
 import getpass
 import os
 from builtins import input
+import libpkpass.util as util
 from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, PasswordMismatchError, NotThePasswordOwnerError,\
         BlankPasswordError
 
-def sort(lst):
-    """Sort our alphanumeric keys"""
-    lst = [str(i) for i in lst]
-    lst.sort()
-    return [int(i) if i.isdigit() else i for i in lst]
 
 class Update(Command):
     """This class implements the CLI functionality of updating existing passwords"""
@@ -34,7 +30,7 @@ class Update(Command):
         if safe or self.args['overwrite']:
             self.recipient_list = password['recipients'].keys()
             print("The following list of users are the current distribution list:")
-            print(", ".join(sort(self.recipient_list)))
+            print(", ".join(util.sort(self.recipient_list)))
             correct_distribution = input("Is this list correct? (y/N) ")
             if not correct_distribution or correct_distribution.lower()[0] == 'n':
                 self.recipient_list = input("Please enter a comma delimited list: ")
