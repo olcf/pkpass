@@ -50,6 +50,7 @@ class Command(object):
             'recovery': False,
             'rules': 'default',
             'theme_map': None,
+            'color': True,
             'verbosity': 0,
             }
         self.recipient_list = []
@@ -86,12 +87,10 @@ class Command(object):
             return [arg.strip() for arg in argname if arg.strip()]
         return None
 
-    def _handle_boolean_args(self, argname, default):
-        if argname in self.args and self.args[argname]:
-            if isinstance(self.args[argname], string_types):
-                return self.args['color'].upper() == 'TRUE'
-            return self.args['color']
-        return default
+    def _handle_boolean_args(self, argname):
+        if isinstance(self.args[argname], string_types):
+            return self.args[argname].upper() == 'TRUE'
+        return self.args[argname]
 
     def _run_command_setup(self, parsedargs):
         ##################################################################
@@ -115,9 +114,11 @@ class Command(object):
         # json args
         connectmap = self._parse_json_arguments('connect')
 
+        print(type(self.args['color']))
 
         # self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
-        self.args['color'] = self._handle_boolean_args('color', True)
+        self.args['color'] = self._handle_boolean_args('color')
+        print(self.args['color'])
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')
         self._convert_strings_to_list('escrow_users')
