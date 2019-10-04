@@ -20,9 +20,10 @@ def color_prepare(string, color_type, colorize, theme_map=None):
         "second_level": "green"
     }
     color = theme_map[color_type].lower() if (color_type in theme_map) else color_defaults[color_type]
-    if color in fg.__dict__:
+    try:
         return "%s%s%s" % (fg(color), string, attr('reset')) if colorize else string
-    return "%s%s%s" % (fg(color_defaults[color_type]), string, attr('reset')) if colorize else string
+    except KeyError:
+        return "%s%s%s" % (fg(color_defaults[color_type]), string, attr('reset')) if colorize else string
 
 
 ####################################################################
