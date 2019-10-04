@@ -60,7 +60,7 @@ def pkparse_error(message):
 ####################################################################
 class Interactive(Cmd):
     """This class implements the interactive interpreter functionality"""
-    intro = """Welcome to PKPass(Public Key Based Password Manager) v%s!
+    intro = """Welcome to PKPass (Public Key Based Password Manager) v%s!
 Type ? to list commands""" % VERSION
     prompt = 'pkpass> '
 ####################################################################
