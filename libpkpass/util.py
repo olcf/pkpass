@@ -15,7 +15,6 @@ def color_prepare(string, color_type, colorize, theme_map=None):
         "info": "CYAN",
         "warning": "YELLOW",
         "debug": "RED",
-        "error": "RED",
         "first_level": "MAGENTA",
         "second_level": "GREEN"
     }
