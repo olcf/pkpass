@@ -16,21 +16,20 @@ from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError
         PasswordIOError, JsonArgumentError, NotThePasswordOwnerError, ConfigParseError
 
 
-##########################################################################
+    ##########################################################################
 class Command(object):
     """ Base class for all commands.  Auotmatically registers with cli subparser
     and provides run execution for itself.                                     """
-##########################################################################
-
+    ##########################################################################
     name = None
     description = None
     selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath', 'color', 'theme_map']
     passphrase = None
 
-    ##################################################################
+        ##################################################################
     def __init__(self, cli, iddb=None):
         """ Intialization function for class. Register with argparse   """
-    ##################################################################
+        ##################################################################
         self.cli = cli
         #default certpath to none because connect string is allowed
         self.args = {
@@ -59,24 +58,24 @@ class Command(object):
         self.identities = iddb if iddb else IdentityDB()
         cli.register(self, self.name, self.description)
 
-    ##################################################################
+        ##################################################################
     def register(self, parser):
         """ Registration function for class. Register with argparse      """
-    ##################################################################
+        ##################################################################
         for arg in sorted(self.selected_args):
             parser.add_argument(
                 *arguments[arg]['args'],
                 **arguments[arg]['kwargs'])
 
-    def run(self, parsedargs):
         ##################################################################
+    def run(self, parsedargs):
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
         self._run_command_setup(parsedargs)
         self._run_command_execution()
 
-    def _convert_strings_to_list(self, argname):
         ##################################################################
+    def _convert_strings_to_list(self, argname):
         """ convert argparsed strings to lists for an argument """
         ##################################################################
         if argname in self.args:
@@ -87,13 +86,15 @@ class Command(object):
             return [arg.strip() for arg in argname if arg.strip()]
         return None
 
+        ##################################################################
     def _handle_boolean_args(self, argname):
+        ##################################################################
         if isinstance(self.args[argname], string_types):
             return self.args[argname].upper() == 'TRUE'
         return self.args[argname]
 
-    def _run_command_setup(self, parsedargs):
         ##################################################################
+    def _run_command_setup(self, parsedargs):
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
 
@@ -149,10 +150,10 @@ class Command(object):
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
 
+        ##################################################################
     def safety_check(self):
-        ####################################################################
         """ This provides a sanity check that you are the owner of a password."""
-        ####################################################################
+        ##################################################################
         try:
             password = PasswordEntry()
             password.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
@@ -160,7 +161,10 @@ class Command(object):
         except PasswordIOError:
             return (True, None)
 
+        ##################################################################
     def update_pass(self, pass_value):
+        """Fully updated a password record"""
+        ##################################################################
         pass_entry = PasswordEntry()
         pass_entry.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
         swap_pass = PasswordEntry()
@@ -176,10 +180,10 @@ class Command(object):
         pass_entry.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
                                        overwrite=self.args['overwrite'])
 
+        ##################################################################
     def create_pass(self, password1, description, authorizer, recipient_list=None):
-        ####################################################################
-        """ This writes password data to a file.                         """
-        ####################################################################
+        """ This writes password data to a file."""
+        ##################################################################
         password_metadata = {}
         password_metadata['description'] = description
         password_metadata['authorizer'] = authorizer
@@ -207,10 +211,10 @@ class Command(object):
         password.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
                                      overwrite=self.args['overwrite'])
 
+        ##################################################################
     def create_or_update_pass(self, password1, description, authorizer, recipient_list=None):
-        ####################################################################
         """ This creates new or updates existing passwords """
-        ####################################################################
+        ##################################################################
         safe, owner = self.safety_check()
         if safe or self.args['overwrite']:
             if owner and owner != self.args['identity']:
@@ -220,21 +224,20 @@ class Command(object):
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
-
+        ##################################################################
     def delete_pass(self):
-        ###########################################################################
         """This deletes a password that the user has created, useful for testing"""
-        ###########################################################################
+        ##################################################################
         filepath = os.path.join(self.args['pwstore'], self.args['pwname'])
         try:
             os.remove(filepath)
         except OSError:
             raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
 
+        ##################################################################
     def rename_pass(self):
-        #######################################################
         """This renames a password that the user has created"""
-        #######################################################
+        ##################################################################
         oldpath = os.path.join(self.args['pwstore'], self.args['pwname'])
         newpath = os.path.join(self.args['pwstore'], self.args['rename'])
         try:
@@ -247,13 +250,16 @@ class Command(object):
         except OSError:
             raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
 
-    def _run_command_execution(self):
         ##################################################################
+    def _run_command_execution(self):
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
         raise NotImplementedError
 
+        ##################################################################
     def _build_recipient_list(self):
+        """take groups and users and make a SOA for the recipients"""
+        ##################################################################
         try:
             if 'groups' in self.args and self.args['groups']:
                 self.recipient_list += self._parse_group_membership()
@@ -267,7 +273,10 @@ class Command(object):
         except KeyError:  # If this is a command with no users, don't worry about it
             pass
 
+        ##################################################################
     def _parse_group_membership(self):
+        """Concat membership of supplied groups"""
+        ##################################################################
         member_list = []
         try:
             for group in self.args['groups']:
@@ -276,7 +285,10 @@ class Command(object):
         except KeyError as err:
             raise GroupDefinitionError(str(err))
 
+        ##################################################################
     def _get_config_args(self, config, cli_args):
+        """Return the configuration from the config file"""
+        ##################################################################
         try:
             with open(config, 'r') as fname:
                 config_args = yaml.safe_load(fname)
@@ -290,11 +302,13 @@ class Command(object):
         except yaml.parser.ParserError:
             raise ConfigParseError("Parsing error with config file, please check syntax")
 
+        ##################################################################
     def _validate_args(self):
+        ##################################################################
         raise NotImplementedError
 
-    def _validate_combinatorial_args(self):
         ##################################################################
+    def _validate_combinatorial_args(self):
         """ This is a weird function name so: combinatorial in this case
             means that one of the 'combinatorial' arguments are required
             however, not all of them are necessarily required.
@@ -316,8 +330,8 @@ class Command(object):
                 raise CliArgumentError(
                     "'%s' or '%s' is required" % tuple(arg_set))
 
-    def _parse_json_arguments(self, argument):
         ##################################################################
+    def _parse_json_arguments(self, argument):
         """ Parses the json.loads arguments as dictionaries to use"""
         ##################################################################
         try:
@@ -329,7 +343,10 @@ class Command(object):
         except ValueError as err:
             raise JsonArgumentError(argument, err)
 
+        ##################################################################
     def _validate_identities(self, swap_list=None):
+        """Ensure identities meet criteria for processing"""
+        ##################################################################
         if not swap_list:
             swap_list = self.escrow_and_recipient_list
         for recipient in swap_list:
@@ -346,11 +363,16 @@ class Command(object):
                 "Error: Your user '%s' is not in the recipient database" %
                 self.args['identity'])
 
+        ##################################################################
     def _print_debug(self):
+        ##################################################################
         print(self.recipient_list)
         print(self.identities.iddb.keys())
 
+        ##################################################################
     def progress_bar(self, value, endvalue, bar_length=50):
+        """Allow a command to print off a progress bar"""
+        ##################################################################
         percent = float(value) / endvalue
         arrow = '-' * int(round(percent * bar_length)-1) + '>'
         spaces = ' ' * (bar_length - len(arrow))

@@ -12,8 +12,8 @@ class Delete(Command):
     description = 'Delete a password in the repository'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath', 'card_slot']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
         safe, owner = self.safety_check()
@@ -22,7 +22,10 @@ class Delete(Command):
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
+        ####################################################################
     def _confirmation(self):
+        """Verify password to modify"""
+        ####################################################################
         yes = {'yes', 'y', 'ye', ''}
         deny = {'no', 'n'}
         confirmation = input("%s: \nDelete this password?(Defaults yes):"
@@ -35,7 +38,9 @@ class Delete(Command):
             print("please respond with yes or no")
             self._confirmation()
 
+        ####################################################################
     def _validate_args(self):
+        ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

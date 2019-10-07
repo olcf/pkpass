@@ -10,17 +10,18 @@ from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, PasswordMismatchError, NotThePasswordOwnerError,\
         BlankPasswordError
 
-
+    ####################################################################
 class Update(Command):
     """This class implements the CLI functionality of updating existing passwords"""
+    ####################################################################
     name = 'update'
     description = 'Change a password value and redistribute to recipients'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath',
                                              'nopassphrase', 'nosign', 'card_slot', 'escrow_users',
                                              'min_escrow', 'noescrow']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
         password = PasswordEntry()
@@ -57,7 +58,9 @@ class Update(Command):
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
 
+        ####################################################################
     def _validate_args(self):
+        ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

@@ -10,15 +10,17 @@ from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, LegacyImportFormatError, FileOpenError
 
 
+    ####################################################################
 class Import(Command):
     """This Class implements the cli functionality of import"""
+    ####################################################################
     name = 'import'
     description = 'Import passwords that you have saved to a file'
     selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase', 'dstpwstore',
                                              'card_slot', 'nocrypto',]
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
         try:
@@ -36,8 +38,10 @@ class Import(Command):
         except IOError:
             raise FileOpenError(self.args['pwfile'], "No such file or directory")
 
+        ####################################################################
     def _file_handler(self, string):
         """This function handles the contents of a file"""
+        ####################################################################
         try:
             self._yaml_file(yaml.safe_load(string))
         except TypeError:
@@ -46,8 +50,10 @@ class Import(Command):
             except TypeError:
                 raise LegacyImportFormatError
 
+        ####################################################################
     def _flat_file(self, passwords):
         """This function handles the simple key:value pair"""
+        ####################################################################
         print("INFO: Flat password file detected, using 'imported' as description \
 you can manually change the description in the file if you would like")
         db_len = len(passwords)
@@ -62,8 +68,10 @@ you can manually change the description in the file if you would like")
             i += 1
         print("")
 
+        ####################################################################
     def _yaml_file(self, passwords):
         """This function handles the yaml format of pkpass"""
+        ####################################################################
         myidentity = self.identities.iddb[self.args['identity']]
         uid = myidentity['uid']
         pwstore = self.args['pwstore']
@@ -89,8 +97,8 @@ you can manually change the description in the file if you would like")
             i += 1
         print("")
 
-    def _validate_args(self):
         ####################################################################
+    def _validate_args(self):
         """ Ensure arguments are appropriate for this command           """
         ####################################################################
         for argument in ['pwfile', 'keypath']:

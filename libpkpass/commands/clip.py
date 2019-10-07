@@ -9,18 +9,19 @@ from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
 
 
+    ####################################################################
 class Clip(Command):
     """This class allows for the copying of a password to the clipboard"""
+    ####################################################################
     name = 'clip'
     description = 'Copy a password to clipboard'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'stdin', 'time', 'keypath',
                                              'nopassphrase', 'noverify', 'card_slot']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-
         password = PasswordEntry()
         password.read_password_data(os.path.join(
             self.args['pwstore'], self.args['pwname']))
@@ -50,7 +51,9 @@ class Clip(Command):
         finally:
             pyperclip.copy(oldclip)
 
+        ####################################################################
     def _validate_args(self):
+        ####################################################################
         for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

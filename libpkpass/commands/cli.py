@@ -21,16 +21,16 @@ import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
 
-##############################################################################
+    ##############################################################################
 class Cli():
     """ Class for parsing command line.  Observes subclasses of Command to Register
     those commands in the actions list.                                        """
-##############################################################################
+    ##############################################################################
 
-    ####################################################################
+        ####################################################################
     def __init__(self):
         """ Intialization function for class. Register all subcommands   """
-    ####################################################################
+        ####################################################################
         # Hash of registered subparser actions, mapping string to actual subparser
         self.actions = {}
         home = os.path.expanduser("~")
@@ -68,10 +68,10 @@ class Cli():
         else:
             self.actions[self.parsedargs.subparser_name].run(self.parsedargs)
 
-    ####################################################################
+        ####################################################################
     def register(self, command_obj, command_name, command_description):
         """ Register command objects and names using an observer pattern """
-    ####################################################################
+        ####################################################################
         self.actions[command_name] = command_obj
         parser = self.subparsers.add_parser(
             command_name, help=command_description)

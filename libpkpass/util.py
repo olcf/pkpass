@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-
+"""General Utility file for common functionality"""
 import sys
 import re
 import fnmatch
 import argparse
-# from colored import fore, style
 from colored import fg, attr
 
-####################################################################
+    ####################################################################
 def color_prepare(string, color_type, colorize, theme_map=None):
-####################################################################
+    """Handle the color output of a given string"""
+    ####################################################################
     if theme_map is None:
         theme_map = {}
     color_defaults = {
@@ -26,10 +26,10 @@ def color_prepare(string, color_type, colorize, theme_map=None):
         return "%s%s%s" % (fg(color_defaults[color_type]), string, attr('reset')) if colorize else string
 
 
-####################################################################
+    ####################################################################
 def set_default_subparser(self, name, args=None, positional_args=0):
     """Set default subparser to interpreter"""
-####################################################################
+    ####################################################################
     subparser_found = False
     for arg in sys.argv[1:]:
         if arg in ['-h', '--help']:
@@ -46,9 +46,10 @@ def set_default_subparser(self, name, args=None, positional_args=0):
             else:
                 args.insert(len(args) - positional_args, name)
 
-####################################################################
+    ####################################################################
 def show_version():
-####################################################################
+    """return the version number in the VERSION file"""
+    ####################################################################
     try:
         version = ""
         with open("VERSION", 'r') as version_file:
@@ -57,18 +58,18 @@ def show_version():
     except IOError as err:
         return err
 
-####################################################################
+    ####################################################################
 def sort(lst):
     """Sort our alphanumeric keys"""
-####################################################################
+    ####################################################################
     lst = [str(i) for i in lst]
     lst.sort()
     return [int(i) if i.isdigit() else i for i in lst]
 
-####################################################################
+    ####################################################################
 def dictionary_filter(string_match, dictionary, secondary_check=None):
     """Filter out our dictionary"""
-####################################################################
+    ####################################################################
     key_list = []
     key_list = fnmatch.filter(dictionary.keys(), string_match)
 
