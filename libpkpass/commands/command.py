@@ -8,6 +8,7 @@ import os
 import yaml
 from six import iteritems
 from six import string_types
+import libpkpass.util as util
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
@@ -368,6 +369,15 @@ class Command(object):
         ##################################################################
         print(self.recipient_list)
         print(self.identities.iddb.keys())
+
+        ##################################################################
+    def color_print(self, string, color_type):
+        """Handle the color printing for objects"""
+        ##################################################################
+        return util.color_prepare(string,
+                                  color_type,
+                                  self.args['color'],
+                                  self.args['theme_map'])
 
         ##################################################################
     def progress_bar(self, value, endvalue, bar_length=50):

@@ -1,7 +1,7 @@
 """This Module allows for the listing of users passwords"""
 
 from __future__ import print_function
-from libpkpass.util import color_prepare, dictionary_filter
+from libpkpass.util import dictionary_filter
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError
@@ -48,23 +48,14 @@ class List(Command):
 
         print("Passwords for '%s':" % self.args['identity'])
         for key, value in result.items():
-            # print("%s\n  distributor: %s\n  name: %s" %
-            #       (color_prepare(key + ":", "first_group", self.args['color']),
-            #        value['distributor'], value['name']))
             print("%s\n  %s\n  %s" %
                   (
-                      color_prepare(key + ":",
-                                    "first_level",
-                                    self.args['color'],
-                                    self.args['theme_map']),
-                      color_prepare("distributor: ",
-                                    "second_level",
-                                    self.args['color'],
-                                    self.args['theme_map']) + value['distributor'],
-                      color_prepare("name: ",
-                                    "second_level",
-                                    self.args['color'],
-                                    self.args['theme_map']) + value['name']
+                      self.color_print(key + ":",
+                                       "first_level"),
+                      self.color_print("Distributor: ",
+                                       "second_level") + value['distributor'],
+                      self.color_print("Name: ",
+                                       "second_level") + value['name']
                   ))
         # print("\n%s" % yaml.dump(result, default_flow_style=False))
 

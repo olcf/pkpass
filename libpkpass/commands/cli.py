@@ -13,9 +13,11 @@ import libpkpass.commands.distribute as distribute
 import libpkpass.commands.export as export
 import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.generate as generate
+import libpkpass.commands.info as info
 import libpkpass.commands.interpreter as interpreter
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
+import libpkpass.commands.modify as modify
 import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
@@ -53,9 +55,11 @@ class Cli():
         export.Export(self)
         generate.Generate(self)
         pkimport.Import(self)
+        info.Info(self)
         interpreter.Interpreter(self)
         pklist.List(self)
         listrecipients.Listrecipients(self)
+        modify.Modify(self)
         recover.Recover(self)
         rename.Rename(self)
         show.Show(self)
