@@ -11,7 +11,7 @@ from libpkpass.errors import CliArgumentError
 from .basetest.basetest import CONFIG, captured_output
 
 PASSWORD_LIST_0 = "Passwordsfor'r2':"
-PASSWORD_LIST_1 = "Passwordsfor'r1':test/passwords/test:distributor:ginsburgnmname:test"
+PASSWORD_LIST_1 = "Passwordsfor'r1':test/passwords/test:Distributor:ginsburgnmName:test"
 
 class ListTests(unittest.TestCase):
     """This class tests the list class"""

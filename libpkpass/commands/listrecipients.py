@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 import libpkpass.util as util
-from libpkpass.util import color_prepare
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
 
@@ -43,13 +42,10 @@ class Listrecipients(Command):
     def _print_identity(self, key):
         """Print off identity"""
         ####################################################################
-        print("%s" % (color_prepare(self.identities.iddb[key]['uid'] + ":",
-                                    "first_level",
-                                    self.args['color'],
-                                    self.args['theme_map'])))
+        print("%s" % self.color_print(self.identities.iddb[key]['uid'] + ":", "first_level"))
         for info in ['verified', 'subject', 'subjecthash', 'issuer', 'issuerhash', 'fingerprint', 'enddate']:
             print("\t%s %s" %
-                  (color_prepare(info + ":", "second_level", self.args['color'], self.args['theme_map']),
+                  (self.color_print(info + ":", "second_level"),
                    self.identities.iddb[key][info]))
 
         ####################################################################

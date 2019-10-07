@@ -18,7 +18,8 @@ def color_prepare(string, color_type, colorize, theme_map=None):
         "warning": "yellow",
         "debug": "red",
         "first_level": "magenta",
-        "second_level": "green"
+        "second_level": "green",
+        "third_level": "blue"
     }
     color = theme_map[color_type].lower() if (color_type in theme_map) else color_defaults[color_type]
     try:

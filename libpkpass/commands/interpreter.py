@@ -23,8 +23,10 @@ import libpkpass.commands.distribute as distribute
 import libpkpass.commands.export as export
 import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.generate as generate
+import libpkpass.commands.info as info
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
+import libpkpass.commands.modify as modify
 import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
@@ -93,8 +95,10 @@ Type ? to list commands""" % VERSION
         export.Export(self)
         generate.Generate(self)
         pkimport.Import(self)
+        info.Info(self)
         pklist.List(self)
         listrecipients.Listrecipients(self)
+        modify.Modify(self)
         recover.Recover(self)
         rename.Rename(self)
         show.Show(self)
@@ -273,8 +277,8 @@ def add_dynamic_function(module_name, class_name):
 
 for command in [('card', 'Card'), ('clip', 'Clip'), ('create', 'Create'), ('delete', 'Delete'),
                 ('distribute', 'Distribute'), ('export', 'Export'),
-                ('generate', 'Generate'), ('pkimport', 'Import'),
+                ('generate', 'Generate'), ('pkimport', 'Import'), ('info', 'Info'),
                 ('pklist', 'List'), ('listrecipients', 'Listrecipients'),
-                ('recover', 'Recover'), ('rename', 'Rename'),
+                ('modify', 'Modify'), ('recover', 'Recover'), ('rename', 'Rename'),
                 ('show', 'Show'), ('update', 'Update')]:
     add_dynamic_function(command[0], command[1])
