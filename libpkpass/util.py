@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """General Utility file for common functionality"""
 import sys
+import os
 import re
 import fnmatch
 import argparse
@@ -50,9 +51,10 @@ def set_default_subparser(self, name, args=None, positional_args=0):
 def show_version():
     """return the version number in the VERSION file"""
     ####################################################################
+    full_path = os.path.join(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0]))), "VERSION")
     try:
         version = ""
-        with open("VERSION", 'r') as version_file:
+        with open(full_path, 'r') as version_file:
             version = version_file.read().strip()
         return version
     except IOError as err:
