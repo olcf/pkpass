@@ -6,16 +6,18 @@ import exrex
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError, RulesMapError
 
+    ####################################################################
 class Generate(Command):
     """This class implements the CLI functionality of automatic generation of passwords"""
+    ####################################################################
     name = 'generate'
     description = 'Generate a new password entry and encrypt it for yourself'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath',
                                              'nopassphrase', 'nosign', 'card_slot', 'escrow_users',
                                              'min_escrow', 'noescrow', 'rules', 'rules_map']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
         safe, owner = self.safety_check()
@@ -28,8 +30,8 @@ class Generate(Command):
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
+        ####################################################################
     def _generate_pass(self):
-        #######################################################################
         """ Generate a password based on a rules list that has been provided"""
         #######################################################################
         try:
@@ -42,7 +44,9 @@ class Generate(Command):
         except re.error:
             raise RulesMapError("Poorly formatted regex, or unsupported")
 
+        #######################################################################
     def _validate_args(self):
+        #######################################################################
         self.args['rules_map'] = self._parse_json_arguments('rules_map')
         for argument in ['pwname', 'keypath', 'rules_map']:
             if argument not in self.args or self.args[argument] is None:

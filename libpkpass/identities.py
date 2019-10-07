@@ -6,8 +6,8 @@ import tempfile
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError, CliArgumentError
 
-class IdentityDB(object):
     ##########################################################################
+class IdentityDB(object):
     """ User database class.  Contains information about the identities of and
         things pertinent to recipients and their groups and keys.              """
     ##########################################################################
@@ -45,8 +45,8 @@ class IdentityDB(object):
 
             self._load_from_directory(dirname, 'certificate')
 
-    def _load_from_directory(self, path, filetype):
         #######################################################################
+    def _load_from_directory(self, path, filetype):
         """ Helper function to read in (keys|certs) and store them correctly """
         #######################################################################
         try:
@@ -63,11 +63,11 @@ class IdentityDB(object):
         except OSError as error:
             raise FileOpenError(path, str(error.strerror))
 
+        #######################################################################
     def load_certs_from_directory(self,
                                   certpath,
                                   verify_on_load=False,
                                   connectmap=None):
-        #######################################################################
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
         if connectmap:
@@ -78,8 +78,8 @@ class IdentityDB(object):
             for key, _ in self.iddb.items():
                 self.verify_identity(key)
 
-    def verify_identity(self, identity):
         #######################################################################
+    def verify_identity(self, identity):
         """ Read in all rsa keys from directory and name them as found """
         #######################################################################
         try:
@@ -98,8 +98,8 @@ class IdentityDB(object):
             raise CliArgumentError(
                 "Error: Recipient '%s' is not in the recipient database" % identity)
 
-    def load_keys_from_directory(self, path):
         #######################################################################
+    def load_keys_from_directory(self, path):
         """ Read in all rsa keys from directory and name them as found """
         #######################################################################
         if os.path.isdir(path):

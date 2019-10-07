@@ -7,15 +7,17 @@ from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
 
+    ####################################################################
 class Export(Command):
     """This Class implements the cli functionality of export"""
+    ####################################################################
     name = 'export'
     description = 'Export passwords that you have access to and encrypt with aes'
     selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase', 'dstpwstore',
                                              'card_slot', 'nocrypto']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
         myidentity = self.identities.iddb[self.args['identity']]
@@ -33,8 +35,10 @@ class Export(Command):
 
         self._iterate_pdb(myidentity, passworddb, crypt_pass)
 
+        ####################################################################
     def _iterate_pdb(self, myidentity, passworddb, crypt_pass=False):
         """ Iterate through the passwords that we can decrypt """
+        ####################################################################
         uid = myidentity['uid']
         all_passwords = {k:v for (k, v) in passworddb.pwdb.items() if uid in v.recipients.keys()}
         i = 1
@@ -49,8 +53,8 @@ class Export(Command):
             i += 1
         print("")
 
-    def _validate_args(self):
         ####################################################################
+    def _validate_args(self):
         """ Ensure arguments are appropriate for this command           """
         ####################################################################
         for argument in ['pwfile', 'keypath']:
@@ -58,5 +62,7 @@ class Export(Command):
                 raise CliArgumentError(
                     "'%s' is a required argument" % argument)
 
+        ####################################################################
     def _validate_combinatorial_args(self):
+        ####################################################################
         pass

@@ -4,11 +4,10 @@ import yaml
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError
 
-
-class PasswordDB(object):
     ##############################################################################
+class PasswordDB(object):
     """ Password database object.  Gets and retrieves password entries from places
-        passwords are stored                                                   """
+        passwords are stored"""
     ##############################################################################
 
     def __init__(self, mode='Filesystem'):
@@ -26,7 +25,7 @@ class PasswordDB(object):
 
     ##############################################################################
     def load_password_data(self, password_id):
-        """ Load and return password from wherever it may be stored              """
+        """ Load and return password from wherever it may be stored"""
     ##############################################################################
         if not password_id in self.pwdb.keys():
             if self.mode == 'Filesystem':
@@ -45,7 +44,7 @@ class PasswordDB(object):
 
     ##############################################################################
     def save_password_data(self, password_id, overwrite=False):
-        """ Store a password to wherever it may be stored                        """
+        """ Store a password to wherever it may be stored """
     ##############################################################################
         if self.mode == 'Filesystem':
             self.write_password_data_to_file(
@@ -53,7 +52,7 @@ class PasswordDB(object):
 
     ##############################################################################
     def read_password_data_from_file(self, filename):
-        """ Open a password file, load passwords and read metadata               """
+        """ Open a password file, load passwords and read metadata """
     ##############################################################################
         try:
             with open(filename, 'r') as fname:

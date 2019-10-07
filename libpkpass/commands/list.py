@@ -7,14 +7,16 @@ from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError
 
 
+    ####################################################################
 class List(Command):
     """This class implements the cli list"""
+    ####################################################################
     name = 'list'
     description = 'List passwords you have access to'
     selected_args = Command.selected_args + ['pwstore', 'stdin', 'recovery', 'filter']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
 
@@ -66,7 +68,9 @@ class List(Command):
                   ))
         # print("\n%s" % yaml.dump(result, default_flow_style=False))
 
+        ####################################################################
     def _validate_args(self):
+        ####################################################################
         for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

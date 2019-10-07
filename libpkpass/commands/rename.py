@@ -7,18 +7,19 @@ from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError
 
-
+    ####################################################################
 class Rename(Command):
     """This class implements the CLI functionality of deletion of passwords"""
+    ####################################################################
     name = 'rename'
     description = 'Rename a password in the repository'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'nopassphrase',
                                              'keypath', 'card_slot', 'rename']
 
-    ####################################################################
+        ####################################################################
     def _run_command_execution(self):
         """ Run function for class. """
-    ####################################################################
+        ####################################################################
         safe, owner = self.safety_check()
         if safe and owner:
             orig_pass = self.args['pwname']
@@ -37,11 +38,10 @@ class Rename(Command):
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
-
-    ####################################################################
+        ####################################################################
     def _confirmation(self, plaintext_pw):
         """Run confirmation for rename"""
-    ####################################################################
+        ####################################################################
         yes = {'yes', 'y', 'ye', ''}
         deny = {'no', 'n'}
         confirmation = input("%s: %s\nRename this password?(Defaults yes):"
@@ -54,10 +54,10 @@ class Rename(Command):
             print("please respond with yes or no")
             self._confirmation(plaintext_pw)
 
-    ####################################################################
+        ####################################################################
     def _validate_args(self):
         """Validate necessary arguments"""
-    ####################################################################
+        ####################################################################
         for argument in ['pwname', 'keypath', 'rename']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

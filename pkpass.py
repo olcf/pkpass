@@ -2,7 +2,7 @@
 """This Module handles the CLI and any error that comes from it"""
 
 from __future__ import print_function
-from libpkpass.errors import *
+from libpkpass.errors import PKPassError
 from libpkpass.commands.cli import Cli
 
 try:

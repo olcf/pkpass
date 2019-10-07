@@ -10,16 +10,18 @@ from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
 
 
+    ####################################################################
 class Distribute(Command):
     """This Class implements the CLI functionality for ditribution"""
+    ####################################################################
     name = 'distribute'
     description = 'Distribute existing password entry/ies to another entity [matching uses python fnmatch]'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'users', 'groups', 'stdin',
                                              'min_escrow', 'escrow_users', 'keypath', 'nopassphrase',
                                              'nosign', 'card_slot', 'noescrow']
 
-    def _run_command_execution(self):
         ####################################################################
+    def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
         passworddb = PasswordDB()
@@ -66,7 +68,9 @@ class Distribute(Command):
         else:
             print("Exiting due to wrong password list")
 
+        ####################################################################
     def _validate_args(self):
+        ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

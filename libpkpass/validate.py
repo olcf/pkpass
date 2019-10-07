@@ -2,10 +2,10 @@
 """This Module validates password objects"""
 
 
-#############################################################################
+    #############################################################################
 def validate_password(password_obj):
     """ Run through password object and validate everything that needs it """
-##############################################################################
+    ##############################################################################
 
     # Validate that required fields exist
     # Validate that certificate signatures are valid
@@ -15,10 +15,10 @@ def validate_password(password_obj):
     return
 
 
-#############################################################################
+    #############################################################################
 def validate_passwords(password_objs):
     """ Run through password object and validate everything that needs it """
-##############################################################################
+    ##############################################################################
 
     for password_obj in password_objs:
         validate_password(password_obj)
