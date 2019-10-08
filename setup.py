@@ -204,7 +204,8 @@ class Verify(Command):
                 'connect', 'dstpwstore', 'escrow_users',
                 'groups', 'identity', 'keypath',
                 'min_escrow', 'pwstore', 'time',
-                'rules', 'rules_map', 'users']
+                'rules', 'rules_map', 'users',
+                'theme_map', 'color']
         store_args = ['all', 'ignore_decrypt', 'long_escrow',
                       'noescrow', 'nocrypto', 'nopassphrase',
                       'nosign', 'noverify', 'overwrite',
