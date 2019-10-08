@@ -5,14 +5,14 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
 .. code-block:: bash
 
 
-    usage: pkpass.py [-h] [--config CONFIG]
-                     {card,clip,create,delete,distribute,export,generate,import,interpreter,list,listrecipients,recover,rename,show,update}
+    usage: pkpass.py [-h] [--config CONFIG] [--version]
+                     {card,clip,create,delete,distribute,export,generate,import,info,list,listrecipients,modify,recover,rename,show,update,interpreter}
                      ...
 
     Public Key Password Manager
 
     positional arguments:
-      {card,clip,create,delete,distribute,export,generate,import,interpreter,list,listrecipients,recover,rename,show,update}
+      {card,clip,create,delete,distribute,export,generate,import,info,list,listrecipients,modify,recover,rename,show,update,interpreter}
                             sub-commands
         card                List the available cards and which card you have
                             selected
@@ -27,19 +27,23 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
         generate            Generate a new password entry and encrypt it for
                             yourself
         import              Import passwords that you have saved to a file
-        interpreter         Interactive mode for pkpass
+        info                Create a new password entry and encrypt it for
+                            yourself
         list                List passwords you have access to
         listrecipients      List the recipients that pkpass knows about
+        modify              Modify the metadata of a password
         recover             Recover a password that has been distributed using
                             escrow functions
         rename              Rename a password in the repository
         show                Display a password
         update              Change a password value and redistribute to recipients
+        interpreter         Interactive mode for pkpass
 
     optional arguments:
       -h, --help            show this help message and exit
       --config CONFIG       Path to a PKPass configuration file. Defaults to
                             '~/.pkpassrc'
+      --version             Show the version of PkPass and exit
 
 Card
 ----
@@ -48,16 +52,20 @@ Card lists out available card slots and the currently chosen one
 .. code-block:: bash
 
     usage: pkpass.py card [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                          [-i IDENTITY] [-q] [-v]
+                          [--color COLOR] [-i IDENTITY] [-q]
+                          [--theme-map THEME_MAP] [-v]
 
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       -q, --quiet           quiet output (show errors only)
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Clip
@@ -67,9 +75,10 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
 .. code-block:: bash
 
     usage: pkpass.py clip [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                          [--certpath CERTPATH] [-i IDENTITY] [--keypath KEYPATH]
-                          [--nopassphrase] [--noverify] [--pwstore PWSTORE] [-q]
-                          [--stdin] [-t TIME] [-v]
+                          [--certpath CERTPATH] [--color COLOR] [-i IDENTITY]
+                          [--keypath KEYPATH] [--nopassphrase] [--noverify]
+                          [--pwstore PWSTORE] [-q] [--stdin]
+                          [--theme-map THEME_MAP] [-t TIME] [-v]
                           [pwname]
 
     positional arguments:
@@ -83,6 +92,7 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
@@ -96,6 +106,8 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -t TIME, --time TIME  Number of seconds to keep password in paste buffer
       -v, --verbose         verbose output (repeat for increased verbosity)
 
@@ -106,10 +118,11 @@ Create is used to create a password in the configured password repository
 .. code-block:: bash
 
     usage: pkpass.py create [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                            [--certpath CERTPATH] [-e ESCROW_USERS] [-i IDENTITY]
-                            [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
-                            [--nopassphrase] [--nosign] [--overwrite]
-                            [--pwstore PWSTORE] [-q] [--stdin] [-v]
+                            [--certpath CERTPATH] [--color COLOR]
+                            [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
+                            [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
+                            [--nosign] [--overwrite] [--pwstore PWSTORE] [-q]
+                            [--stdin] [--theme-map THEME_MAP] [-v]
                             [pwname]
 
     positional arguments:
@@ -123,6 +136,7 @@ Create is used to create a password in the configured password repository
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -e ESCROW_USERS, --escrow_users ESCROW_USERS
                             Escrow users list is a comma sepearated list of
                             recovery users that each get part of a key
@@ -146,6 +160,8 @@ Create is used to create a password in the configured password repository
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Delete
@@ -156,9 +172,9 @@ This is mostly just to allow testing to be a little faster
 .. code-block:: bash
 
     usage: pkpass.py delete [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                            [--certpath CERTPATH] [-i IDENTITY]
+                            [--certpath CERTPATH] [--color COLOR] [-i IDENTITY]
                             [--keypath KEYPATH] [--overwrite] [--pwstore PWSTORE]
-                            [-q] [--stdin] [-v]
+                            [-q] [--stdin] [--theme-map THEME_MAP] [-v]
                             [pwname]
 
     positional arguments:
@@ -172,6 +188,7 @@ This is mostly just to allow testing to be a little faster
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
@@ -183,6 +200,8 @@ This is mostly just to allow testing to be a little faster
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Distribute
@@ -195,11 +214,12 @@ This function will confirm password list is valid even if only one password matc
 .. code-block:: bash
 
     usage: pkpass.py distribute [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                                [--certpath CERTPATH] [-e ESCROW_USERS]
-                                [-g GROUPS] [-i IDENTITY] [--keypath KEYPATH]
-                                [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
-                                [--nosign] [--pwstore PWSTORE] [-q] [--stdin]
-                                [-u USERS] [-v]
+                                [--certpath CERTPATH] [--color COLOR]
+                                [-e ESCROW_USERS] [-g GROUPS] [-i IDENTITY]
+                                [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
+                                [--nopassphrase] [--nosign] [--pwstore PWSTORE]
+                                [-q] [--stdin] [--theme-map THEME_MAP] [-u USERS]
+                                [-v]
                                 [pwname]
 
     positional arguments:
@@ -213,6 +233,7 @@ This function will confirm password list is valid even if only one password matc
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -e ESCROW_USERS, --escrow_users ESCROW_USERS
                             Escrow users list is a comma sepearated list of
                             recovery users that each get part of a key
@@ -237,6 +258,8 @@ This function will confirm password list is valid even if only one password matc
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -u USERS, --users USERS
                             Comma seperated list of recipients
       -v, --verbose         verbose output (repeat for increased verbosity)
@@ -248,9 +271,10 @@ Export allows the current user to migrate all his passwords to one file, this te
 .. code-block:: bash
 
     usage: pkpass.py export [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                            [--certpath CERTPATH] [--dstpwstore DSTPWSTORE]
-                            [-i IDENTITY] [--nocrypto] [--nopassphrase] [-q]
-                            [--stdin] [-v]
+                            [--certpath CERTPATH] [--color COLOR]
+                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--nocrypto]
+                            [--nopassphrase] [-q] [--stdin]
+                            [--theme-map THEME_MAP] [-v]
                             [pwfile]
 
     positional arguments:
@@ -263,6 +287,7 @@ Export allows the current user to migrate all his passwords to one file, this te
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       --dstpwstore DSTPWSTORE
                             Path to the destination password store.
       -i IDENTITY, --identity IDENTITY
@@ -273,22 +298,31 @@ Export allows the current user to migrate all his passwords to one file, this te
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Generate
 --------
 Generate allows a user to specify a password name and to have the pkpass system generate it based on a regular expression
 an example rules_map could look like the following
-rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
+
+.. code-block:: bash
+
+    rules_map:
+      default: "[^\\s]{20}"
+      sec: "([a-z]|[A-Z]|[0-9]){15}"
+
 
 .. code-block:: bash
 
     usage: pkpass.py generate [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                              [--certpath CERTPATH] [-e ESCROW_USERS]
-                              [-i IDENTITY] [--keypath KEYPATH] [-m MIN_ESCROW]
-                              [--noescrow] [--nopassphrase] [--nosign]
-                              [--overwrite] [--pwstore PWSTORE] [-q] [-R RULES]
-                              [--rules-map RULES_MAP] [--stdin] [-v]
+                              [--certpath CERTPATH] [--color COLOR]
+                              [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
+                              [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
+                              [--nosign] [--overwrite] [--pwstore PWSTORE] [-q]
+                              [-R RULES] [--rules-map RULES_MAP] [--stdin]
+                              [--theme-map THEME_MAP] [-v]
                               [pwname]
 
     positional arguments:
@@ -302,6 +336,7 @@ rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -e ESCROW_USERS, --escrow_users ESCROW_USERS
                             Escrow users list is a comma sepearated list of
                             recovery users that each get part of a key
@@ -330,6 +365,8 @@ rules_map: '{"default": "[^\\s]{20}", "sec": "([a-z]|[A-Z]|[0-9]){15}"}'
                             passwords
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Import
@@ -339,9 +376,10 @@ Import allows a user to take an exported password file and import them into a ne
 .. code-block:: bash
 
     usage: pkpass.py import [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                            [--certpath CERTPATH] [--dstpwstore DSTPWSTORE]
-                            [-i IDENTITY] [--nocrypto] [--nopassphrase] [-q]
-                            [--stdin] [-v]
+                            [--certpath CERTPATH] [--color COLOR]
+                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--nocrypto]
+                            [--nopassphrase] [-q] [--stdin]
+                            [--theme-map THEME_MAP] [-v]
                             [pwfile]
 
     positional arguments:
@@ -354,6 +392,7 @@ Import allows a user to take an exported password file and import them into a ne
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       --dstpwstore DSTPWSTORE
                             Path to the destination password store.
       -i IDENTITY, --identity IDENTITY
@@ -364,7 +403,39 @@ Import allows a user to take an exported password file and import them into a ne
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
+
+Info
+----
+Info displays metadata to the user about a given password
+
+.. code-block:: bash
+
+    usage: pkpass.py info [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
+                          [--color COLOR] [-i IDENTITY] [--pwstore PWSTORE] [-q]
+                          [--theme-map THEME_MAP] [-v]
+                          [pwname]
+
+    positional arguments:
+      pwname                Name of the password. Ex:
+                            passwords/team/infrastructure/root
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --cabundle CABUNDLE   Path to CA certificate bundle file
+      --certpath CERTPATH   Path to directory containing public keys. Certificates
+                            must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
+      -i IDENTITY, --identity IDENTITY
+                            Override identity of user running the program
+      --pwstore PWSTORE, --srcpwstore PWSTORE
+                            Path to the source password store. Defaults to
+                            "./passwords"
+      -q, --quiet           quiet output (show errors only)
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
 
 Interpreter
 -----------
@@ -404,6 +475,8 @@ Creates an interactive session, the default behavior of pkpass if no arguments a
       -q, --quiet           quiet output (show errors only)
       -v, --verbose         verbose output (repeat for increased verbosity)
 
+     -v, --verbose         verbose output (repeat for increased verbosity)
+
 List
 ----
 List shows all passwords available to a given user
@@ -411,14 +484,16 @@ List shows all passwords available to a given user
 .. code-block:: bash
 
     usage: pkpass.py list [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                          [-f FILTER] [-i IDENTITY] [--pwstore PWSTORE] [-q] [-r]
-                          [--stdin] [-v]
+                          [--color COLOR] [-f FILTER] [-i IDENTITY]
+                          [--pwstore PWSTORE] [-q] [-r] [--stdin]
+                          [--theme-map THEME_MAP] [-v]
 
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -f FILTER, --filter FILTER
                             Reduce output of commands to matching items
       -i IDENTITY, --identity IDENTITY
@@ -431,6 +506,8 @@ List shows all passwords available to a given user
                             functionality
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Listrecipients
@@ -440,14 +517,16 @@ List the recipients that pkpass knows about
 .. code-block:: bash
 
     usage: pkpass.py listrecipients [-h] [--cabundle CABUNDLE]
-                                    [--certpath CERTPATH] [-f FILTER]
-                                    [-i IDENTITY] [-q] [--stdin] [-v]
+                                    [--certpath CERTPATH] [--color COLOR]
+                                    [-f FILTER] [-i IDENTITY] [-q] [--stdin]
+                                    [--theme-map THEME_MAP] [-v]
 
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -f FILTER, --filter FILTER
                             Reduce output of commands to matching items
       -i IDENTITY, --identity IDENTITY
@@ -455,6 +534,39 @@ List the recipients that pkpass knows about
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
+      -v, --verbose         verbose output (repeat for increased verbosity)
+
+Modify
+------
+Modify the metadata of a given password
+
+.. code-block:: bash
+
+    usage: pkpass.py modify [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
+                            [--color COLOR] [-i IDENTITY] [--pwstore PWSTORE] [-q]
+                            [--theme-map THEME_MAP] [-v]
+                            [pwname]
+
+    positional arguments:
+      pwname                Name of the password. Ex:
+                            passwords/team/infrastructure/root
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --cabundle CABUNDLE   Path to CA certificate bundle file
+      --certpath CERTPATH   Path to directory containing public keys. Certificates
+                            must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
+      -i IDENTITY, --identity IDENTITY
+                            Override identity of user running the program
+      --pwstore PWSTORE, --srcpwstore PWSTORE
+                            Path to the source password store. Defaults to
+                            "./passwords"
+      -q, --quiet           quiet output (show errors only)
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Recover
@@ -465,15 +577,16 @@ This requires password owners to have created escrow users. Each necessary escro
 .. code-block:: bash
 
     usage: pkpass.py recover [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                             [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
-                             [-m MIN_ESCROW] [--nosign] [--pwstore PWSTORE] [-q]
-                             [-v]
+                             [--color COLOR] [-e ESCROW_USERS] [-i IDENTITY]
+                             [--keypath KEYPATH] [-m MIN_ESCROW] [--nosign]
+                             [--pwstore PWSTORE] [-q] [--theme-map THEME_MAP] [-v]
 
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -e ESCROW_USERS, --escrow_users ESCROW_USERS
                             Escrow users list is a comma sepearated list of
                             recovery users that each get part of a key
@@ -490,6 +603,8 @@ This requires password owners to have created escrow users. Each necessary escro
                             Path to the source password store. Defaults to
                             "./passwords"
       -q, --quiet           quiet output (show errors only)
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Rename
@@ -499,9 +614,10 @@ This renames a password in the given repository
 .. code-block:: bash
 
     usage: pkpass.py rename [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                            [--certpath CERTPATH] [-i IDENTITY]
+                            [--certpath CERTPATH] [--color COLOR] [-i IDENTITY]
                             [--keypath KEYPATH] [--nopassphrase] [--overwrite]
-                            [--pwstore PWSTORE] [-q] [--stdin] [-v]
+                            [--pwstore PWSTORE] [-q] [--stdin]
+                            [--theme-map THEME_MAP] [-v]
                             [pwname] [rename]
 
     positional arguments:
@@ -516,6 +632,7 @@ This renames a password in the given repository
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
@@ -529,6 +646,8 @@ This renames a password in the given repository
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Show
@@ -538,9 +657,10 @@ This unlocks a password and displays it on stdout
 .. code-block:: bash
 
     usage: pkpass.py show [-h] [-a] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                          [--certpath CERTPATH] [-i IDENTITY] [-I]
+                          [--certpath CERTPATH] [--color COLOR] [-i IDENTITY] [-I]
                           [--keypath KEYPATH] [--nopassphrase] [--noverify]
-                          [--pwstore PWSTORE] [-q] [-r] [--stdin] [-v]
+                          [--pwstore PWSTORE] [-q] [-r] [--stdin]
+                          [--theme-map THEME_MAP] [-v]
                           [pwname]
 
     positional arguments:
@@ -557,6 +677,7 @@ This unlocks a password and displays it on stdout
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       -I, --ignore-decrypt  Ignore decryption errors during show all process
@@ -573,6 +694,8 @@ This unlocks a password and displays it on stdout
                             functionality
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
 
 Update
@@ -582,10 +705,11 @@ This changes a password value and redistributes the password to the recipients
 .. code-block:: bash
 
     usage: pkpass.py update [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                            [--certpath CERTPATH] [-e ESCROW_USERS] [-i IDENTITY]
-                            [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
-                            [--nopassphrase] [--nosign] [--overwrite]
-                            [--pwstore PWSTORE] [-q] [--stdin] [-v]
+                            [--certpath CERTPATH] [--color COLOR]
+                            [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
+                            [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
+                            [--nosign] [--overwrite] [--pwstore PWSTORE] [-q]
+                            [--stdin] [--theme-map THEME_MAP] [-v]
                             [pwname]
 
     positional arguments:
@@ -599,6 +723,7 @@ This changes a password value and redistributes the password to the recipients
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       -e ESCROW_USERS, --escrow_users ESCROW_USERS
                             Escrow users list is a comma sepearated list of
                             recovery users that each get part of a key
@@ -622,4 +747,6 @@ This changes a password value and redistributes the password to the recipients
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)

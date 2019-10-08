@@ -18,12 +18,16 @@ a connector pkpass needs a ``connect`` argument
 
 .. code-block:: bash
 
-    connect: '{"ConnectorName":{"arbitrary_argument1": "aa1_value", "aa2": "aa2_value"}}'
+    connect:
+      base_directory: /path/to/local/certs # or /tmp
+      ConnectorName:
+        arbitary_argument1: aa1_value
+        aa2: aa2_value
 
-This connect argument is parsed as a json, the upper level key is the class that python will attempt to import.
-This class name should also be in a file that is name in all lowercase, of the same name.
+This connect argument is a dictionary, the upper level key is the class that python will attempt to import.
+This class name should also be in a module that is its name in all lowercase.
 
-Example: ConnectorName would be in file connectorname.py
+Example: the class ConnectorName would be in module connectorname
 
 The value of "ConnectorName" in our example above will all be passed to init as a dictionary. 
 this means that "arbitrary_argument1" and "aa2" will both be available for the connector class

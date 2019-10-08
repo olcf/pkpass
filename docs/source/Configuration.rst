@@ -43,7 +43,10 @@ are arguments with 'store_true' or 'store_false' attributes. The following argum
     keypath
     min_escrow
     pwstore
+    rules_map
+    rules
     time
+    theme_map
     users
 
 These along with user-defined groups should all work in an RC file.
