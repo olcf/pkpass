@@ -4,8 +4,10 @@
 # Should be burned to the ground and never spoken of again.
 # You know it, I know it, everybody knows it.
 
+# We need to disable unused import linting because the command classes *are* actually used...
+# pylint: disable=unused-import
+
 from __future__ import print_function
-import argparse
 import os
 import sys
 import glob
@@ -31,6 +33,7 @@ import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
+import libpkpass.commands.pkinterface as pkinterface
 from libpkpass.errors import PKPassError
 
 VERSION = util.show_version()
@@ -62,58 +65,33 @@ def pkparse_error(message):
     raise PKPassError(message)
 
     ####################################################################
-class Interactive(Cmd):
+class Interactive(Cmd, pkinterface.PkInterface):
     """This class implements the interactive interpreter functionality"""
     intro = """Welcome to PKPass (Public Key Based Password Manager) v%s!
 Type ? to list commands""" % VERSION
     prompt = 'pkpass> '
     ####################################################################
-    # This needs to look very similar to cli but not the same, which is frustrating
+
         ####################################################################
     def __init__(self, args, recipients_database):
         ####################################################################
         Cmd.__init__(self)
-        # Hash of registered subparser actions, mapping string to actual subparser
-        self.actions = {}
-        self.parser = argparse.ArgumentParser(
-            description='Public Key Password Manager')
+        # manually remove interpreter from command line so that argparse doesn't try to use it
+        # This needs to be removed before the PkInterace init
+        sys.argv.remove('interpreter')
 
-        home = os.path.expanduser("~")
-        self.parser.add_argument(
-            '--config', type=str, help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
-            default=os.path.join(home, '.pkpassrc'))
-        self.subparsers = self.parser.add_subparsers(
-            help='sub-commands', dest='subparser_name')
+        pkinterface.PkInterface.__init__(self)
+
         self.recipients_database = recipients_database
         self.parser.error = pkparse_error
 
-        card.Card(self)
-        clip.Clip(self)
-        create.Create(self)
-        delete.Delete(self)
-        distribute.Distribute(self)
-        export.Export(self)
-        generate.Generate(self)
-        pkimport.Import(self)
-        info.Info(self)
-        pklist.List(self)
-        listrecipients.Listrecipients(self)
-        modify.Modify(self)
-        recover.Recover(self)
-        rename.Rename(self)
-        show.Show(self)
-        update.Update(self)
-
         # Hold onto args passed on the command line
         self.pre_args = args
-        # manually remove interpreter from command line so that argparse doesn't try to use it
-        sys.argv.remove('interpreter')
         # change our cwd so users can tab complete
         self._change_pwstore()
 
         # We basically need to grab the first argument and ditch it
         self.parsedargs = {}
-
 
         ####################################################################
     def cmdloop_with_keyboard_interrupt(self):
@@ -157,15 +135,6 @@ Type ? to list commands""" % VERSION
         finally:
             self.pre_args['pwstore'] = config_args['pwstore']
             self._change_pwstore()
-
-        ####################################################################
-    def register(self, command_obj, command_name, command_description):
-        """ Register command objects and names using an observer pattern """
-        ####################################################################
-        self.actions[command_name] = command_obj
-        parser = self.subparsers.add_parser(
-            command_name, help=command_description)
-        command_obj.register(parser)
 
         ####################################################################
     def precmd(self, line):
@@ -240,6 +209,13 @@ Type ? to list commands""" % VERSION
             return False
         except (IOError, SystemExit):
             return False
+
+        ####################################################################
+    def do_git(self, line):
+        """If your password store is git back, you can control git from here"""
+        ####################################################################
+        subprocess.call(["git"] + line.split())
+        return False
 
     ##############################################################################
 def add_dynamic_function(module_name, class_name):
