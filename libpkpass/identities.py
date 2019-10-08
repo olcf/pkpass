@@ -25,23 +25,30 @@ class IdentityDB(object):
         return "%r" % self.__dict__
 
     def _load_certs_from_external(self, connection_map):
-        temp_dir = str(tempfile.gettempdir())
+        if 'base_directory' in connection_map and connection_map['base_directory']:
+            temp_dir = connection_map['base_directory']
+            del connection_map['base_directory']
+        else:
+            temp_dir = str(tempfile.gettempdir())
+
         for key, value in connection_map.items():
             dirname = os.path.join(temp_dir, str(key))
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-            encoded = key
-            connector = "libpkpass.connectors." + encoded.lower()
-            connector = __import__(connector, fromlist=[encoded])
-            connector = getattr(connector, encoded)
-            connector = connector(value)
-            # connector.list_certificates() should return a dict
-            # the key being the username and the value being
-            # a list of certs
-            certs = connector.list_certificates()
-            for name, certlist in certs.items():
-                with open(os.path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
-                    tmpcert.write("\n".join(certlist))
+            if ('cache' not in value or not value['cache']\
+                    or not os.listdir(dirname)):
+                encoded = key
+                connector = "libpkpass.connectors." + encoded.lower()
+                connector = __import__(connector, fromlist=[encoded])
+                connector = getattr(connector, encoded)
+                connector = connector(value)
+                # connector.list_certificates() should return a dict
+                # the key being the username and the value being
+                # a list of certs
+                certs = connector.list_certificates()
+                for name, certlist in certs.items():
+                    with open(os.path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
+                        tmpcert.write("\n".join(certlist))
 
             self._load_from_directory(dirname, 'certificate')
 
