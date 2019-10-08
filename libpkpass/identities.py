@@ -42,9 +42,6 @@ class IdentityDB(object):
                 connector = __import__(connector, fromlist=[encoded])
                 connector = getattr(connector, encoded)
                 connector = connector(value)
-                # connector.list_certificates() should return a dict
-                # the key being the username and the value being
-                # a list of certs
                 certs = connector.list_certificates()
                 for name, certlist in certs.items():
                     with open(os.path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
