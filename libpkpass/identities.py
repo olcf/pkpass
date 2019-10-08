@@ -38,7 +38,7 @@ class IdentityDB(object):
             if ('cache' not in value or not value['cache']\
                     or not os.listdir(dirname)):
                 encoded = key
-                connector = "libpkpass.connectors." + encoded.lower()
+                connector = encoded.lower()
                 connector = __import__(connector, fromlist=[encoded])
                 connector = getattr(connector, encoded)
                 connector = connector(value)
