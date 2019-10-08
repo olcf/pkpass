@@ -20,5 +20,7 @@ class ConnectorInterface(object):
 
         ##############################################################################
     def list_certificates(self):
+        """This should return a dict with the key being username and the value being
+        a list of certicates """
         ##############################################################################
         raise NotImplementedError
