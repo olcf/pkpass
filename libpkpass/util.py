@@ -47,6 +47,7 @@ def set_default_subparser(self, name, args=None, positional_args=0):
                 sys.argv.insert(len(sys.argv) - positional_args, name)
             else:
                 args.insert(len(args) - positional_args, name)
+            print(sys.argv)
 
     ####################################################################
 def show_version():
