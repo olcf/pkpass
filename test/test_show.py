@@ -49,7 +49,7 @@ class ShowErrors(unittest.TestCase):
                 return_value=argparse.Namespace(subparser_name='show', identity='r1',
                                                 nopassphrase="true",
                                                 all=True,
-                                                pwname='test',
+                                                pwname='*test*',
                                                 config=CONFIG))
     def test_showall_decryption_error(self, subparser_name):
         """test decryption functionality"""

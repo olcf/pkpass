@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import os
+import fnmatch
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError, DecryptionError
@@ -41,7 +42,8 @@ class Show(Command):
         # os.walk returns root, dirs, and files we just need files
         for root, _, pwnames in os.walk(directory):
             for pwname in pwnames:
-                if self.args['pwname'] is None or self.args['pwname'].upper() in pwname.upper():
+                if self.args['pwname'] is None or\
+                        fnmatch.fnmatch(os.path.join(root, pwname), self.args['pwname']):
                     try:
                         self._decrypt_wrapper(
                             root, password, myidentity, pwname)
