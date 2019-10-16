@@ -33,7 +33,7 @@ class Show(Command):
             raise PasswordIOError("No password supplied")
         else:
             self._decrypt_wrapper(
-                self._resolve_directory_path(), password, myidentity, self.args['pwname'])
+                self.args['pwstore'], password, myidentity, self.args['pwname'])
 
         ####################################################################
     def _walk_dir(self, directory, password, myidentity, ignore_decrypt=False):
@@ -54,17 +54,6 @@ class Show(Command):
                         raise
                     except NotARecipientError:
                         continue
-
-        ####################################################################
-    def _resolve_directory_path(self):
-        """This handles how a user inputs the pwname"""
-        ####################################################################
-        pwstore_pass = os.path.join(self.args['pwstore'], self.args['pwname'])
-        pwd = os.getcwd()
-        pwd_pass = os.path.join(pwd, self.args['pwname'])
-        if not os.path.exists(pwstore_pass) and os.path.exists(pwd_pass):
-            return pwd
-        return self.args['pwstore']
 
         ####################################################################
     def _handle_escrow_show(self, password, myidentity):
