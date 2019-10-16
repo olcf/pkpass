@@ -140,6 +140,8 @@ class Command(object):
             self.identities.load_keys_from_directory(self.args['keypath'])
             self._validate_identities()
 
+        if 'pwname' in self.args and self.args['pwname']:
+            self._resolve_directory_path()
         self.args['card_slot'] = self.args['card_slot'] if self.args['card_slot'] else 0
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
             if self.args['verbosity'] != -1:
@@ -150,6 +152,15 @@ class Command(object):
                                 self.args['theme_map'])
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
+        ####################################################################
+    def _resolve_directory_path(self):
+        """This handles how a user inputs the pwname, this tries to be smart
+        good luck everybody else"""
+        ####################################################################
+        pwd = os.getcwd()
+        pwd_pwname = os.path.normpath(os.path.join(pwd, self.args['pwname']))
+        if self.args['pwstore'] in pwd_pwname:
+            self.args['pwname'] = pwd_pwname.replace(self.args['pwstore'] + os.sep, '')
 
         ##################################################################
     def safety_check(self):
