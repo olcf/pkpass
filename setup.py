@@ -16,6 +16,7 @@ with io.open('requirements.txt') as requirements_file:
     REQUIRED = requirements_file.read().splitlines()
 
 try:
+    FINAL_PLUG = []
     with io.open('plugin-requirements.txt') as plugin_file:
         PLUGIN_REQUIRES = plugin_file.read().splitlines()
         for line in PLUGIN_REQUIRES:
