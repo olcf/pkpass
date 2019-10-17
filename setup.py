@@ -9,19 +9,23 @@ import sys
 from subprocess import Popen, PIPE, STDOUT
 import getpass
 from shutil import rmtree
-
 from setuptools import setup, Command
+import libpkpass
 
 with io.open('requirements.txt') as requirements_file:
     REQUIRED = requirements_file.read().splitlines()
+
+try:
+    with io.open('plugin-requirements.txt') as plugin_file:
+        PLUGIN_REQUIRES = plugin_file.read().splitlines()
+except:
+    PLUGIN_REQUIRES = []
 
 HOME = os.path.expanduser("~")
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Load the package's __version__.py module as a dictionary.
 ABOUT = {}
-with open(os.path.join(HERE, 'VERSION')) as version_file:
-    ABOUT['__version__'] = version_file.read().strip()
 
 class UploadCommand(Command):
     """Support setup.py upload."""
@@ -237,8 +241,12 @@ class Verify(Command):
             print("Config Valid")
 
 setup(
-    version=ABOUT['__version__'],
+    version=libpkpass.__version__,
     install_requires=REQUIRED,
+    extras_require={
+        'testing': ["mock", "tox"],
+        'plugin': PLUGIN_REQUIRES
+    },
     cmdclass={
         'upload': UploadCommand,
         'rcfile': RCFile,

@@ -5,6 +5,7 @@ test/pki/intermediate
 test/scratch/*
 !libpkpass/connectors/connectorinterface.py
 libpkpass/connectors/*
+plugin-requirements.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
