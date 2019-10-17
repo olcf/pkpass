@@ -12,21 +12,19 @@ from shutil import rmtree
 from setuptools import setup, Command
 import libpkpass
 
-with io.open('plugin-requirements.txt') as requirements_file:
+with io.open('requirements.txt') as requirements_file:
     REQUIRED = requirements_file.read().splitlines()
 
 try:
     with io.open('plugin-requirements.txt') as plugin_file:
-        PLUGIN_REQUIRES = REQUIRED.extend(plugin_file.read().splitlines())
+        PLUGIN_REQUIRES = plugin_file.read().splitlines()
         for line in PLUGIN_REQUIRES:
-            req, plug = line.split()
-            REQUIRED.append(req)
-            FINAL_PLUG.append(plug)
+            split_line = line.split(" ")
+            REQUIRED.append(split_line[0])
+            FINAL_PLUG.append(split_line[1])
 except:
-    continue
+    print("no plugin-requirements.txt")
 
-print("DEBUG")
-print(REQUIRED)
 HOME = os.path.expanduser("~")
 HERE = os.path.abspath(os.path.dirname(__file__))
 
