@@ -95,6 +95,18 @@ class Command(object):
         return self.args[argname]
 
         ##################################################################
+    def _handle_filepath_args(self):
+        """Does filepath expansion for config args"""
+        ##################################################################
+        file_path_args = ['cabundle', 'pwstore', 'certpath', 'keypath']
+        for arg in file_path_args:
+            if arg in self.args and self.args[arg]:
+                self.args[arg] = os.path.expanduser(self.args[arg])
+        if 'connect' in self.args and self.args['connect']:
+            if 'base_directory' in self.args['connect'] and self.args['connect']['base_directory']:
+                self.args['connect']['base_directory'] = os.path.expanduser(self.args['connect']['base_directory'])
+
+        ##################################################################
     def _run_command_setup(self, parsedargs):
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
@@ -106,6 +118,9 @@ class Command(object):
         config_args = self._get_config_args(cli_args['config'], cli_args)
         self.args.update(config_args)
 
+        connectmap = self._parse_json_arguments('connect')
+        self._handle_filepath_args()
+
         fles = ['cabundle', 'pwstore']
         for key, value in iteritems(cli_args):
             if value is not None or key not in self.args:
@@ -114,7 +129,6 @@ class Command(object):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
         # json args
-        connectmap = self._parse_json_arguments('connect')
 
 
         # self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
