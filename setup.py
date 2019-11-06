@@ -5,10 +5,11 @@
 from __future__ import print_function
 import io
 import os
+import shutil
+from shutil import rmtree
 import sys
 from subprocess import Popen, PIPE, STDOUT
 import getpass
-from shutil import rmtree
 from setuptools import setup, Command
 import libpkpass
 
@@ -28,6 +29,19 @@ except:
 
 HOME = os.path.expanduser("~")
 HERE = os.path.abspath(os.path.dirname(__file__))
+
+def rcfile_check():
+    rc_location = os.path.join(HOME, ".pkpassrc")
+    example_location = os.path.join(HERE, 'example_pkpassrc')
+    if os.path.exists(rc_location):
+        if os.path.isdir(rc_location):
+            print("WARN: default rc file location is a directory")
+        else:
+            print(".pkpassrc already defined, skipping")
+            return
+    else:
+        print("Copying example rc file to %s" % rc_location)
+        shutil.copyfile(example_location, rc_location)
 
 # Load the package's __version__.py module as a dictionary.
 ABOUT = {}
@@ -258,3 +272,5 @@ setup(
         'verify': Verify,
         },
     )
+
+rcfile_check()
