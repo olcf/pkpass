@@ -3,7 +3,6 @@
 # $ pip install twine
 
 from __future__ import print_function
-import io
 import os
 import shutil
 from shutil import rmtree
@@ -23,17 +22,6 @@ REQUIRED = [
     'PyYAML>=4.2b1',
     'setuptools>=41.2.0'
 ]
-
-try:
-    FINAL_PLUG = []
-    with io.open('plugin-requirements.txt') as plugin_file:
-        PLUGIN_REQUIRES = plugin_file.read().splitlines()
-        for line in PLUGIN_REQUIRES:
-            split_line = line.split(" ")
-            REQUIRED.append(split_line[0])
-            FINAL_PLUG.append(split_line[1])
-except:
-    print("no plugin-requirements.txt")
 
 HOME = os.path.expanduser("~")
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -270,7 +258,6 @@ class Verify(Command):
 setup(
     version=libpkpass.__version__,
     install_requires=REQUIRED,
-    dependency_links=list(FINAL_PLUG),
     extras_require={
         'testing': ["mock", "tox"]
     },
