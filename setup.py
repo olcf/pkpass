@@ -268,4 +268,7 @@ setup(
         },
     )
 
-rcfile_check()
+try:
+    rcfile_check()
+except FileNotFoundError as err:
+    print("WARN: could not copy example rc file")
