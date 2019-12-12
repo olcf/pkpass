@@ -7,6 +7,9 @@ test/scratch/*
 libpkpass/connectors/*
 plugin-requirements.txt
 
+# sonarqube
+.scannerwork/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

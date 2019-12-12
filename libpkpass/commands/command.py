@@ -102,9 +102,9 @@ class Command(object):
         for arg in file_path_args:
             if arg in self.args and self.args[arg]:
                 self.args[arg] = os.path.expanduser(self.args[arg])
-        if 'connect' in self.args and self.args['connect']:
-            if 'base_directory' in self.args['connect'] and self.args['connect']['base_directory']:
-                self.args['connect']['base_directory'] = os.path.expanduser(self.args['connect']['base_directory'])
+        if 'connect' in self.args and self.args['connect'] and \
+                'base_directory' in self.args['connect'] and self.args['connect']['base_directory']:
+            self.args['connect']['base_directory'] = os.path.expanduser(self.args['connect']['base_directory'])
 
         ##################################################################
     def _run_command_setup(self, parsedargs):
@@ -129,9 +129,6 @@ class Command(object):
                 raise FileOpenError(self.args[key], "No such file or directory")
 
         # json args
-
-
-        # self.args['color'] = self.args['color'].upper() == 'TRUE' if 'color' in self.args and self.args['color'] is not None else True
         self.args['color'] = self._handle_boolean_args('color')
         self._convert_strings_to_list('groups')
         self._convert_strings_to_list('users')

@@ -27,10 +27,8 @@ class PasswordDB(object):
     def load_password_data(self, password_id):
         """ Load and return password from wherever it may be stored"""
     ##############################################################################
-        if not password_id in self.pwdb.keys():
-            if self.mode == 'Filesystem':
-                self.pwdb[password_id] = self.read_password_data_from_file(
-                    password_id)
+        if not password_id in self.pwdb.keys() and self.mode == 'Filesystem':
+            self.pwdb[password_id] = self.read_password_data_from_file(password_id)
         return self.pwdb[password_id]
 
     #############################################################################
