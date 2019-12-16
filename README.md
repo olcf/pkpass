@@ -25,13 +25,12 @@ Passwords that are created are distributed to recipients by public key encryptio
 Install
 -------
 
-### MacOs:
+### Everything:
+`pip install pkpass-olcf`
 
+### MacOs:
 `brew install olcf/tap/pkpass`
 
-### Linux:
-
-Currently I do not have a package process done for any linux distro, you'll need to pull from the repo and run setup
 
 x509 Certificate Repository
 -------
