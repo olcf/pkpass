@@ -1,5 +1,8 @@
 Setup
 =====
+Pip install is available via:
+  | ``pip install pkpass-olcf``
+
 Brew install is available via:
   | ``brew install olcf/tap/pkpass``
 
