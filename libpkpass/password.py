@@ -228,7 +228,6 @@ class PasswordEntry(object):
         for key in sorted(recipient_entry.keys()):
             if key == 'timestamp':
                 recipient_entry[key] = "{0:12.2f}".format(float(recipient_entry[key]))
-#                recipient_entry[key] = (round(recipient_entry[key] * 100) / 100)
             if key != 'signature':
                 if isinstance(recipient_entry[key], bytes):
                     recipient_entry[key] = recipient_entry[key].decode('ASCII')
