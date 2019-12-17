@@ -40,10 +40,12 @@ class Info(Command):
                 print("    %s %s" % (self.color_print("Total Group Share Holders:", "third_level"),
                                      len(list(group_value['recipients'].keys()))))
 
-                timestamp = int(round(float(min([x['timestamp'] for x in list(group_value['recipients'].values()) if 'timestamp' in x]))))
-                timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-                print("    %s %s" % (self.color_print("Group creation time:", "third_level"),
-                                     timestamp))
+                timestamp_list = [x['timestamp'] for x in list(group_value['recipients'].values()) if 'timestamp' in x]
+                if timestamp_list:
+                    timestamp = int(round(float(min(timestamp_list))))
+                    timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                    print("    %s %s" % (self.color_print("Group creation time:", "third_level"),
+                                         timestamp))
 
         # Recipients
         print("%s %s" % (self.color_print("\nRecipients:", "first_level"),
