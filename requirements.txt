@@ -8,3 +8,4 @@ pyperclip>=1.6.0
 PyYAML>=4.2b1
 setuptools>=41.2.0
 versioneer>=0.18
+six>=1.13.0
