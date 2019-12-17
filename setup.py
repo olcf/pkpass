@@ -10,7 +10,7 @@ import sys
 from subprocess import Popen, PIPE, STDOUT
 import getpass
 from setuptools import setup, Command
-import libpkpass
+import versioneer
 
 REQUIRED = [
     'colored>=1.4.0',
@@ -255,17 +255,17 @@ class Verify(Command):
         if valid:
             print("Config Valid")
 
+CMDCLASS = versioneer.get_cmdclass()
+CMDCLASS['upload'] = UploadCommand
+CMDCLASS['rcfile'] = RCFile
+CMDCLASS['verify'] = Verify
 setup(
-    version=libpkpass.__version__,
+    version=versioneer.get_version(),
     install_requires=REQUIRED,
     extras_require={
         'testing': ["mock", "tox"]
     },
-    cmdclass={
-        'upload': UploadCommand,
-        'rcfile': RCFile,
-        'verify': Verify,
-        },
+    cmdclass=CMDCLASS,
     )
 
 try:

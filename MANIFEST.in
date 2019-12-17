@@ -1,1 +1,3 @@
 include example_pkpassrc
+include versioneer.py
+include libpkpass/_version.py
