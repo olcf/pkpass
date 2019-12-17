@@ -34,9 +34,7 @@ class Update(Command):
             print(", ".join(util.sort(self.recipient_list)))
             correct_distribution = input("Is this list correct? (y/N) ")
             if not correct_distribution or correct_distribution.lower()[0] == 'n':
-                self.recipient_list = input("Please enter a comma delimited list: ")
-                self.recipient_list = list(set(self._convert_strings_to_list(self.recipient_list)))
-                print(self.recipient_list)
+                self._new_distribution()
 
             self._validate_identities(self.recipient_list)
 
@@ -57,6 +55,21 @@ class Update(Command):
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
+        ####################################################################
+    def _new_distribution(self):
+        """enter a new recipient list"""
+        ####################################################################
+        breaker = False
+        while not breaker:
+            self.recipient_list = input("Please enter a comma delimited list: ")
+            self.recipient_list = list(set(self._convert_strings_to_list(self.recipient_list)))
+            print(self.recipient_list)
+            try:
+                self._validate_identities(self.recipient_list)
+                breaker = True
+            except CliArgumentError as err:
+                print(err)
+                continue
 
         ####################################################################
     def _validate_args(self):
