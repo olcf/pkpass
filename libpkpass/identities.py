@@ -24,7 +24,7 @@ class IdentityDB(object):
     def __str__(self):
         return "%r" % self.__dict__
 
-    def _load_certs_from_external(self, connection_map):
+    def _load_certs_from_external(self, connection_map, nocache):
         if 'base_directory' in connection_map and connection_map['base_directory']:
             temp_dir = connection_map['base_directory']
             del connection_map['base_directory']
@@ -35,8 +35,7 @@ class IdentityDB(object):
             dirname = os.path.join(temp_dir, str(key))
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-            if ('cache' not in value or not value['cache']\
-                    or not os.listdir(dirname)):
+            if nocache or not os.listdir(dirname):
                 encoded = key
                 connector = encoded.lower()
                 connector = __import__(connector, fromlist=[encoded])
@@ -71,11 +70,12 @@ class IdentityDB(object):
     def load_certs_from_directory(self,
                                   certpath,
                                   verify_on_load=False,
-                                  connectmap=None):
+                                  connectmap=None,
+                                  nocache=False):
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
         if connectmap:
-            self._load_certs_from_external(connectmap)
+            self._load_certs_from_external(connectmap, nocache)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
         if verify_on_load:

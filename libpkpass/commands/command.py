@@ -24,7 +24,8 @@ class Command(object):
     ##########################################################################
     name = None
     description = None
-    selected_args = ['verbosity', 'quiet', 'identity', 'cabundle', 'certpath', 'color', 'theme_map']
+    selected_args = ['nocache', 'verbosity', 'quiet', 'identity', 'cabundle',
+                     'certpath', 'color', 'theme_map']
     passphrase = None
 
         ##################################################################
@@ -44,6 +45,7 @@ class Command(object):
             'certpath': None,
             'escrow_users': None,
             'min_escrow': None,
+            'no_cache': False,
             'noverify': None,
             'noescrow': False,
             'overwrite': False,
@@ -147,7 +149,9 @@ class Command(object):
             self.identities.load_certs_from_directory(
                 self.args['certpath'],
                 verify_on_load=verify_on_load,
-                connectmap=connectmap)
+                connectmap=connectmap,
+                nocache=self.args['no_cache']
+            )
             self.identities.load_keys_from_directory(self.args['keypath'])
             self._validate_identities()
 

@@ -127,6 +127,14 @@ ARGUMENTS = {
         }
     },
 
+    'nocache': {
+        'args': ['--no-cache'],
+        'kwargs': {
+            'action': 'store_true',
+            'help': 'if using a connector, pull the certs again'
+        }
+    },
+
     'noescrow': {
         'args': ['--noescrow'],
         'kwargs':{
