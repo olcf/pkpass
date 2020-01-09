@@ -21,6 +21,7 @@ import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
+import libpkpass.commands.verifyinstall as verifyinstall
 
     ##############################################################################
 class PkInterface():
@@ -59,6 +60,7 @@ class PkInterface():
         rename.Rename(self)
         show.Show(self)
         update.Update(self)
+        verifyinstall.VerifyInstall(self)
 
         ####################################################################
     def register(self, command_obj, command_name, command_description):
