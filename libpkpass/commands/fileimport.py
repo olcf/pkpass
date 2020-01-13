@@ -38,6 +38,7 @@ class Import(Command):
                     self._file_handler(crypto.sk_decrypt_string(password, passwd))
                     self.progress_bar(i, db_len)
                     i += 1
+            print("")
         except IOError:
             raise FileOpenError(self.args['pwfile'], "No such file or directory")
 

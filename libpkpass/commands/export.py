@@ -48,7 +48,10 @@ class Export(Command):
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"])
             password.recipients[uid]['encrypted_secret'] = plaintext_pw.encode("ASCII")
-            password.write_password_data(self.args['pwfile'], False, not self.args['nocrypto'], crypt_pass,
+            password.write_password_data(self.args['pwfile'],
+                                         overwrite=False,
+                                         encrypted_export=not self.args['nocrypto'],
+                                         password=crypt_pass,
                                          export=True)
             self.progress_bar(i, len(all_passwords))
             i += 1
