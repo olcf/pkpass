@@ -31,10 +31,14 @@ class Import(Command):
                 self._file_handler(contents)
             else:
                 passwd = getpass.getpass("Please enter the password for the file: ")
-                passwords = []
-                for password in contents.split("\n"):
-                    passwords.append(crypto.sk_decrypt_string(password, passwd))
-                self._file_handler("\n".join(passwords))
+                i = 1
+                passwords = contents.split("\n")
+                db_len = len(passwords)
+                print(db_len)
+                for password in passwords:
+                    self._file_handler(crypto.sk_decrypt_string(password, passwd))
+                    self.progress_bar(i, db_len)
+                    i += 1
         except IOError:
             raise FileOpenError(self.args['pwfile'], "No such file or directory")
 
@@ -42,13 +46,13 @@ class Import(Command):
     def _file_handler(self, string):
         """This function handles the contents of a file"""
         ####################################################################
-        try:
-            self._yaml_file(yaml.safe_load(string))
-        except TypeError:
-            try:
-                self._flat_file(string.strip().split("\n"))
-            except TypeError:
-                raise LegacyImportFormatError
+        # try:
+        self._yaml_file(yaml.safe_load(string))
+        # except TypeError:
+            # try:
+                # self._flat_file(string.strip().split("\n"))
+            # except TypeError:
+                # raise LegacyImportFormatError
 
         ####################################################################
     def _flat_file(self, passwords):
@@ -57,7 +61,6 @@ class Import(Command):
         print("INFO: Flat password file detected, using 'imported' as description \
 you can manually change the description in the file if you would like")
         db_len = len(passwords)
-        i = 1
         for password in passwords:
             psplit = password.split(":")
             fname = psplit[0].strip()
@@ -69,33 +72,28 @@ you can manually change the description in the file if you would like")
         print("")
 
         ####################################################################
-    def _yaml_file(self, passwords):
+    def _yaml_file(self, password):
         """This function handles the yaml format of pkpass"""
         ####################################################################
         myidentity = self.identities.iddb[self.args['identity']]
         uid = myidentity['uid']
         pwstore = self.args['pwstore']
-        db_len = len(passwords)
-        i = 1
-        for password in passwords:
-            plaintext_str = passwords[password]['recipients'][uid]['encrypted_secret']
-            full_path = os.path.join(pwstore, password)
-            self.args['pwname'] = password
-            self.args['overwrite'] = True
-            plist = list(passwords[password]['recipients'])
-            if os.path.isfile(full_path):
-                existing_password = PasswordEntry()
-                existing_password.read_password_data(full_path)
-                self.args['overwrite'] = False
-                passwords[password]['metadata'] = existing_password['metadata']
-                plist += list(existing_password['recipients'])
 
-            description = passwords[password]['metadata']['description']
-            authorizer = passwords[password]['metadata']['authorizer']
-            self.create_or_update_pass(plaintext_str, description, authorizer, plist)
-            self.progress_bar(i, db_len)
-            i += 1
-        print("")
+        self.args['pwname'] = password['metadata']['name']
+        plaintext_str = password['recipients'][uid]['encrypted_secret']
+        full_path = os.path.join(pwstore, password['metadata']['name'])
+        self.args['overwrite'] = True
+        plist = list(password['recipients'])
+        if os.path.isfile(full_path):
+            existing_password = PasswordEntry()
+            existing_password.read_password_data(full_path)
+            self.args['overwrite'] = False
+            password['metadata'] = existing_password['metadata']
+            plist += list(existing_password['recipients'])
+
+        description = password['metadata']['description']
+        authorizer = password['metadata']['authorizer']
+        self.create_or_update_pass(plaintext_str, description, authorizer, plist)
 
         ####################################################################
     def _validate_args(self):
