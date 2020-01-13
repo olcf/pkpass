@@ -34,7 +34,6 @@ class Import(Command):
                 i = 1
                 passwords = contents.split("\n")
                 db_len = len(passwords)
-                print(db_len)
                 for password in passwords:
                     self._file_handler(crypto.sk_decrypt_string(password, passwd))
                     self.progress_bar(i, db_len)
