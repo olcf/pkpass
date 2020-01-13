@@ -14,7 +14,6 @@ class PasswordEntry(object):
     """ Password entry object.  Contains information about a password and
     related metadata, as well as a list of individually encrypted strings"""
     ##########################################################################
-
     def __init__(self, **kwargs):
 
         self.metadata = {'name': None,
@@ -278,7 +277,10 @@ class PasswordEntry(object):
             raise YamlFormatError(str(error.problem_mark), error.problem)
 
         ############################################################################################
-    def write_password_data(self, filename, overwrite=False, encrypted_export=False, password=None):
+    def write_password_data(self, filename, overwrite=False,
+                            export=False,
+                            encrypted_export=False,
+                            password=None):
         """Write password data to a password file """
         ############################################################################################
         self.validate()
@@ -289,12 +291,13 @@ class PasswordEntry(object):
             if not incwd and not os.path.isdir(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
             passdata = {key: value for key, value in self.todict().items() if value}
-            with open(filename, 'w') as fname:
+            open_method = 'a' if export else 'w'
+            with open(filename, open_method) as fname:
                 if encrypted_export:
                     encrypted = crypto.sk_encrypt_string(
                         yaml.safe_dump(passdata, default_flow_style=False),
                         password)
-                    fname.write(encrypted + "\n")
+                    fname.write(encrypted.decode() + "\n")
                 else:
                     fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):

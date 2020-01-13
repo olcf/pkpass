@@ -17,7 +17,7 @@ def pk_split_secret(plaintext_string, escrow_list, minimum=None):
         raise EscrowError("minimum escrow", 2, minimum)
     if escrow_len < 3:
         raise EscrowError("escrow users list", 3, escrow_len)
-    return ptohss.split_secret(plaintext_string, minimum, escrow_len)
+    return ptohss.split_secret(str(plaintext_string), minimum, escrow_len)
 
     ##############################################################################
 def pk_recover_secret(shares):

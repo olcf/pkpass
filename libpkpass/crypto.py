@@ -39,7 +39,7 @@ def pk_encrypt_string(plaintext_string, identity):
     ciphertext_derived_key = stdout
 
     fern = Fernet(plaintext_derived_key)
-    encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
+    encrypted_string = fern.encrypt(handle_python_strings(plaintext_string))
 
     return (encrypted_string, base64.urlsafe_b64encode(handle_python_strings(ciphertext_derived_key)))
 
@@ -110,7 +110,6 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
     plaintext_string = fern.decrypt(handle_python_strings(ciphertext_string))
     return plaintext_string.decode("ASCII")
 
-
     ##############################################################################
 def pk_sign_string(string, identity, passphrase, card_slot=None):
     """ Compute the hash of string and create a digital signature """
@@ -147,7 +146,6 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
 
     return signature
 
-
     ##############################################################################
 def pk_verify_signature(string, signature, identity):
     """ Compute the hash of string and verify the digital signature """
@@ -159,7 +157,6 @@ def pk_verify_signature(string, signature, identity):
 
     return stdout.decode("ASCII") == stringhash
 
-
     ##############################################################################
 def pk_verify_chain(identity):
     """ Verify the publickey trust chain against a CA Bundle and return True if valid"""
@@ -170,14 +167,12 @@ def pk_verify_chain(identity):
 
     return stdout.decode("ASCII").rstrip() == "%s: OK" % identity['certificate_path']
 
-
     ##############################################################################
 def get_cert_fingerprint(identity):
     """ Return the modulus of the x509 certificate of the identity """
     ##############################################################################
     # SHA1 Fingerprint=F9:9D:71:54:55:BE:99:24:6A:5E:E0:BB:48:F9:63:AE:A2:05:54:98
     return get_cert_element(identity, 'fingerprint').split('=')[1]
-
 
     ##############################################################################
 def get_cert_subject(identity):
@@ -186,7 +181,6 @@ def get_cert_subject(identity):
     # subject= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
     return ' '.join(get_cert_element(identity, 'subject').split(' ')[1:])
 
-
     ##############################################################################
 def get_cert_issuer(identity):
     """ Return the issuer DN of the x509 certificate of the identity """
@@ -194,13 +188,11 @@ def get_cert_issuer(identity):
     # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
     return ' '.join(get_cert_element(identity, 'issuer').split(' ')[1:])
 
-
     ##############################################################################
 def get_cert_enddate(identity):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
     return get_cert_element(identity, 'enddate').split('=')[1]
-
 
     ##############################################################################
 def get_cert_issuerhash(identity):
@@ -208,13 +200,11 @@ def get_cert_issuerhash(identity):
     ##############################################################################
     return get_cert_element(identity, 'issuer_hash')
 
-
     ##############################################################################
 def get_cert_subjecthash(identity):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
     return get_cert_element(identity, 'subject_hash')
-
 
     ##############################################################################
 def get_cert_element(identity, element):
@@ -231,7 +221,6 @@ def get_cert_element(identity, element):
     except IndexError:
         raise X509CertificateError(stdout)
 
-
     ##############################################################################
 def sk_encrypt_string(plaintext_string, key):
     """ Symmetrically Encrypt and return a base 64 encoded string using the provided secret"""
@@ -239,7 +228,6 @@ def sk_encrypt_string(plaintext_string, key):
     fern = Fernet(hash_password(key))
     encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
     return base64.urlsafe_b64encode(handle_python_strings(encrypted_string))
-
 
     ##############################################################################
 def sk_decrypt_string(ciphertext_string, key):
@@ -253,12 +241,11 @@ def sk_decrypt_string(ciphertext_string, key):
     except InvalidToken:
         raise DecryptionError("Incorrect Password")
 
-
     ##############################################################################
 def hash_password(password):
     """Hash people's password"""
     ##############################################################################
-    password = b"%s" % password
+    password = handle_python_strings("%s" % password)
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
                      iterations=100000, backend=default_backend())
     return base64.urlsafe_b64encode(handle_python_strings(kdf.derive(password)))
