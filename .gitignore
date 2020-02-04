@@ -9,6 +9,7 @@ plugin-requirements.txt
 
 # sonarqube
 .scannerwork/
+.sonar/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
