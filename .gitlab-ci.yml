@@ -1,0 +1,10 @@
+---
+stages:
+  - scanner
+
+# run sonar scan
+Sonar Scan:
+  stage: scanner
+  image: $SONAR_SCAN_IMAGE
+  script:
+    - /usr/bin/entrypoint.sh
