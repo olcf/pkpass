@@ -46,13 +46,13 @@ class Import(Command):
     def _file_handler(self, string):
         """This function handles the contents of a file"""
         ####################################################################
-        # try:
-        self._yaml_file(yaml.safe_load(string))
-        # except TypeError:
-            # try:
-                # self._flat_file(string.strip().split("\n"))
-            # except TypeError:
-                # raise LegacyImportFormatError
+        try:
+            self._yaml_file(yaml.safe_load(string))
+        except (TypeError, yaml.scanner.ScannerError):
+            try:
+                self._flat_file(string.strip().split("\n"))
+            except TypeError:
+                raise LegacyImportFormatError
 
         ####################################################################
     def _flat_file(self, passwords):
@@ -61,6 +61,7 @@ class Import(Command):
         print("INFO: Flat password file detected, using 'imported' as description \
 you can manually change the description in the file if you would like")
         db_len = len(passwords)
+        i = 0
         for password in passwords:
             psplit = password.split(":")
             fname = psplit[0].strip()

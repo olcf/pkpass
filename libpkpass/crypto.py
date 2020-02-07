@@ -239,7 +239,12 @@ def sk_decrypt_string(ciphertext_string, key):
         plaintext_string = fern.decrypt(base64.urlsafe_b64decode(handle_python_strings(ciphertext_string)))
         return plaintext_string.decode("ASCII")
     except InvalidToken:
-        raise DecryptionError("Incorrect Password")
+        # handle some legacy stuff from NCCS
+        try:
+            plaintext_string = fern.decrypt(ciphertext_string)
+            return plaintext_string.decode("ASCII")
+        except InvalidToken:
+            raise DecryptionError("Incorrect Password")
 
     ##############################################################################
 def hash_password(password):
