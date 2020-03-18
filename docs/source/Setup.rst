@@ -13,29 +13,11 @@ If you are using additional PIV/X509 certificate repositories or password reposi
 compromise, there may be other information such as system names, account names, and personnel information that you do not want to be publicly available.
 
 
+RC file
+-------
+Pkpass has an RC file that can store default values for you so you don't have to write an essay everytime you want to look at or create passwords.
 
-Setup/Initial
--------------
-For the initial setup there are two scripts that you can run, each can serve the same function.
-The bash script ``./setup.sh`` obviously will only work on systems with bash such as linux and macos
-The python script ``./setup.py`` *should* run on all systems.
-
-* bash:  
-    This is a wrapper script for ``./setup.py`` it serves the function of installing pkpass in a python3 virtualenv  
-
-* python:  
-    | This will run through specific commands  
-    | ``./setup.py rcfile`` will create an rcfile  
-    | ``./setup.py install`` will run the installation on a system level  
-    | ``./setup.py install --user`` will run the installation on a user level  
-    | ``./setup.py verify -r "/path/to/.pkpassrc"`` will do basic linting of the pkpassrc file  
-    | ``./setup.py verify`` will do basic linting on a pkpassrc file located at ``~/.pkpassrc``  
-    | if you need the -h flag may help.  
-
-In both cases, these files can install dependencies and create a .pkpassrc file for you
-
-If you would like to proceed manually, or have problems with the setup script:
-You will want to create a .pkpassrc file in your home directory.  A typical pkpassrc file looks like this:
+An example file is below
 
 .. code-block:: bash
 
@@ -46,6 +28,11 @@ You will want to create a .pkpassrc file in your home directory.  A typical pkpa
 
 In this case, 'passdb' is the name of the directory in the user's home area that contains x509 certificates, keys (if necessary) and the ca bundle.
 
+The RC file can store any command line argument that is not a true/false value. See Configuration for more details
+
+
+CA Bundle
+---------
 You can create a ca bundle by combining all CA Certificates that you trust into one file and moving the file to the cabundle path.  Usually the site admins create this CA Bundle for users as part of their certificate management practices.  
 Example
 
