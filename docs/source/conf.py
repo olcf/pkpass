@@ -25,9 +25,7 @@ author = u'Noah Ginsburg, Ryan Adamson'
 HERE = os.path.abspath(os.path.dirname(__file__))
 THERE = os.path.join(HERE, "..", "..")
 
-VERSION = None
-with open(os.path.join(THERE, 'VERSION')) as version_file:
-    VERSION = version_file.read().strip()
+VERSION = "2.2.7"
 
 # The short X.Y version
 version = VERSION
