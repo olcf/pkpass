@@ -8,9 +8,9 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
     usage: pkpass.py [-h] [--config CONFIG] [--version]
                      {card,clip,create,delete,distribute,export,generate,import,info,list,listrecipients,modify,recover,rename,show,update,interpreter}
                      ...
-
+    
     Public Key Password Manager
-
+    
     positional arguments:
       {card,clip,create,delete,distribute,export,generate,import,info,list,listrecipients,modify,recover,rename,show,update,interpreter}
                             sub-commands
@@ -38,7 +38,7 @@ The Commands can be listed out by passing the help flag to pkpass as seen below
         show                Display a password
         update              Change a password value and redistribute to recipients
         interpreter         Interactive mode for pkpass
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --config CONFIG       Path to a PKPass configuration file. Defaults to
@@ -52,9 +52,9 @@ Card lists out available card slots and the currently chosen one
 .. code-block:: bash
 
     usage: pkpass.py card [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                          [--color COLOR] [-i IDENTITY] [-q]
+                          [--color COLOR] [-i IDENTITY] [--no-cache] [-q]
                           [--theme-map THEME_MAP] [-v]
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -63,6 +63,7 @@ Card lists out available card slots and the currently chosen one
       --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       -q, --quiet           quiet output (show errors only)
       --theme-map THEME_MAP
                             Map of colors to use for colorized output
@@ -76,15 +77,15 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
 
     usage: pkpass.py clip [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                           [--certpath CERTPATH] [--color COLOR] [-i IDENTITY]
-                          [--keypath KEYPATH] [--nopassphrase] [--noverify]
-                          [--pwstore PWSTORE] [-q] [--stdin]
+                          [--keypath KEYPATH] [--no-cache] [--nopassphrase]
+                          [--noverify] [--pwstore PWSTORE] [-q] [--stdin]
                           [--theme-map THEME_MAP] [-t TIME] [-v]
                           [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -97,6 +98,7 @@ The intent of clip is to copy a password to your clipboard on the unlock event, 
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
+      --no-cache            if using a connector, pull the certs again
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --noverify            Do not verify certificates and signatures
@@ -120,15 +122,16 @@ Create is used to create a password in the configured password repository
     usage: pkpass.py create [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR]
                             [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
-                            [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
-                            [--nosign] [--overwrite] [--pwstore PWSTORE] [-q]
-                            [--stdin] [--theme-map THEME_MAP] [-v]
+                            [-m MIN_ESCROW] [--no-cache] [--noescrow]
+                            [--nopassphrase] [--nosign] [--overwrite]
+                            [--pwstore PWSTORE] [-q] [--stdin]
+                            [--theme-map THEME_MAP] [-v]
                             [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -147,6 +150,7 @@ Create is used to create a password in the configured password repository
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --no-cache            if using a connector, pull the certs again
       --noescrow            Do not use escrow functionality, ignore defaults in rc
                             file
       --nopassphrase, --nopin
@@ -173,14 +177,15 @@ This is mostly just to allow testing to be a little faster
 
     usage: pkpass.py delete [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR] [-i IDENTITY]
-                            [--keypath KEYPATH] [--overwrite] [--pwstore PWSTORE]
-                            [-q] [--stdin] [--theme-map THEME_MAP] [-v]
+                            [--keypath KEYPATH] [--no-cache] [--overwrite]
+                            [--pwstore PWSTORE] [-q] [--stdin]
+                            [--theme-map THEME_MAP] [-v]
                             [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -193,6 +198,7 @@ This is mostly just to allow testing to be a little faster
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
+      --no-cache            if using a connector, pull the certs again
       --overwrite           Overwrite a password that already exists
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
@@ -216,16 +222,16 @@ This function will confirm password list is valid even if only one password matc
     usage: pkpass.py distribute [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                                 [--certpath CERTPATH] [--color COLOR]
                                 [-e ESCROW_USERS] [-g GROUPS] [-i IDENTITY]
-                                [--keypath KEYPATH] [-m MIN_ESCROW] [--noescrow]
-                                [--nopassphrase] [--nosign] [--pwstore PWSTORE]
-                                [-q] [--stdin] [--theme-map THEME_MAP] [-u USERS]
-                                [-v]
+                                [--keypath KEYPATH] [-m MIN_ESCROW] [--no-cache]
+                                [--noescrow] [--nopassphrase] [--nosign]
+                                [--pwstore PWSTORE] [-q] [--stdin]
+                                [--theme-map THEME_MAP] [-u USERS] [-v]
                                 [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -246,6 +252,7 @@ This function will confirm password list is valid even if only one password matc
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --no-cache            if using a connector, pull the certs again
       --noescrow            Do not use escrow functionality, ignore defaults in rc
                             file
       --nopassphrase, --nopin
@@ -272,14 +279,14 @@ Export allows the current user to migrate all his passwords to one file, this te
 
     usage: pkpass.py export [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR]
-                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--nocrypto]
-                            [--nopassphrase] [-q] [--stdin]
+                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--no-cache]
+                            [--nocrypto] [--nopassphrase] [-q] [--stdin]
                             [--theme-map THEME_MAP] [-v]
                             [pwfile]
-
+    
     positional arguments:
       pwfile                path to the import/export file
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -292,6 +299,7 @@ Export allows the current user to migrate all his passwords to one file, this te
                             Path to the destination password store.
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       --nocrypto            Do not use a password for import/export files
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
@@ -309,26 +317,20 @@ an example rules_map could look like the following
 
 .. code-block:: bash
 
-    rules_map:
-      default: "[^\\s]{20}"
-      sec: "([a-z]|[A-Z]|[0-9]){15}"
-
-
-.. code-block:: bash
-
     usage: pkpass.py generate [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                               [--certpath CERTPATH] [--color COLOR]
                               [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
-                              [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
-                              [--nosign] [--overwrite] [--pwstore PWSTORE] [-q]
-                              [-R RULES] [--rules-map RULES_MAP] [--stdin]
+                              [-m MIN_ESCROW] [--no-cache] [--noescrow]
+                              [--nopassphrase] [--nosign] [--overwrite]
+                              [--pwstore PWSTORE] [-q] [-R RULES]
+                              [--rules-map RULES_MAP] [--stdin]
                               [--theme-map THEME_MAP] [-v]
                               [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -347,6 +349,7 @@ an example rules_map could look like the following
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --no-cache            if using a connector, pull the certs again
       --noescrow            Do not use escrow functionality, ignore defaults in rc
                             file
       --nopassphrase, --nopin
@@ -377,14 +380,14 @@ Import allows a user to take an exported password file and import them into a ne
 
     usage: pkpass.py import [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR]
-                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--nocrypto]
-                            [--nopassphrase] [-q] [--stdin]
+                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--no-cache]
+                            [--nocrypto] [--nopassphrase] [-q] [--stdin]
                             [--theme-map THEME_MAP] [-v]
                             [pwfile]
-
+    
     positional arguments:
       pwfile                path to the import/export file
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -397,6 +400,7 @@ Import allows a user to take an exported password file and import them into a ne
                             Path to the destination password store.
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       --nocrypto            Do not use a password for import/export files
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
@@ -414,14 +418,14 @@ Info displays metadata to the user about a given password
 .. code-block:: bash
 
     usage: pkpass.py info [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                          [--color COLOR] [-i IDENTITY] [--pwstore PWSTORE] [-q]
-                          [--theme-map THEME_MAP] [-v]
+                          [--color COLOR] [-i IDENTITY] [--no-cache]
+                          [--pwstore PWSTORE] [-q] [--theme-map THEME_MAP] [-v]
                           [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -430,12 +434,14 @@ Info displays metadata to the user about a given password
       --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
       -q, --quiet           quiet output (show errors only)
       --theme-map THEME_MAP
                             Map of colors to use for colorized output
+      -v, --verbose         verbose output (repeat for increased verbosity)
 
 Interpreter
 -----------
@@ -444,11 +450,12 @@ Creates an interactive session, the default behavior of pkpass if no arguments a
 .. code-block:: bash
 
     usage: pkpass.py interpreter [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                                 [--certpath CERTPATH] [--connect CONNECT]
-                                 [-e ESCROW_USERS] [-g GROUPS] [-i IDENTITY]
-                                 [--keypath KEYPATH] [-m MIN_ESCROW]
-                                 [--pwstore PWSTORE] [-q] [-v]
-
+                                 [--certpath CERTPATH] [--color COLOR]
+                                 [--connect CONNECT] [-e ESCROW_USERS] [-g GROUPS]
+                                 [-i IDENTITY] [--keypath KEYPATH] [-m MIN_ESCROW]
+                                 [--no-cache] [--pwstore PWSTORE] [-q]
+                                 [--theme-map THEME_MAP] [-v]
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -456,6 +463,7 @@ Creates an interactive session, the default behavior of pkpass if no arguments a
                             The slot number of the card that should be used
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
+      --color COLOR         Disable color or not, accepts true/false
       --connect CONNECT     Connection string for the api to retrieve certs
       -e ESCROW_USERS, --escrow_users ESCROW_USERS
                             Escrow users list is a comma sepearated list of
@@ -469,13 +477,14 @@ Creates an interactive session, the default behavior of pkpass if no arguments a
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --no-cache            if using a connector, pull the certs again
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
       -q, --quiet           quiet output (show errors only)
+      --theme-map THEME_MAP
+                            Map of colors to use for colorized output
       -v, --verbose         verbose output (repeat for increased verbosity)
-
-     -v, --verbose         verbose output (repeat for increased verbosity)
 
 List
 ----
@@ -484,10 +493,10 @@ List shows all passwords available to a given user
 .. code-block:: bash
 
     usage: pkpass.py list [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                          [--color COLOR] [-f FILTER] [-i IDENTITY]
+                          [--color COLOR] [-f FILTER] [-i IDENTITY] [--no-cache]
                           [--pwstore PWSTORE] [-q] [-r] [--stdin]
                           [--theme-map THEME_MAP] [-v]
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -498,6 +507,7 @@ List shows all passwords available to a given user
                             Reduce output of commands to matching items
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
@@ -518,9 +528,9 @@ List the recipients that pkpass knows about
 
     usage: pkpass.py listrecipients [-h] [--cabundle CABUNDLE]
                                     [--certpath CERTPATH] [--color COLOR]
-                                    [-f FILTER] [-i IDENTITY] [-q] [--stdin]
-                                    [--theme-map THEME_MAP] [-v]
-
+                                    [-f FILTER] [-i IDENTITY] [--no-cache] [-q]
+                                    [--stdin] [--theme-map THEME_MAP] [-v]
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -531,6 +541,7 @@ List the recipients that pkpass knows about
                             Reduce output of commands to matching items
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       -q, --quiet           quiet output (show errors only)
       --stdin               Take all password input from stdin instead of from a
                             user input prompt
@@ -545,14 +556,14 @@ Modify the metadata of a given password
 .. code-block:: bash
 
     usage: pkpass.py modify [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
-                            [--color COLOR] [-i IDENTITY] [--pwstore PWSTORE] [-q]
-                            [--theme-map THEME_MAP] [-v]
+                            [--color COLOR] [-i IDENTITY] [--no-cache]
+                            [--pwstore PWSTORE] [-q] [--theme-map THEME_MAP] [-v]
                             [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -561,6 +572,7 @@ Modify the metadata of a given password
       --color COLOR         Disable color or not, accepts true/false
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
+      --no-cache            if using a connector, pull the certs again
       --pwstore PWSTORE, --srcpwstore PWSTORE
                             Path to the source password store. Defaults to
                             "./passwords"
@@ -578,9 +590,10 @@ This requires password owners to have created escrow users. Each necessary escro
 
     usage: pkpass.py recover [-h] [--cabundle CABUNDLE] [--certpath CERTPATH]
                              [--color COLOR] [-e ESCROW_USERS] [-i IDENTITY]
-                             [--keypath KEYPATH] [-m MIN_ESCROW] [--nosign]
-                             [--pwstore PWSTORE] [-q] [--theme-map THEME_MAP] [-v]
-
+                             [--keypath KEYPATH] [-m MIN_ESCROW] [--no-cache]
+                             [--nosign] [--pwstore PWSTORE] [-q]
+                             [--theme-map THEME_MAP] [-v]
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -597,6 +610,7 @@ This requires password owners to have created escrow users. Each necessary escro
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --no-cache            if using a connector, pull the certs again
       --nosign              Do not digitally sign the password information that
                             you are generating
       --pwstore PWSTORE, --srcpwstore PWSTORE
@@ -615,16 +629,16 @@ This renames a password in the given repository
 
     usage: pkpass.py rename [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR] [-i IDENTITY]
-                            [--keypath KEYPATH] [--nopassphrase] [--overwrite]
-                            [--pwstore PWSTORE] [-q] [--stdin]
+                            [--keypath KEYPATH] [--no-cache] [--nopassphrase]
+                            [--overwrite] [--pwstore PWSTORE] [-q] [--stdin]
                             [--theme-map THEME_MAP] [-v]
                             [pwname] [rename]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
       rename                New name of the password.
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -637,6 +651,7 @@ This renames a password in the given repository
                             Override identity of user running the program
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
+      --no-cache            if using a connector, pull the certs again
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --overwrite           Overwrite a password that already exists
@@ -658,15 +673,15 @@ This unlocks a password and displays it on stdout
 
     usage: pkpass.py show [-h] [-a] [--cabundle CABUNDLE] [-c CARD_SLOT]
                           [--certpath CERTPATH] [--color COLOR] [-i IDENTITY] [-I]
-                          [--keypath KEYPATH] [--nopassphrase] [--noverify]
-                          [--pwstore PWSTORE] [-q] [-r] [--stdin]
+                          [--keypath KEYPATH] [--no-cache] [--nopassphrase]
+                          [--noverify] [--pwstore PWSTORE] [-q] [-r] [--stdin]
                           [--theme-map THEME_MAP] [-v]
                           [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       -a, --all             Show all available password to the given user, if a
@@ -683,6 +698,7 @@ This unlocks a password and displays it on stdout
       -I, --ignore-decrypt  Ignore decryption errors during show all process
       --keypath KEYPATH     Path to directory containing private keys. Keys must
                             end in '.key'
+      --no-cache            if using a connector, pull the certs again
       --nopassphrase, --nopin
                             Do not prompt for a pin/passphrase
       --noverify            Do not verify certificates and signatures
@@ -707,15 +723,16 @@ This changes a password value and redistributes the password to the recipients
     usage: pkpass.py update [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR]
                             [-e ESCROW_USERS] [-i IDENTITY] [--keypath KEYPATH]
-                            [-m MIN_ESCROW] [--noescrow] [--nopassphrase]
-                            [--nosign] [--overwrite] [--pwstore PWSTORE] [-q]
-                            [--stdin] [--theme-map THEME_MAP] [-v]
+                            [-m MIN_ESCROW] [--no-cache] [--noescrow]
+                            [--nopassphrase] [--nosign] [--overwrite]
+                            [--pwstore PWSTORE] [-q] [--stdin]
+                            [--theme-map THEME_MAP] [-v]
                             [pwname]
-
+    
     positional arguments:
       pwname                Name of the password. Ex:
                             passwords/team/infrastructure/root
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       --cabundle CABUNDLE   Path to CA certificate bundle file
@@ -734,6 +751,7 @@ This changes a password value and redistributes the password to the recipients
       -m MIN_ESCROW, --min_escrow MIN_ESCROW
                             Minimum number of users required to unlock escrowed
                             password
+      --no-cache            if using a connector, pull the certs again
       --noescrow            Do not use escrow functionality, ignore defaults in rc
                             file
       --nopassphrase, --nopin
