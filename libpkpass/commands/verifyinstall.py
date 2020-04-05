@@ -1,5 +1,4 @@
 """This is used to check the os requirements"""
-
 from os import path
 from shutil import which
 from libpkpass.commands.command import Command

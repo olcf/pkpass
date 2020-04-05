@@ -1,9 +1,7 @@
 """This module allows for the creation of passwords"""
 import getpass
-from builtins import input
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, PasswordMismatchError, BlankPasswordError
-
 
     ####################################################################
 class Create(Command):

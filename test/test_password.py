@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 """This Module tests the password entry module"""
-
 import unittest
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
-
 
 class TestBasicFunction(unittest.TestCase):
     """This Class tests the password entry class"""

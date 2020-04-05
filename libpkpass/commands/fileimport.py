@@ -1,6 +1,4 @@
 """This Module allows for the import of passwords"""
-
-from __future__ import print_function
 import getpass
 import os.path
 import yaml
@@ -8,7 +6,6 @@ import libpkpass.crypto as crypto
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, LegacyImportFormatError, FileOpenError
-
 
     ####################################################################
 class Import(Command):

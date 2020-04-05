@@ -1,18 +1,16 @@
 """This Module handles the identitydb object"""
-
-from __future__ import print_function
 import os
 import tempfile
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError, CliArgumentError
 
     ##########################################################################
-class IdentityDB(object):
+class IdentityDB():
     """ User database class.  Contains information about the identities of and
         things pertinent to recipients and their groups and keys.              """
     ##########################################################################
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
         self.cabundle = ""

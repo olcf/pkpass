@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """This module tests the recover module"""
-
 import unittest
 import libpkpass.escrow as escrow
 

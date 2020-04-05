@@ -1,7 +1,4 @@
 """This module handles the CLI for password recovery"""
-
-from __future__ import print_function
-from builtins import input
 from libpkpass.escrow import pk_recover_secret
 from libpkpass.commands.command import Command
 

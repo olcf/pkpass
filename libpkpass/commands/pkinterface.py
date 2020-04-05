@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """This is a super class to handle commonalities between the cli and interpreter"""
-
-from __future__ import print_function
 import argparse
 import os
 import libpkpass.util as util

@@ -6,8 +6,6 @@
 
 # We need to disable unused import linting because the command classes *are* actually used...
 # pylint: disable=unused-import
-
-from __future__ import print_function
 import os
 import sys
 import glob

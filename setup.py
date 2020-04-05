@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # Note: to use the 'upload' functionality of this file, you must:
 # $ pip install twine
-
-from __future__ import print_function
 import os
 import shutil
 from shutil import rmtree
@@ -16,9 +14,8 @@ REQUIRED = [
     'colored>=1.4.0',
     'cryptography>=2.3',
     'exrex>=0.10.5',
-    'future>=0.17.1',
-    'pyseltongue>=0.3.1',
     'pyperclip>=1.6.0',
+    'pyseltongue>=0.3.1',
     'PyYAML>=4.2b1',
     'setuptools>=41.2.0'
 ]

@@ -1,9 +1,6 @@
 """This module allows for the updating of passwords"""
-
-from __future__ import print_function
 import getpass
 import os
-from builtins import input
 import libpkpass.util as util
 from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command

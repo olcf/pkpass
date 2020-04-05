@@ -1,6 +1,4 @@
 """This Module allows for the export of passwords for the purpose of importing to a new card"""
-
-from __future__ import print_function
 import os
 import getpass
 from libpkpass.commands.command import Command
