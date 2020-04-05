@@ -1,6 +1,7 @@
 """This Module handles the identitydb object"""
 import os
 import tempfile
+import threading
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError, CliArgumentError
 
@@ -77,12 +78,22 @@ class IdentityDB():
         if certpath:
             self._load_from_directory(certpath, 'certificate')
         if verify_on_load:
-            for key, _ in self.iddb.items():
-                self.verify_identity(key)
+            x_ls = self.iddb.keys()
+            thread_list = []
+            results = []
+            for username in x_ls:
+                thread = threading.Thread(target=self.verify_identity, args=(username, results))
+                thread_list.append(thread)
+            for thread in thread_list:
+                thread.start()
+            for thread in thread_list:
+                thread.join()
 
         #######################################################################
-    def verify_identity(self, identity):
-        """ Read in all rsa keys from directory and name them as found """
+    def verify_identity(self, identity, results):
+        """ Read in all rsa keys from directory and name them as found
+        results is a meaningless parameter, but is required to make threading work
+        """
         #######################################################################
         try:
             self.iddb[identity]['cabundle'] = self.cabundle

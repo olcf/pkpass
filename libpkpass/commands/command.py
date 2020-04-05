@@ -372,14 +372,14 @@ class Command():
         if not swap_list:
             swap_list = self.escrow_and_recipient_list
         for recipient in swap_list:
-            self.identities.verify_identity(recipient)
+            self.identities.verify_identity(recipient, [])
             if recipient not in self.identities.iddb.keys():
                 raise CliArgumentError(
                     "Error: Recipient '%s' is not in the recipient database" %
                     recipient)
 
         if self.args['identity'] in self.identities.iddb.keys():
-            self.identities.verify_identity(self.args['identity'])
+            self.identities.verify_identity(self.args['identity'], [])
         else:
             raise CliArgumentError(
                 "Error: Your user '%s' is not in the recipient database" %
