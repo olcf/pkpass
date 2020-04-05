@@ -8,7 +8,7 @@ from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOErro
 import libpkpass.crypto as crypto
 
     #######################################################################
-class PasswordEntry(object):
+class PasswordEntry():
     """ Password entry object.  Contains information about a password and
     related metadata, as well as a list of individually encrypted strings"""
     ##########################################################################
@@ -110,10 +110,10 @@ class PasswordEntry(object):
         #######################################################################
         if recipients is None:
             recipients = []
-        for recipient in recipients:
-            self.recipients[recipient] = self._add_recipient(recipient, secret, distributor,
-                                                             identitydb, encryption_algorithm, passphrase,
-                                                             card_slot)
+
+        self.recipients = {r:self._add_recipient(
+            r, secret, distributor, identitydb, encryption_algorithm, passphrase, card_slot
+        ) for r in recipients}
         if escrow_users:
             #escrow_users may now be none after the set operations
             if (len(escrow_users) > 3) and (len(list((set(escrow_users) - set(recipients)))) < 3):
@@ -145,7 +145,8 @@ class PasswordEntry(object):
             identitydb=None,
             encryption_algorithm='rsautl',
             passphrase=None,
-            card_slot=None):
+            card_slot=None,
+    ):
         """Add recipient or sharer to list"""
         #######################################################################
         try:

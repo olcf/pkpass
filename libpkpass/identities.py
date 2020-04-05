@@ -1,7 +1,7 @@
 """This Module handles the identitydb object"""
 import os
 import tempfile
-import threading
+from threading import Thread
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError, CliArgumentError
 
@@ -78,15 +78,12 @@ class IdentityDB():
         if certpath:
             self._load_from_directory(certpath, 'certificate')
         if verify_on_load:
-            x_ls = self.iddb.keys()
-            thread_list = []
-            results = []
-            for username in x_ls:
-                thread = threading.Thread(target=self.verify_identity, args=(username, results))
-                thread_list.append(thread)
-            for thread in thread_list:
-                thread.start()
-            for thread in thread_list:
+            threads = []
+            for identity, _ in self.iddb.items():
+                threads.append(Thread(target=self.verify_identity,
+                                      args=(identity, [])))
+                threads[-1].start()
+            for thread in threads:
                 thread.join()
 
         #######################################################################
