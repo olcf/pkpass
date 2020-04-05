@@ -1,6 +1,4 @@
 """This module allows for the automated generation of passwords"""
-from __future__ import print_function
-from builtins import input
 import re
 import exrex
 from libpkpass.commands.command import Command

@@ -1,6 +1,4 @@
 """This module is used to process the decryption of keys"""
-
-from __future__ import print_function
 import os
 import fnmatch
 from libpkpass.commands.command import Command

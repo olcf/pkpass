@@ -1,6 +1,4 @@
 """This Module defines what a password contains"""
-
-from __future__ import print_function
 import uuid
 import time
 import os

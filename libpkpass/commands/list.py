@@ -1,11 +1,8 @@
 """This Module allows for the listing of users passwords"""
-
-from __future__ import print_function
 from libpkpass.util import dictionary_filter
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError
-
 
     ####################################################################
 class List(Command):

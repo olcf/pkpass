@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """This Module implements a CLI"""
-
-from __future__ import print_function
 import libpkpass.util as util
 import libpkpass.commands.pkinterface as pkinterface
 import libpkpass.commands.interpreter as interpreter

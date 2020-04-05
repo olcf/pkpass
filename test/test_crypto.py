@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 """This Module tests crypto functionality"""
-
-from __future__ import print_function
 import unittest
 import libpkpass.crypto as crypto
 from libpkpass.identities import IdentityDB
-
 
 class TestBasicFunction(unittest.TestCase):
     """This class tests the crypto class"""

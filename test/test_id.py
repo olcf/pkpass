@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 """This Module tests iddb module"""
-
 import unittest
 import os.path
 from libpkpass.identities import IdentityDB
-
 
 class TestBasicFunction(unittest.TestCase):
     """This class tests the iddb class"""

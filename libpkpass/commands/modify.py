@@ -1,12 +1,8 @@
 """This Module allows for editing metadata of passwords"""
-
-from __future__ import print_function
 import os
-from builtins import input
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
-
 
     ####################################################################
 class Modify(Command):

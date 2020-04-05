@@ -1,10 +1,7 @@
 """This module allows for the creation of passwords"""
-from __future__ import print_function
 import sys
-from builtins import input
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError
-
 
 class Delete(Command):
     """This class implements the CLI functionality of deletion of passwords"""

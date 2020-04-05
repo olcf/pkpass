@@ -1,6 +1,4 @@
 """This Module allows for copying a password directly to the clipboard"""
-
-from __future__ import print_function
 import time
 import os
 import pyperclip

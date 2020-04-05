@@ -1,13 +1,9 @@
 """This module is a generic for all pkpass commands"""
-
-from __future__ import print_function
 import sys
 import getpass
 import json
 import os
 import yaml
-from six import iteritems
-from six import string_types
 import libpkpass.util as util
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.password import PasswordEntry
@@ -16,9 +12,8 @@ from libpkpass.crypto import print_card_info
 from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
         PasswordIOError, JsonArgumentError, NotThePasswordOwnerError, ConfigParseError
 
-
     ##########################################################################
-class Command(object):
+class Command():
     """ Base class for all commands.  Auotmatically registers with cli subparser
     and provides run execution for itself.                                     """
     ##########################################################################
@@ -84,7 +79,7 @@ class Command(object):
         if argname in self.args:
             self.args[argname] = self.args[argname].split(",") if self.args[argname] else []
             self.args[argname] = [arg.strip() for arg in self.args[argname] if arg.strip()]
-        elif isinstance(argname, string_types):
+        elif isinstance(argname, str):
             argname = argname.split(",") if argname else []
             return [arg.strip() for arg in argname if arg.strip()]
         return None
@@ -92,7 +87,7 @@ class Command(object):
         ##################################################################
     def _handle_boolean_args(self, argname):
         ##################################################################
-        if isinstance(self.args[argname], string_types):
+        if isinstance(self.args[argname], str):
             return self.args[argname].upper() == 'TRUE'
         return self.args[argname]
 
@@ -124,7 +119,7 @@ class Command(object):
         self._handle_filepath_args()
 
         fles = ['cabundle', 'pwstore']
-        for key, value in iteritems(cli_args):
+        for key, value in cli_args.items():
             if value is not None or key not in self.args:
                 self.args[key] = value
             if key in fles and not os.path.exists(self.args[key]):

@@ -1,10 +1,7 @@
 """This Module allows for the listing of recipients"""
-
-from __future__ import print_function
 import libpkpass.util as util
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
-
 
     ####################################################################
 class Listrecipients(Command):

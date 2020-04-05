@@ -1,8 +1,6 @@
 """This module allows for the creation of passwords"""
-from __future__ import print_function
 import os
 import sys
-from builtins import input
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError

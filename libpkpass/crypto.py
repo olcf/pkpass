@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """This Module handles the crypto functions i.e. encryption and decryption"""
-
-from __future__ import print_function
 import base64
 import tempfile
 import os
@@ -14,14 +12,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from libpkpass.util import color_prepare
 from libpkpass.errors import EncryptionError, DecryptionError, SignatureCreationError, X509CertificateError
-
-    ##############################################################################
-def handle_python_strings(string):
-    """handles py2/3 incompatiblities"""
-    ##############################################################################
-    if not isinstance(string, bytes):
-        string = string.encode("ASCII")
-    return string
 
     ##############################################################################
 def pk_encrypt_string(plaintext_string, identity):
@@ -39,9 +29,9 @@ def pk_encrypt_string(plaintext_string, identity):
     ciphertext_derived_key = stdout
 
     fern = Fernet(plaintext_derived_key)
-    encrypted_string = fern.encrypt(handle_python_strings(plaintext_string))
+    encrypted_string = fern.encrypt(plaintext_string.encode("ASCII"))
 
-    return (encrypted_string, base64.urlsafe_b64encode(handle_python_strings(ciphertext_derived_key)))
+    return (encrypted_string, base64.urlsafe_b64encode(ciphertext_derived_key))
 
     ##############################################################################
 def print_card_info(card_slot, identity, verbosity, color, theme_map):
@@ -51,7 +41,7 @@ def print_card_info(card_slot, identity, verbosity, color, theme_map):
         command = ['pkcs11-tool', '-L']
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate()
-        out_list = handle_python_strings(stdout).split(b'Slot')
+        out_list = stdout.split(b'Slot')
         if verbosity > 1:
             print_all_slots(stdout, color, theme_map)
         for out in out_list[1:]:
@@ -68,14 +58,13 @@ def print_all_slots(slot_info, color, theme_map):
     ##############################################################################
     columns = int(shutil.get_terminal_size().columns) // 4
     print(color_prepare("#" * columns, "debug", color, theme_map))
-    print(handle_python_strings(slot_info).decode("ASCII").strip())
+    print(slot_info.decode("ASCII").strip())
     print(color_prepare("#" * columns, "debug", color, theme_map))
 
     ##############################################################################
 def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None):
     """ Decrypt a base64 encoded string for the provided identity"""
     ##############################################################################
-    ciphertext_derived_key = handle_python_strings(ciphertext_derived_key)
     if 'key_path' in identity:
         command = ['openssl', 'rsautl', '-inkey', identity['key_path'], '-decrypt', '-pkcs']
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
@@ -107,7 +96,7 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
 
     fern = Fernet(plaintext_derived_key)
 
-    plaintext_string = fern.decrypt(handle_python_strings(ciphertext_string))
+    plaintext_string = fern.decrypt(ciphertext_string)
     return plaintext_string.decode("ASCII")
 
     ##############################################################################
@@ -119,7 +108,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         command = ['openssl', 'rsautl', '-sign', '-inkey', identity['key_path']]
         proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         stdout, _ = proc.communicate(input=stringhash.encode('ASCII'))
-        signature = base64.urlsafe_b64encode(handle_python_strings(stdout))
+        signature = base64.urlsafe_b64encode(stdout)
     else:
         # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
         # command line (insecure) or via stdin.  So, we have to put signature text
@@ -136,7 +125,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         out.close()
 
         with open(out.name, 'rb') as sigfile:
-            signature = base64.urlsafe_b64encode(handle_python_strings(sigfile.read()))
+            signature = base64.urlsafe_b64encode(sigfile.read())
 
         os.unlink(fname.name)
         os.unlink(out.name)
@@ -153,7 +142,7 @@ def pk_verify_signature(string, signature, identity):
     stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
     command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-verify']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature)))
+    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(signature))
 
     return stdout.decode("ASCII") == stringhash
 
@@ -227,16 +216,15 @@ def sk_encrypt_string(plaintext_string, key):
     ##############################################################################
     fern = Fernet(hash_password(key))
     encrypted_string = fern.encrypt(plaintext_string.encode('ASCII'))
-    return base64.urlsafe_b64encode(handle_python_strings(encrypted_string))
+    return base64.urlsafe_b64encode(encrypted_string)
 
     ##############################################################################
 def sk_decrypt_string(ciphertext_string, key):
     """ Symmetrically Decrypt a base64 encoded string using the provided key"""
     ##############################################################################
     fern = Fernet(hash_password(key))
-    ciphertext_string = handle_python_strings(ciphertext_string)
     try:
-        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(handle_python_strings(ciphertext_string)))
+        plaintext_string = fern.decrypt(base64.urlsafe_b64decode(ciphertext_string))
         return plaintext_string.decode("ASCII")
     except InvalidToken:
         # handle some legacy stuff from NCCS
@@ -250,7 +238,6 @@ def sk_decrypt_string(ciphertext_string, key):
 def hash_password(password):
     """Hash people's password"""
     ##############################################################################
-    password = handle_python_strings("%s" % password)
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
                      iterations=100000, backend=default_backend())
-    return base64.urlsafe_b64encode(handle_python_strings(kdf.derive(password)))
+    return base64.urlsafe_b64encode(kdf.derive(password))

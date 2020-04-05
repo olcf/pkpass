@@ -1,14 +1,10 @@
 """This Modules allows for distributing created passwords to other users"""
-from __future__ import print_function
-import fnmatch
 import os
-from builtins import input
 import libpkpass.util as util
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
-
 
     ####################################################################
 class Distribute(Command):

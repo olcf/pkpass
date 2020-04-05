@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """This module tests the list module"""
-
-from __future__ import absolute_import
 import unittest
 import argparse
 import mock
