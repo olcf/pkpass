@@ -5,7 +5,7 @@ from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError
 
     ##############################################################################
-class PasswordDB(object):
+class PasswordDB():
     """ Password database object.  Gets and retrieves password entries from places
         passwords are stored"""
     ##############################################################################
