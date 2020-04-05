@@ -5,7 +5,7 @@ import tempfile
 import os
 import hashlib
 import shutil
-from subprocess import Popen, PIPE, STDOUT, DEVNULL
+from subprocess import Popen, PIPE, STDOUT
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -81,7 +81,9 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         if card_slot is not None:
             command.extend(['--reader', str(card_slot)])
         command.extend(['--pin', '-'])
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL)
+        #subprocess.DEVNULL doesn't exist in python2 so...
+        with open(os.devnull, 'w') as devnull:
+            proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=devnull)
         stdout, _ = proc.communicate(input=passphrase.encode('ASCII'))
         os.unlink(fname.name)
         try:
