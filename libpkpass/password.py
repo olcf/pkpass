@@ -208,7 +208,7 @@ class PasswordEntry():
         identitydb = iddb.iddb
         recipient_entry = self.recipients[uid].copy()
         distributor = recipient_entry['distributor']
-        iddb.verify_identity(distributor)
+        iddb.verify_identity(distributor, [])
         signature = recipient_entry.pop('signature')
         message = self._create_signable_string(recipient_entry)
         sig_ok = crypto.pk_verify_signature(
