@@ -1,5 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This Module handles the CLI and any error that comes from it"""
+import sys
+if sys.version_info[0] < 3:
+    raise Exception('Python version 3 is required 3.5 and higher is actively tested')
+
+# pylint: disable=wrong-import-position
+# Reasoning for the disablement is because we want people to not try to run with python2
 import traceback
 from libpkpass.errors import PKPassError
 from libpkpass.commands.cli import Cli
