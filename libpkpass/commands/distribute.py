@@ -47,6 +47,7 @@ class Distribute(Command):
                         passphrase=self.passphrase,
                         card_slot=self.args['card_slot'])
 
+                    password.read_password_data(dist_pass)
                     password.add_recipients(secret=plaintext_pw,
                                             distributor=self.args['identity'],
                                             recipients=self.recipient_list,

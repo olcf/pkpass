@@ -111,9 +111,10 @@ class PasswordEntry():
         if recipients is None:
             recipients = []
 
-        self.recipients = {r:self._add_recipient(
+        new_recipients = {r:self._add_recipient(
             r, secret, distributor, identitydb, encryption_algorithm, passphrase, card_slot
         ) for r in recipients}
+        self.recipients.update(new_recipients)
         if escrow_users:
             #escrow_users may now be none after the set operations
             if (len(escrow_users) > 3) and (len(list((set(escrow_users) - set(recipients)))) < 3):
