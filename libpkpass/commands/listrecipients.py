@@ -40,10 +40,13 @@ class Listrecipients(Command):
         """Print off identity"""
         ####################################################################
         print("%s" % self.color_print(self.identities.iddb[key]['uid'] + ":", "first_level"))
-        for info in ['verified', 'subject', 'subjecthash', 'issuer', 'issuerhash', 'fingerprint', 'enddate']:
-            print("\t%s %s" %
-                  (self.color_print(info + ":", "second_level"),
-                   self.identities.iddb[key][info]))
+        print("\t%s" % self.color_print("certs:", "second_level"))
+        for cert in self.identities.iddb[key]['certs']:
+            for info in ['verified', 'subject', 'subjecthash', 'issuer', 'issuerhash', 'fingerprint', 'enddate']:
+                print("\t\t%s %s" %
+                      (self.color_print(info + ":", "third_level"),
+                       cert[info]))
+            print()
 
         ####################################################################
     def _validate_args(self):

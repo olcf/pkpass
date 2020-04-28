@@ -6,6 +6,7 @@ import os
 import hashlib
 import shutil
 from subprocess import Popen, PIPE, STDOUT, DEVNULL
+from pem import parse_file
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -22,15 +23,18 @@ def handle_python_strings(string):
     return string
 
     ##############################################################################
-def pk_encrypt_string(plaintext_string, identity):
+def pk_encrypt_string(plaintext_string, certificate):
     """ Encrypt and return a base 64 encoded string for the provided identity"""
     ##############################################################################
 
     plaintext_derived_key = Fernet.generate_key()
 
-    command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-encrypt', '-pkcs']
+    with tempfile.NamedTemporaryFile(delete=False) as fname:
+        fname.write(certificate)
+    command = ['openssl', 'rsautl', '-inkey', fname.name, '-certin', '-encrypt', '-pkcs']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate(input=plaintext_derived_key)
+    os.unlink(fname.name)
 
     if proc.returncode != 0:
         raise EncryptionError("Error encrypting derived key: %s" % stdout)
@@ -147,68 +151,74 @@ def pk_verify_signature(string, signature, identity):
     """ Compute the hash of string and verify the digital signature """
     ##############################################################################
     stringhash = hashlib.sha256(string.encode("ASCII")).hexdigest()
-    command = ['openssl', 'rsautl', '-inkey', identity['certificate_path'], '-certin', '-verify']
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature)))
+    for cert in parse_file(identity['certificate_path']):
+        with tempfile.NamedTemporaryFile(delete=False) as fname:
+            fname.write(cert.as_bytes())
+        command = ['openssl', 'rsautl', '-inkey', fname.name, '-certin', '-verify']
+        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        stdout, _ = proc.communicate(input=base64.urlsafe_b64decode(handle_python_strings(signature)))
+        os.unlink(fname.name)
+        if stdout.decode("ASCII") == stringhash:
+            return True
 
     return stdout.decode("ASCII") == stringhash
 
     ##############################################################################
-def pk_verify_chain(identity):
+def pk_verify_chain(certificate, cabundle):
     """ Verify the publickey trust chain against a CA Bundle and return True if valid"""
     ##############################################################################
-    command = ['openssl', 'verify', '-CAfile', identity['cabundle'], identity['certificate_path']]
+    command = ['openssl', 'verify', '-CAfile', cabundle]
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate()
+    stdout, _ = proc.communicate(input=certificate)
 
-    return stdout.decode("ASCII").rstrip() == "%s: OK" % identity['certificate_path']
+    return stdout.decode("ASCII").rstrip() == "stdin: OK"
 
     ##############################################################################
-def get_cert_fingerprint(identity):
+def get_cert_fingerprint(cert):
     """ Return the modulus of the x509 certificate of the identity """
     ##############################################################################
     # SHA1 Fingerprint=F9:9D:71:54:55:BE:99:24:6A:5E:E0:BB:48:F9:63:AE:A2:05:54:98
-    return get_cert_element(identity, 'fingerprint').split('=')[1]
+    return get_cert_element(cert, 'fingerprint').split('=')[1]
 
     ##############################################################################
-def get_cert_subject(identity):
+def get_cert_subject(cert):
     """ Return the subject DN of the x509 certificate of the identity """
     ##############################################################################
     # subject= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return ' '.join(get_cert_element(identity, 'subject').split(' ')[1:])
+    return ' '.join(get_cert_element(cert, 'subject').split(' ')[1:])
 
     ##############################################################################
-def get_cert_issuer(identity):
+def get_cert_issuer(cert):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
     # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return ' '.join(get_cert_element(identity, 'issuer').split(' ')[1:])
+    return ' '.join(get_cert_element(cert, 'issuer').split(' ')[1:])
 
     ##############################################################################
-def get_cert_enddate(identity):
+def get_cert_enddate(cert):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_cert_element(identity, 'enddate').split('=')[1]
+    return get_cert_element(cert, 'enddate').split('=')[1]
 
     ##############################################################################
-def get_cert_issuerhash(identity):
+def get_cert_issuerhash(cert):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_cert_element(identity, 'issuer_hash')
+    return get_cert_element(cert, 'issuer_hash')
 
     ##############################################################################
-def get_cert_subjecthash(identity):
+def get_cert_subjecthash(cert):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_cert_element(identity, 'subject_hash')
+    return get_cert_element(cert, 'subject_hash')
 
     ##############################################################################
-def get_cert_element(identity, element):
+def get_cert_element(cert, element):
     """ Return an arbitrary element of an x509 certificate """
     ##############################################################################
-    command = ['openssl', 'x509', '-in', identity['certificate_path'], '-noout', ("-%s" % element)]
+    command = ['openssl', 'x509', '-noout', ("-%s" % element)]
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate()
+    stdout, _ = proc.communicate(input=cert)
     if proc.returncode != 0:
         raise X509CertificateError(stdout)
 

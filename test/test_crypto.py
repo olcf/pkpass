@@ -22,13 +22,13 @@ class TestBasicFunction(unittest.TestCase):
         """Test encrypting a string"""
         results = []
         for _, identity in self.identities.iddb.items():
-            results.append(crypto.pk_encrypt_string(self.plaintext, identity))
+            results.append(crypto.pk_encrypt_string(self.plaintext, identity['certs'][0]['cert_bytes']))
         self.assertTrue(results[0] != results[1])
 
     # Encrypt/Decrypt strings for all test identities and make sure we get back what we put in
         for _, identity in self.identities.iddb.items():
             (ciphertext, derived_key) = crypto.pk_encrypt_string(
-                self.plaintext, identity)
+                self.plaintext, identity['certs'][0]['cert_bytes'])
             plaintext = crypto.pk_decrypt_string(
                 ciphertext, derived_key, identity, None)
             self.assertEqual(self.plaintext, plaintext)
@@ -49,7 +49,7 @@ class TestBasicFunction(unittest.TestCase):
     def test_cert_fingerprint(self):
         """Verify fingerprint is correct"""
         for _, identity in self.identities.iddb.items():
-            fingerprint = crypto.get_cert_fingerprint(identity)
+            fingerprint = crypto.get_cert_fingerprint(identity['certs'][0]['cert_bytes'])
             self.assertTrue(len(fingerprint.split(':')) == 20)
 
 
