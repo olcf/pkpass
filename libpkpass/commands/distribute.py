@@ -35,6 +35,7 @@ class Distribute(Command):
             db_len = len(passworddb.pwdb.keys())
             i = 0
             self.progress_bar(i, db_len)
+            self.recipient_list.append(str(self.args['identity']))
             for dist_pass, _ in passworddb.pwdb.items():
                 password = PasswordEntry()
                 password.read_password_data(dist_pass)

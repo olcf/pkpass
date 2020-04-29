@@ -47,7 +47,7 @@ class Show(Command):
                             root, password, myidentity, pwname)
                     except DecryptionError as err:
                         if ignore_decrypt:
-                            print(err.msg)
+                            print(err)
                             continue
                         raise
                     except NotARecipientError:

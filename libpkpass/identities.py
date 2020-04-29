@@ -2,6 +2,7 @@
 import os
 import tempfile
 from threading import Thread
+from pem import parse_file
 import libpkpass.crypto as crypto
 from libpkpass.errors import FileOpenError, CliArgumentError
 
@@ -94,16 +95,19 @@ class IdentityDB():
         #######################################################################
         try:
             self.iddb[identity]['cabundle'] = self.cabundle
-            self.iddb[identity]['verified'] = crypto.pk_verify_chain(self.iddb[identity])
-            self.iddb[identity]['fingerprint'] = crypto.get_cert_fingerprint(
-                self.iddb[identity])
-            self.iddb[identity]['subject'] = crypto.get_cert_subject(self.iddb[identity])
-            self.iddb[identity]['issuer'] = crypto.get_cert_issuer(self.iddb[identity])
-            self.iddb[identity]['enddate'] = crypto.get_cert_enddate(self.iddb[identity])
-            self.iddb[identity]['issuerhash'] = crypto.get_cert_issuerhash(
-                self.iddb[identity])
-            self.iddb[identity]['subjecthash'] = crypto.get_cert_subjecthash(
-                self.iddb[identity])
+            self.iddb[identity]['certs'] = []
+            for cert in parse_file(self.iddb[identity]['certificate_path']):
+                cert = cert.as_bytes()
+                cert_dict = {}
+                cert_dict['cert_bytes'] = cert
+                cert_dict['verified'] = crypto.pk_verify_chain(cert, self.iddb[identity]['cabundle'])
+                cert_dict['fingerprint'] = crypto.get_cert_fingerprint(cert)
+                cert_dict['subject'] = crypto.get_cert_subject(cert)
+                cert_dict['issuer'] = crypto.get_cert_issuer(cert)
+                cert_dict['enddate'] = crypto.get_cert_enddate(cert)
+                cert_dict['issuerhash'] = crypto.get_cert_issuerhash(cert)
+                cert_dict['subjecthash'] = crypto.get_cert_subjecthash(cert)
+                self.iddb[identity]['certs'].append(cert_dict)
         except KeyError:
             raise CliArgumentError(
                 "Error: Recipient '%s' is not in the recipient database" % identity)

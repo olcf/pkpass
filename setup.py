@@ -11,13 +11,14 @@ from setuptools import setup, Command
 import versioneer
 
 REQUIRED = [
+    'PyYAML>=4.2b1',
     'colored>=1.4.0',
     'cryptography>=2.3',
     'exrex>=0.10.5',
+    'pem>=20.1.0'
     'pyperclip>=1.6.0',
     'pyseltongue>=0.3.1',
-    'PyYAML>=4.2b1',
-    'setuptools>=41.2.0'
+    'setuptools>=41.2.0',
 ]
 
 HOME = os.path.expanduser("~")

@@ -2,6 +2,7 @@
 import uuid
 import time
 import os
+from subprocess import Popen, PIPE, STDOUT
 import yaml
 from libpkpass.escrow import pk_split_secret
 from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError
@@ -137,6 +138,7 @@ class PasswordEntry():
                 escrow_users=escrow_users,
                 minimum=minimum)
 
+
         #######################################################################
     def _add_recipient(
             self,
@@ -151,25 +153,31 @@ class PasswordEntry():
         """Add recipient or sharer to list"""
         #######################################################################
         try:
-            if encryption_algorithm == 'rsautl':
-                (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
-                    secret, identitydb.iddb[recipient])
-            recipient_entry = {'encrypted_secret': encrypted_secret,
-                               'derived_key': encrypted_derived_key,
-                               'distributor': distributor,
-                               'distributor_hash': identitydb.iddb[distributor]['subjecthash'],
-                               'recipient_hash': identitydb.iddb[recipient]['subjecthash'],
-                               # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
-                               # 'recipient_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[recipient] ),
-                               'encryption_algorithm': encryption_algorithm,
-                               'timestamp': time.time()}
-
+            encrypted_secrets = {}
+            for cert in identitydb.iddb[recipient]['certs']:
+                if encryption_algorithm == 'rsautl':
+                    (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
+                        secret, cert['cert_bytes'])
+                encrypted_secrets[cert['fingerprint']] = {
+                    'encrypted_secret': encrypted_secret,
+                    'derived_key': encrypted_derived_key,
+                    'recipient_hash': cert['subjecthash'],
+                }
+            recipient_entry = {
+                'encrypted_secrets': encrypted_secrets,
+                # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
+                # 'recipient_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[recipient] ),
+                'encryption_algorithm': encryption_algorithm,
+                'timestamp': time.time(),
+                'distributor': distributor,
+                'distributor_hash': get_distributor_hash(),
+            }
             message = self._create_signable_string(recipient_entry)
-
             recipient_entry['signature'] = crypto.pk_sign_string(
                 message,
                 identitydb.iddb[distributor],
-                passphrase, card_slot)
+                passphrase, card_slot
+            )
 
             return recipient_entry
         except KeyError:
@@ -190,12 +198,32 @@ class PasswordEntry():
                 (identity['uid'], self.metadata['name']))
 
         try:
+            # support old yaml format
             return crypto.pk_decrypt_string(
                 recipient_entry['encrypted_secret'],
                 recipient_entry['derived_key'],
                 identity,
                 passphrase,
                 card_slot)
+        except KeyError:
+            try:
+                command = ['pkcs15-tool', '--read-certificate', '1']
+                proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                stdout, _ = proc.communicate()
+                command = ['openssl', 'x509', '-noout', "-fingerprint"]
+                proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                stdout, _ = proc.communicate(input=stdout)
+                cert_key = stdout.decode("ASCII").rstrip().split('=')[1]
+                return crypto.pk_decrypt_string(
+                    recipient_entry['encrypted_secrets'][cert_key]['encrypted_secret'],
+                    recipient_entry['encrypted_secrets'][cert_key]['derived_key'],
+                    identity,
+                    passphrase,
+                    card_slot)
+            except DecryptionError:
+                raise DecryptionError(
+                    "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
+                    self.metadata['name'])
         except DecryptionError:
             raise DecryptionError(
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
@@ -214,9 +242,11 @@ class PasswordEntry():
         message = self._create_signable_string(recipient_entry)
         sig_ok = crypto.pk_verify_signature(
             message, signature, identitydb[distributor])
-        return {'distributor': distributor,
-                'sigOK': sig_ok,
-                'certOK': identitydb[distributor]['verified']}
+        return {
+            'distributor': distributor,
+            'sigOK': sig_ok,
+            'certOK': identitydb[distributor]['certs'][0]['verified']
+        }
 
         #######################################################################
     def _create_signable_string(self, recipient_entry):
@@ -227,7 +257,7 @@ class PasswordEntry():
         for key in sorted(recipient_entry.keys()):
             if key == 'timestamp':
                 recipient_entry[key] = "{0:12.2f}".format(float(recipient_entry[key]))
-            if key != 'signature':
+            if key not in ['signature', 'encrypted_secrets']:
                 if isinstance(recipient_entry[key], bytes):
                     recipient_entry[key] = recipient_entry[key].decode('ASCII')
                 message = message + str(key) + str(recipient_entry[key])
@@ -302,3 +332,15 @@ class PasswordEntry():
                     fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)
+
+    #######################################################################
+def get_distributor_hash():
+    """Return hash of cert distributor is using"""
+    #######################################################################
+    command = ['pkcs15-tool', '--read-certificate', '1']
+    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    stdout, _ = proc.communicate()
+    command = ['openssl', 'x509', '-noout', "-subject_hash"]
+    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    stdout, _ = proc.communicate(input=stdout)
+    return stdout.decode("ASCII").rstrip()
