@@ -9,11 +9,10 @@ from libpkpass.errors import CliArgumentError
 from .basetest.basetest import CONFIG, captured_output
 
 PASSWORD_LIST_0 = "Passwordsfor'r2':"
-PASSWORD_LIST_1 = "Passwordsfor'r1':test/passwords/test:Distributor:ginsburgnmName:test"
+PASSWORD_LIST_1 = "Passwordsfor'r1':test/passwords/test:Distributor:r1Name:test"
 
 class ListTests(unittest.TestCase):
     """This class tests the list class"""
-
 
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='list', identity='bleh',
@@ -41,10 +40,7 @@ class ListTests(unittest.TestCase):
         with captured_output() as (out, _):
             pklist.List(cli.Cli())
         output = "".join(out.getvalue().strip().split())
-        if output == PASSWORD_LIST_0:
-            ret = True
-        self.assertTrue(ret)
-
+        self.assertEqual(output, PASSWORD_LIST_0)
 
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='list', identity='r1',
@@ -57,9 +53,7 @@ class ListTests(unittest.TestCase):
         with captured_output() as (out, _):
             pklist.List(cli.Cli())
         output = "".join(out.getvalue().strip().split())
-        if output == PASSWORD_LIST_1:
-            ret = True
-        self.assertTrue(ret)
+        self.assertEqual(output, PASSWORD_LIST_1)
 
 if __name__ == '__main__':
     unittest.main()

@@ -156,8 +156,12 @@ class PasswordEntry():
             encrypted_secrets = {}
             for cert in identitydb.iddb[recipient]['certs']:
                 if encryption_algorithm == 'rsautl':
-                    (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
-                        secret, cert['cert_bytes'])
+                    if 'key_path' in identitydb.iddb[recipient].keys():
+                        (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
+                            secret, identitydb.iddb[recipient])
+                    else:
+                        (encrypted_secret, encrypted_derived_key) = crypto.pk_encrypt_string(
+                            secret, cert['cert_bytes'])
                 encrypted_secrets[cert['fingerprint']] = {
                     'encrypted_secret': encrypted_secret,
                     'derived_key': encrypted_derived_key,
@@ -207,19 +211,29 @@ class PasswordEntry():
                 card_slot)
         except KeyError:
             try:
-                command = ['pkcs15-tool', '--read-certificate', '1']
-                proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-                stdout, _ = proc.communicate()
-                command = ['openssl', 'x509', '-noout', "-fingerprint"]
-                proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-                stdout, _ = proc.communicate(input=stdout)
-                cert_key = stdout.decode("ASCII").rstrip().split('=')[1]
-                return crypto.pk_decrypt_string(
-                    recipient_entry['encrypted_secrets'][cert_key]['encrypted_secret'],
-                    recipient_entry['encrypted_secrets'][cert_key]['derived_key'],
-                    identity,
-                    passphrase,
-                    card_slot)
+                # support rsa
+                if 'key_path' in identity.keys():
+                    for _, value in recipient_entry['encrypted_secrets'].items():
+                        return crypto.pk_decrypt_string(
+                            value['encrypted_secret'],
+                            value['derived_key'],
+                            identity,
+                            passphrase
+                        )
+                else:
+                    command = ['pkcs15-tool', '--read-certificate', '1']
+                    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                    stdout, _ = proc.communicate()
+                    command = ['openssl', 'x509', '-noout', "-fingerprint"]
+                    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                    stdout, _ = proc.communicate(input=stdout)
+                    cert_key = stdout.decode("ASCII").rstrip().split('=')[1]
+                    return crypto.pk_decrypt_string(
+                        recipient_entry['encrypted_secrets'][cert_key]['encrypted_secret'],
+                        recipient_entry['encrypted_secrets'][cert_key]['derived_key'],
+                        identity,
+                        passphrase,
+                        card_slot)
             except DecryptionError:
                 raise DecryptionError(
                     "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """This module tests the rename module"""
+import builtins
 import unittest
 import argparse
 import mock
@@ -10,22 +11,6 @@ from .basetest.basetest import CONFIG, BADPIN
 
 class RenameTests(unittest.TestCase):
     """This class tests the rename class"""
-
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='rename', identity='r1',
-                                                nopassphrase="true",
-                                                all=None,
-                                                pwname='test',
-                                                rename='retest',
-                                                config=CONFIG))
-    def test_safe_error(self, subparser_name):
-        """test decryption functionality"""
-        ret = False
-        try:
-            rename.Rename(cli.Cli())
-        except DecryptionError:
-            ret = True
-        self.assertTrue(ret)
 
     @mock.patch('argparse.ArgumentParser.parse_args',
                 return_value=argparse.Namespace(subparser_name='rename', identity='bleh',
@@ -52,14 +37,26 @@ class RenameTests(unittest.TestCase):
                                                 rename='retest',
                                                 overwrite="true",
                                                 config=CONFIG))
-    def test_rename_decryption_error(self, subparser_name):
+    def test_rename_success(self, subparser_name):
         """test decryption functionality"""
-        ret = False
+        ret = True
         try:
-            rename.Rename(cli.Cli())
+            with mock.patch.object(builtins, 'input', lambda _: 'y'):
+                rename.Rename(cli.Cli())
+            with mock.patch('argparse.ArgumentParser.parse_args',
+                            return_value=argparse.Namespace(
+                                subparser_name='rename', identity='r1',
+                                nopassphrase="true",
+                                all=True,
+                                pwname='retest',
+                                rename='test',
+                                overwrite="true",
+                                config=CONFIG)):
+                with mock.patch.object(builtins, 'input', lambda _: 'y'):
+                    rename.Rename(cli.Cli())
         except DecryptionError as error:
             if error.msg == BADPIN:
-                ret = True
+                ret = False
         self.assertTrue(ret)
 
     @mock.patch('argparse.ArgumentParser.parse_args',
