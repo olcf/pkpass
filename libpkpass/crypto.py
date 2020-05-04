@@ -28,13 +28,17 @@ def pk_encrypt_string(plaintext_string, certificate):
     ##############################################################################
 
     plaintext_derived_key = Fernet.generate_key()
-
-    with tempfile.NamedTemporaryFile(delete=False) as fname:
-        fname.write(certificate)
-    command = ['openssl', 'rsautl', '-inkey', fname.name, '-certin', '-encrypt', '-pkcs']
+    if isinstance(certificate, bytes):
+        with tempfile.NamedTemporaryFile(delete=False) as fname:
+            fname.write(certificate)
+            cert_file_path = fname.name
+    else:
+        cert_file_path = certificate['certificate_path']
+    command = ['openssl', 'rsautl', '-inkey', cert_file_path, '-certin', '-encrypt', '-pkcs']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate(input=plaintext_derived_key)
-    os.unlink(fname.name)
+    if isinstance(certificate, bytes):
+        os.unlink(fname.name)
 
     if proc.returncode != 0:
         raise EncryptionError("Error encrypting derived key: %s" % stdout)

@@ -1,17 +1,45 @@
 metadata:
-  authorizer: ginsburgnm
-  creator: ginsburgnm
-  description: fake
+  authorizer: y
+  creator: r1
+  description: y
   name: test
   schemaVersion: v1
   signature: null
 recipients:
   r1:
-    derived_key: E5-IRUIY1QIkOAGMB1ZIHk3_jnnOgVk38KSrhNgyT_lUju-d50waQ70qL44ZjVyEj6zgllBCevsFJpZWFHjqhJQMI73gmwVD-qxuvj5RwkHgf1HrEpArmG3r_KJX3aCwqWKa6AVYWva-xaU48YHJpgbDz_isGV7_cqUWoyeKabddNqVw43dRjK-Ts5THyH5SoMJNfibKO3hOKF5B6fc83K2rydAYIIB5gWj3KQTQQI96xydpQ20Frq2R323kP27oghs3RovNkfPLK2YHYY6srC1Q8uy2QTH3k7gmLsYMt_xVbYNaOnqIyuyur4DOPodg5xA9P2cZoug197uNnYURIA==
-    distributor: ginsburgnm
+    distributor: r1
     distributor_hash: 374672d9
-    encrypted_secret: gAAAAABbaZvfWLaMT6VME57Kg8HwN1fQ4XCS7tMHuhXuJv4EQDIqqVVmaImsv-gxmrU8GqAVcGc_luJTK1X1MDKbjaPlj9Ej2Q==
+    encrypted_secrets:
+      AD:21:5F:4A:F8:8F:69:63:2A:43:34:CD:99:58:27:A1:02:C9:5D:FF:
+        derived_key: !!binary |
+          RFd6MUdqQ2FVREZWQlRBRFRyTVAxZ1pBSkNIUENlUW5JODN0eXRjRlN2dkQ2VnNMczN5bVozUnBZ
+          QXhTQkk4NGNud3VVRk9SWWVreURUdnMxeFlHRzlIczdqc29BR0tNZ1NPNFFSR2RhREZkV1ptcFNa
+          alFraW1PVXEzXzlPVGpyWmxseFlYYmJYQm95eFNONXlkVmRCdlFaaGFIMlBnOHpLZVEyajFNaUc2
+          LUJTLVp5VXFfQy1CbVVBd25Ib2JaVHV4dlhmSFQzZHN4alR2LVYyWEd0YkVNb0U2SHE5R3RrdU9U
+          RW5aTm1qNG1Pb0RQTGNUNDhRYWhPZ0RvbnVaaUtkYUt2TUV6QzAxRzBYWGp0d2pRWG9Ma25jcU0z
+          bXhQQldFc0ppdXBsRi1pQmhMWHBLY3hsMlRFeGhSSzZRZTd1c2xfRkt1OHpaVUE2SC1MV2R1dlk3
+          NVZNZHZ1cFowODVXOWtKTHlrTkI5TEowUWtzYTlYMlZ3RDhvbVRjSThFR0lDZk9kZzBZRl9xVzBt
+          aHRxUmdUcFNfbVR2REx6SUtvQ01heUlvWS0tMFZLbGdxRG9NSklTODZyUXh0ZXZjdlVNaUlObm03
+          YmNaUVNuZ0tsTFFWVTJ5dlhqUWp6Q3o1S3FZYmV0REgtQnVFYmFpUTlCVTFnN2luLUNFQ1gxSXla
+          OFFSczJGNGRidm5mN0o5MFRLVzV4V0lrV1YwVlNfOGtPNk13cGIxbnFVWkxxYlpMVjZWSmhyZE1B
+          Ml9fNmxEalpkdkFBWk9SSERkVm5abjNGR2JRYlZPWHQxeGdHcnVWakZqNGNyLWVYLXVUTzE2V3la
+          SDZUVXNtWHQ4YzExY3NYZmVDZkRYRGRtYy1raHZwVXkyYkxjbkdoYjFJYjIxZURDYlVvNEt1Yk09
+        encrypted_secret: !!binary |
+          Z0FBQUFBQmVzRUo5NGxLVDBTS1N4Q2E2LTAzVFpZRm5pTkVYR0F2RmEyNHJKTVRuNXlRWjl5emQ0
+          NzhXM1U3NFpwTkcxRnBsWk12Y0lvcUdRZGpPTE1Bd2RuWTBTZF9pdGc9PQ==
+        recipient_hash: 63b96030
     encryption_algorithm: rsautl
-    recipient_hash: 374672d9
-    signature: Tx0Q2zMVEygmulpnKYnZSAh3oZCmBYggd_RSCg8v0sbxcyvf6468ajDiX8tY87j4SPqsbLI1orD9QWOUp2Ve1s_i4FQ5TZRXGbsStobc6PzJ9GVEgCjKf2AJuiAbBN66ike2zZM8MBwH6LYNmW2fImno6SPGLD_t1_GApwR-yM7AZwIcCx0IuWqcYLpHN6JLSUVVyZ0n2A4OAkNEqI6OKESTi69KXEHM7pTrtHHO8rRs4uhKPSPE6Z4yXtBvteH_2xP-CCmpycpK_G_nBPrC3j5By9SGAHchj3CnK_mUZmDgq9fZf3i9ijlRa-BYdXaFh2n9XkD_zPtO-CZxqzNbag==
-    timestamp: 1533647839.652613
+    signature: !!binary |
+      WmdiWHVyZzh6ek12WVBWaXA1d1NnOEpqWjN3T1RGc21TZXlDdzQ2ZmR3eG9nOXk1LXVHWWMza0hT
+      Ymlab3VvME51NkNvMFBOQ2w0MXIwaGFiSjU1N3daT1dTZ01HSWpCdHoyU2FqLUpFcjN2M2FEYjd2
+      eDNicFotMUF2TGpWVHZKaWltTXRNT2RkbjdXelpiZ0xKU3lnbHg2X1ZER1FlR3pnWE5RemQycl8x
+      eWRpTjhxS2p4amJCN0RiMndKaE92YldfZVY3RWw3cU5pV0dwOUdfcWhTQnQtdUZNMmxGODVncGhW
+      YXRMdjk0cDJkQnlJaU8zQm1lY2VKSDFXZ1dwLTllSWtMYmpBY0Jvd01nUUd2c1JQUkVpS1h2Qnlo
+      YXMycXpoVDM4Um1nalozRWl6clI0QjNvYmdMQS1nb3NUYzQ1OF9MQUpBYTRlbWV5STVwdGpuclBp
+      dXRaZjdTYllzWkNhZDBLbDBzUkdJN1lMb3o1ZkdKWHlWNGh6VnBWMlNZWlluRTRBckRLN1ktd1g1
+      SUlPRmZad2JCVWg2bGl4V3k5N2xwNGc1UGZYaWtYTDdxdGlRSlEzQS1XWTVQZzV6eWM0NllaS3Zs
+      eDV1RXJDcVZnVkcybTcwWFU1a25NdmpMRnpLRm5LcHVDYVZ2YkgycGJSYWwwQkZjWDhpZzBHeV9w
+      MmNYanZKcEp4VWIwdzhDb3FvaGVCeDd4cC1adlNsQzNVZzlpdXhNaWJlQlVIQTF6WndFdHpCbzZ5
+      cVNHQlVCTFd1bV9WXzB4THV4dWNPZHIydkJsZ28tNzBuNDQ2R2JrSG1tUThDYzRwMU5PcFd1cGRQ
+      Y2ZIRGVvZmcwY3ZHdGVTdWtCeHRnSEpnVkFZcWRydEFEVjhEbEdiR1U0SmN3dU96OWhrOXk2RG89
+    timestamp: '1588609661.66'

@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """This module tests the distribute module"""
+import builtins
 import unittest
 import argparse
 import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.distribute as distribute
-from libpkpass.errors import CliArgumentError
+from libpkpass.errors import CliArgumentError, DecryptionError
 from .basetest.basetest import CONFIG
 
 class DistributeTests(unittest.TestCase):
@@ -39,6 +40,22 @@ class DistributeTests(unittest.TestCase):
             if error.msg == "'pwname' is a required argument":
                 ret = True
         self.assertTrue(ret)
+
+    @mock.patch('argparse.ArgumentParser.parse_args',
+                return_value=argparse.Namespace(subparser_name='distribute', identity='r1',
+                                                nopassphrase="true",
+                                                pwname='test',
+                                                config=CONFIG))
+    def test_distribute_cli_decrypt(self, subparser_name):
+        """test decryption functionality"""
+        ret = ""
+        try:
+            with mock.patch.object(builtins, 'input', lambda _: 'y'):
+                distribute.Distribute(cli.Cli())
+        except DecryptionError as error:
+            ret = error.msg
+        self.assertEqual(ret, "")
+
 
 if __name__ == '__main__':
     unittest.main()

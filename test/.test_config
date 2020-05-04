@@ -2,3 +2,6 @@ certpath: test/pki/intermediate/certs
 keypath: test/pki/intermediate/private
 cabundle: test/pki/intermediate/certs/ca-bundle
 pwstore: test/passwords
+
+rules_map:
+  default: "[^\\s]{20}"

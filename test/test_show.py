@@ -17,14 +17,14 @@ class ShowErrors(unittest.TestCase):
                                                 all=None,
                                                 pwname='test',
                                                 config=CONFIG))
-    def test_decryption_error(self, subparser_name):
+    def test_decryption(self, subparser_name):
         """test decryption functionality"""
-        ret = False
+        ret = True
         try:
             show.Show(cli.Cli())
         except DecryptionError as error:
             if error.msg == BADPIN:
-                ret = True
+                ret = False
         self.assertTrue(ret)
 
     @mock.patch('argparse.ArgumentParser.parse_args',
@@ -49,14 +49,14 @@ class ShowErrors(unittest.TestCase):
                                                 all=True,
                                                 pwname='*test*',
                                                 config=CONFIG))
-    def test_showall_decryption_error(self, subparser_name):
+    def test_showall_decryption(self, subparser_name):
         """test decryption functionality"""
-        ret = False
+        ret = True
         try:
             show.Show(cli.Cli())
         except DecryptionError as error:
             if error.msg == BADPIN:
-                ret = True
+                ret = False
         self.assertTrue(ret)
 
     @mock.patch('argparse.ArgumentParser.parse_args',
