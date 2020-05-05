@@ -73,6 +73,7 @@ To utilize the functionality for showing a password on behalf of another user yo
 Example:
 
 .. code-block:: bash
+
     pkpass show password_i_dont_have_direct_access_to -b rsa_user
 
 the argument `rsa_user` needs to be both the username and the password name for the password that store's this user's rsa key
