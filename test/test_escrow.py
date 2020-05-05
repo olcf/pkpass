@@ -10,6 +10,7 @@ class EscrowTests(unittest.TestCase):
     shares = escrow.pk_split_secret(PASSWORD, ["r1", "r2", "r3"], 2)
 
     def test_spliting_with_no_min(self):
+        """Test SSSS without a minimum requirement"""
         shares = escrow.pk_split_secret(PASSWORD, ["r1", "r2", "r3"], None)
         passwd = escrow.pk_recover_secret(shares)
         self.assertEqual(passwd, PASSWORD)
