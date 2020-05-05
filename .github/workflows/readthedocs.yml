@@ -22,4 +22,5 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Run a one-line script
-      run: curl -X POST -H "Authorization: Token $ {{ secrets.READTHEDOCSTOKEN }}" -H "Content-Length: 0" https://readthedocs.org/api/v3/projects/pkpass/versions/latest/builds/
+      run: |
+        curl -X POST -H "Authorization: Token $ {{ secrets.READTHEDOCSTOKEN }}" -H "Content-Length: 0" https://readthedocs.org/api/v3/projects/pkpass/versions/latest/builds/
