@@ -3,7 +3,6 @@
 test/pki/ca
 test/pki/intermediate
 test/scratch/*
-test/passwords/*
 !libpkpass/connectors/connectorinterface.py
 libpkpass/connectors/*
 plugin-requirements.txt

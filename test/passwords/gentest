@@ -1,0 +1,45 @@
+metadata:
+  authorizer: y
+  creator: r3
+  description: y
+  name: gentest
+  schemaVersion: v1
+  signature: null
+recipients:
+  r3:
+    distributor: r3
+    distributor_hash: 374672d9
+    encrypted_secrets:
+      A4:29:BE:AC:3A:21:E2:BF:92:DF:34:91:E5:52:C3:B3:F1:72:56:B8:
+        derived_key: !!binary |
+          TWdkek9SVTR0YUlEVjI4bThMSFRTV3VhVnZ6YU93bzFyeUdwbWYzVlFCWmpxNGVJeGZSaW1IeUcz
+          cmlUSmVoRTR5aExVa01nMFRQVHFuejMtT3lDSE9TODV0czZjejVzXzJES3h0YXpqNkQzUndtSWdM
+          aUc3TTVhZGdYdUhyZzJ6R3lTektIbExoSTRPLXM3ZkR1YnV2TjlqQWozeVgzaWFwYkdYX1NiYllS
+          NXdkNlpRai1FUldPdThTa04zdFVuME5ZUWNQVXhKb2JyeU5TUjd5SXplNzFfZXdQRW9MTGM3cVNG
+          bTM1ME4xME83UDJLUjhOaFMwYmhNNG9HNVJjcnRNak9EQXVBM28xSi1MTlQzR2Z5bG95R1NhLWY5
+          M19KUFhJb1V2WmNEeXd2YVV0NnlheVZiYktxNHpna2hsYmhzNm53a0dUSUtkUWZMeUlrc1YxbEhx
+          dkFhTktSY3BOUnozSnBCMDlId1FCZ2xzei1pOHBRMXRxUmRnMW42dTBWSHUybndnNkh5eWhFSGJ0
+          WHUwUl8xa1JwR2w0T1RKdzNLbm1EVG9vQkJrNGN0YmxOUlUwTS1mN21jQmFvVlh0TWl3UFNudV9V
+          TUVWSTQzZlZFS3pNR0xObC1zaU1XT3FoMV9Oa21EMm5NTnZTU2tzaTN1NkRCWkdWdkh4bURNdkJP
+          MWQtS1lXbktfa09mRmEzVEs3SWNEMm5KbFliN3VidTN2d0JpTUotNnplOUVrY0YxS00yOC1QVHhR
+          SzJadWFEWlZOUU1FbFNQU2FOekpXNXJ1ODJjeEEzeFVqMjg3aUZ5UlRoaU05Z2RKYVNjVW94aE9k
+          UlFlUFRqZ2xwRUVlUjNCd1k4ZkJSMlJ0amxmTEF5Z0xBR1VwYkZSQnVtenNYMFU0ZmFKWkVGN2c9
+        encrypted_secret: !!binary |
+          Z0FBQUFBQmVzWjlkUy1KSXNMNXY5WkdlQmVRX1g5a25oVF8wQldNOHZvVWZjZ0VPcFJubS1hMDFX
+          NkFiTHVsRzZJY1RPOU83YzlNWGtQUVBGZngzZWR3SnVHaHVIa1h1dHc9PQ==
+        recipient_hash: b779ae6e
+    encryption_algorithm: rsautl
+    signature: !!binary |
+      MGR3SG1aS3FDMmljQUhNWUVJSUhRdXVuWmVJV2tQWWM5aFl5RFV2RFF5Z0phb2RyallmY014aTdr
+      WWc1Tmk3S0Nua1h5T2FZQUw2SGVPUzk5OFZkUHZocmduS1laZmgxMVF4RU1zUk03ZHY3cERJQThp
+      Q0xubVowRDFuWTN0bjN5WHpHbm9EWjlndXZFOWh0LS1ZTXNreFZ1ZlRaV0pUdTNwRkNOZGI5RVJo
+      QVNyQXNXOUpud21ielFaSFJYQTR0cjJSZmlGWklwdlBNVmZ3NVg1OE9uSkljcFlpVTZRUFI0enNu
+      cTlmWlhJd2h5dndTenNhaGF1RF9PM0MzTHJzVUFLcnZqdWpGSVRZYlo1UUpwVUxJeWw5bHI5V3J5
+      Y21ZVnkzTjRTWlVhUzh5c3FMbEdtSU9wTEFmcGdFd1VGQ3RLX3dqbmpmQjBWS2d5S0RXQzBPRkhR
+      NW5FV29zNS13SU9FWGsycjdCUlEwTWEyM25fUlRIQmdfOUg1MllXODhpdVU0Vk81WVdQUURGMjVB
+      ODZ3LTZxdmV4LWQ1cUpTcXVhRWM4clVVU2tVb2ZxVWFobzNsekIyaE9VNHlFRWZoT3hVTE1JeGU1
+      a2lCX0t4Yzhwd2pES0R2NTdNb292ekJlR1JuXzN1SzBHeDJIYld6ZjdsazdkSjEwdWhGSE9JOFY5
+      WHdlMjZ2TXBBZ2tMQ3FpOHg1V0ZrcHF6aVVTeWV6MUhEMjctYVRqN0ZuQmxkWG9VQWRfOUZUOVh4
+      dkZCSVhyYnNQUzhKaTdxNHJFVVM3WkpUV3dxNkV4WTlHVWdtS0tsTHhyVHpMVWoxNjdtZDRKMkht
+      SDNxRGUyTGtkRERyd3R5WDk3dzlVeS12aHB0Z0VoTnZiS3B3V3J5bjQ2d3RuR0tjZkV6S1NhTnM9
+    timestamp: '1588698973.16'
