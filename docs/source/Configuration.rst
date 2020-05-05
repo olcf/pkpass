@@ -65,3 +65,14 @@ This will create an unsigned keypair.  We really want it to create a certificate
     openssl req -newkey rsa:4096 -keyout local.key -x509 -out local.cert
 
 As long as the private and public keys are in directories that pkpass can find, distribution to those identities works exactly the same.  Keys must be named 'username.key'.  For user foo, the private key must be named 'foo.key' and reside in the keypath directory.
+
+Behalf of functionality
+-----------------------
+To utilize the functionality for showing a password on behalf of another user you need to create a password that is the private key of this user. Then when you issue a show command you specify the username with the `-b` flag
+
+Example:
+
+.. code-block:: bash
+    pkpass show password_i_dont_have_direct_access_to -b rsa_user
+
+the argument `rsa_user` needs to be both the username and the password name for the password that store's this user's rsa key

@@ -2,10 +2,10 @@
 import uuid
 import time
 import os
-from subprocess import Popen, PIPE, STDOUT
 import yaml
 from libpkpass.escrow import pk_split_secret
-from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError
+from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError,\
+    X509CertificateError
 import libpkpass.crypto as crypto
 
     #######################################################################
@@ -118,25 +118,29 @@ class PasswordEntry():
         self.recipients.update(new_recipients)
         if escrow_users:
             #escrow_users may now be none after the set operations
-            if (len(escrow_users) > 3) and (len(list((set(escrow_users) - set(recipients)))) < 3):
-                print("warning: min_escrow requirement not met after removing password recipients from escrow user list")
-                return
-            escrow_map, split_secret = self.add_escrow(
-                secret=secret,
-                escrow_users=escrow_users,
-                minimum=minimum,
-                pwstore=pwstore)
-            self.process_escrow_map(
-                escrow_map,
-                split_secret=split_secret,
-                distributor=distributor,
-                recipients=recipients,
-                identitydb=identitydb,
-                encryption_algorithm=encryption_algorithm,
-                passphrase=passphrase,
-                card_slot=card_slot,
-                escrow_users=escrow_users,
-                minimum=minimum)
+            try:
+                if (len(escrow_users) > 3) and (len(list((set(escrow_users) - set(recipients)))) < 3):
+                    print("warning: min_escrow requirement not met after removing password recipients from escrow user list")
+                    return
+                escrow_map, split_secret = self.add_escrow(
+                    secret=secret,
+                    escrow_users=escrow_users,
+                    minimum=minimum,
+                    pwstore=pwstore)
+                self.process_escrow_map(
+                    escrow_map,
+                    split_secret=split_secret,
+                    distributor=distributor,
+                    recipients=recipients,
+                    identitydb=identitydb,
+                    encryption_algorithm=encryption_algorithm,
+                    passphrase=passphrase,
+                    card_slot=card_slot,
+                    escrow_users=escrow_users,
+                    minimum=minimum)
+            except ValueError as err:
+                print("Warning cannot create escrow shares, reason: %s" % err)
+                print("Your password has been created without escrow capabilities")
 
 
         #######################################################################
@@ -167,6 +171,10 @@ class PasswordEntry():
                     'derived_key': encrypted_derived_key,
                     'recipient_hash': cert['subjecthash'],
                 }
+            try:
+                distributor_hash = crypto.get_card_subjecthash()
+            except X509CertificateError:
+                distributor_hash = identitydb.iddb[distributor]['certs'][0]['subjecthash']
             recipient_entry = {
                 'encrypted_secrets': encrypted_secrets,
                 # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
@@ -174,7 +182,7 @@ class PasswordEntry():
                 'encryption_algorithm': encryption_algorithm,
                 'timestamp': time.time(),
                 'distributor': distributor,
-                'distributor_hash': get_distributor_hash(),
+                'distributor_hash': distributor_hash,
             }
             message = self._create_signable_string(recipient_entry)
             recipient_entry['signature'] = crypto.pk_sign_string(
@@ -221,13 +229,7 @@ class PasswordEntry():
                             passphrase
                         )
                 else:
-                    command = ['pkcs15-tool', '--read-certificate', '1']
-                    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-                    stdout, _ = proc.communicate()
-                    command = ['openssl', 'x509', '-noout', "-fingerprint"]
-                    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-                    stdout, _ = proc.communicate(input=stdout)
-                    cert_key = stdout.decode("ASCII").rstrip().split('=')[1]
+                    cert_key = crypto.get_card_fingerprint()
                     return crypto.pk_decrypt_string(
                         recipient_entry['encrypted_secrets'][cert_key]['encrypted_secret'],
                         recipient_entry['encrypted_secrets'][cert_key]['derived_key'],
@@ -346,15 +348,3 @@ class PasswordEntry():
                     fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)
-
-    #######################################################################
-def get_distributor_hash():
-    """Return hash of cert distributor is using"""
-    #######################################################################
-    command = ['pkcs15-tool', '--read-certificate', '1']
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate()
-    command = ['openssl', 'x509', '-noout', "-subject_hash"]
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=stdout)
-    return stdout.decode("ASCII").rstrip()

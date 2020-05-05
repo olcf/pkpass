@@ -12,19 +12,28 @@ class IdentityDB():
         things pertinent to recipients and their groups and keys.              """
     ##########################################################################
 
+        #######################################################################
     def __init__(self):
+        #######################################################################
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
         self.cabundle = ""
         self.iddb = {}
 
+        #######################################################################
     def __repr__(self):
+        #######################################################################
         return "%s(%r)" % (self.__class__, self.__dict__)
 
+        #######################################################################
     def __str__(self):
+        #######################################################################
         return "%r" % self.__dict__
 
+        #######################################################################
     def _load_certs_from_external(self, connection_map, nocache):
+        """Load certificates from external via use of plugin"""
+        #######################################################################
         if 'base_directory' in connection_map and connection_map['base_directory']:
             temp_dir = connection_map['base_directory']
             del connection_map['base_directory']

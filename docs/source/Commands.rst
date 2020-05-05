@@ -671,22 +671,25 @@ This unlocks a password and displays it on stdout
 
 .. code-block:: bash
 
-    usage: pkpass.py show [-h] [-a] [--cabundle CABUNDLE] [-c CARD_SLOT]
-                          [--certpath CERTPATH] [--color COLOR] [-i IDENTITY] [-I]
-                          [--keypath KEYPATH] [--no-cache] [--nopassphrase]
-                          [--noverify] [--pwstore PWSTORE] [-q] [-r] [--stdin]
-                          [--theme-map THEME_MAP] [-v]
+    usage: pkpass.py show [-h] [-a] [-b BEHALF] [--cabundle CABUNDLE]
+                          [-c CARD_SLOT] [--certpath CERTPATH] [--color COLOR]
+                          [-i IDENTITY] [-I] [--keypath KEYPATH] [--no-cache]
+                          [--nopassphrase] [--noverify] [--pwstore PWSTORE] [-q]
+                          [-r] [--stdin] [--theme-map THEME_MAP] [-v]
                           [pwname]
-    
+
     positional arguments:
       pwname                Name of the password. Ex:
-                            passwords/team/infrastructure/root
-    
+                        passwords/team/infrastructure/root
+
     optional arguments:
       -h, --help            show this help message and exit
       -a, --all             Show all available password to the given user, if a
                             pwname is supplied filtering will be done case-
                             insensitivey based on the filename
+      -b BEHALF, --behalf BEHALF
+                            Show passwords for a user using a password as its
+                            private key
       --cabundle CABUNDLE   Path to CA certificate bundle file
       -c CARD_SLOT, --card_slot CARD_SLOT
                             The slot number of the card that should be used

@@ -232,6 +232,54 @@ def get_cert_element(cert, element):
         raise X509CertificateError(stdout)
 
     ##############################################################################
+def get_card_element(element):
+    """Return an arbitrary element of a pcks15 capable device"""
+    ##############################################################################
+    command = ['pkcs15-tool', '--read-certificate', '1']
+    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    stdout, _ = proc.communicate()
+    return get_cert_element(stdout, element)
+
+    ##############################################################################
+def get_card_fingerprint():
+    """ Return the modulus of the x509 certificate of the identity """
+    ##############################################################################
+    # SHA1 Fingerprint=F9:9D:71:54:55:BE:99:24:6A:5E:E0:BB:48:F9:63:AE:A2:05:54:98
+    return get_card_element('fingerprint').split('=')[1]
+
+    ##############################################################################
+def get_card_subject():
+    """ Return the subject DN of the x509 certificate of the identity """
+    ##############################################################################
+    # subject= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
+    return ' '.join(get_card_element('subject').split(' ')[1:])
+
+    ##############################################################################
+def get_card_issuer():
+    """ Return the issuer DN of the x509 certificate of the identity """
+    ##############################################################################
+    # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
+    return ' '.join(get_card_element('issuer').split(' ')[1:])
+
+    ##############################################################################
+def get_card_enddate():
+    """ Return the issuer DN of the x509 certificate of the identity """
+    ##############################################################################
+    return get_card_element('enddate').split('=')[1]
+
+    ##############################################################################
+def get_card_issuerhash():
+    """ Return the issuer DN of the x509 certificate of the identity """
+    ##############################################################################
+    return get_card_element('issuer_hash')
+
+    ##############################################################################
+def get_card_subjecthash():
+    """ Return the issuer DN of the x509 certificate of the identity """
+    ##############################################################################
+    return get_card_element('subject_hash')
+
+    ##############################################################################
 def sk_encrypt_string(plaintext_string, key):
     """ Symmetrically Encrypt and return a base 64 encoded string using the provided secret"""
     ##############################################################################
