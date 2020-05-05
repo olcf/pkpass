@@ -1,79 +1,57 @@
 #!/usr/bin/env python
 """This module tests the show module"""
 import unittest
-import argparse
-import mock
 import libpkpass.commands.cli as cli
 import libpkpass.commands.show as show
 from libpkpass.errors import DecryptionError, CliArgumentError
-from .basetest.basetest import CONFIG, BADPIN
+from .basetest.basetest import ERROR_MSGS, patch_args
 
 class ShowErrors(unittest.TestCase):
     """This class tests the show class"""
-
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='show', identity='r1',
-                                                nopassphrase="true",
-                                                all=None,
-                                                pwname='test',
-                                                config=CONFIG))
-    def test_decryption(self, subparser_name):
-        """test decryption functionality"""
+    def test_decryption(self):
+        """Test successful decryption"""
         ret = True
         try:
-            show.Show(cli.Cli())
-        except DecryptionError as error:
-            if error.msg == BADPIN:
-                ret = False
+            with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
+                            all=None, pwname='test'):
+                show.Show(cli.Cli())
+        except DecryptionError:
+            ret = False
         self.assertTrue(ret)
 
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='show', identity='bleh',
-                                                nopassphrase="true",
-                                                all=None,
-                                                pwname='test',
-                                                config=CONFIG))
-    def test_recipient_not_in_database(self, subparser_name):
-        """test decryption functionality"""
-        ret = False
-        try:
-            show.Show(cli.Cli())
-        except CliArgumentError as error:
-            if error.msg == "Error: Your user 'bleh' is not in the recipient database":
-                ret = True
-        self.assertTrue(ret)
+    def test_recipient_not_in_database(self):
+        """test what happens when the recipient is not in the appropriate directory"""
+        with self.assertRaises(CliArgumentError) as context:
+            with patch_args(subparser_name='show', identity='bleh', nopassphrase='true',
+                            all=None, pwname='test'):
+                show.Show(cli.Cli())
+        self.assertEqual(
+            context.exception.msg,
+            ERROR_MSGS['rep']
+        )
 
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='show', identity='r1',
-                                                nopassphrase="true",
-                                                all=True,
-                                                pwname='*test*',
-                                                config=CONFIG))
-    def test_showall_decryption(self, subparser_name):
-        """test decryption functionality"""
+    def test_showall_decryption(self):
+        """Test showing all passwords"""
         ret = True
         try:
-            show.Show(cli.Cli())
-        except DecryptionError as error:
-            if error.msg == BADPIN:
-                ret = False
+            with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
+                            all=True, pwname='*test*'):
+                show.Show(cli.Cli())
+        except DecryptionError:
+            ret = False
         self.assertTrue(ret)
 
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='show', identity='r1',
-                                                nopassphrase="true",
-                                                all=None,
-                                                config=CONFIG))
-    def test_show_nopass_error(self, subparser_name):
-        """test decryption functionality"""
+    def test_show_nopass_error(self):
+        """Test what happens when neither pwname or the all flag are supplied"""
         ret = False
         try:
-            show.Show(cli.Cli())
+            with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
+                            all=None):
+                show.Show(cli.Cli())
         except KeyError as error:
             if str(error) == "'pwname'":
                 ret = str(error)
         self.assertEqual(ret, "'pwname'")
-
 
 if __name__ == '__main__':
     unittest.main()

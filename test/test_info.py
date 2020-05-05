@@ -1,58 +1,45 @@
 #!/usr/bin/env python
 """This module tests the info module"""
 import unittest
-import argparse
-import mock
+import yaml
 import libpkpass.commands.cli as cli
 import libpkpass.commands.info as info
 from libpkpass.errors import CliArgumentError
-from .basetest.basetest import CONFIG, captured_output
+from .basetest.basetest import captured_output, patch_args, ERROR_MSGS
 
 class InfoTests(unittest.TestCase):
     """This class tests the info class"""
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='info', identity='r1',
-                                                nopassphrase="true",
-                                                pwname='test',
-                                                color=False,
-                                                config=CONFIG))
-    def test_info(self, subparser_name):
-        """test decryption functionality"""
-        ret = True
-        with captured_output() as (out, _):
-            info.Info(cli.Cli())
-        output = "".join(out.getvalue().strip().split()).split("timestamp")[0]
-        check_dict = {
+    def setUp(self):
+        self.check_dict = {
             'Metadata': {
                 'Authorizer': 'y',
                 'Creator': 'r1',
                 'Description': 'y',
                 'Name': 'test',
                 'Schemaversion': 'v1',
-                'Signature': 'None',
-                'Recipients': 'r1',
-                'TotalRecipients': '1',
-            }
+                'Signature': 'None'
+            },
+            'Recipients': 'r1',
+            'Total Recipients': 1,
         }
-        for key, value in check_dict['Metadata'].items():
-            if key not in output and value not in output:
-                ret = False
-        self.assertTrue(ret)
 
-    @mock.patch('argparse.ArgumentParser.parse_args',
-                return_value=argparse.Namespace(subparser_name='info', identity='r1',
-                                                nopassphrase="true",
-                                                pwname=None,
-                                                config=CONFIG))
-    def test_info_no_pass(self, subparser_name):
-        """test decryption functionality"""
-        ret = False
-        try:
-            info.Info(cli.Cli())
-        except CliArgumentError as err:
-            if err.msg == "'pwname' is a required argument":
-                ret = True
-        self.assertTrue(ret)
+    def test_info(self):
+        """Test what info shows on a password"""
+        with patch_args(subparser_name='info', identity='r1',
+                        nopassphrase="true", pwname='test'):
+            with captured_output() as (out, _):
+                info.Info(cli.Cli())
+        output = yaml.safe_load(out.getvalue())
+        del output['Earliest distribute timestamp']
+        self.assertDictEqual(output, self.check_dict)
+
+    def test_info_no_pass(self):
+        """Test what happens when pwname is not supplied"""
+        with patch_args(subparser_name='info', identity='r1',
+                        nopassphrase="true", pwname=None):
+            with self.assertRaises(CliArgumentError) as context:
+                info.Info(cli.Cli())
+        self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
 if __name__ == '__main__':
     unittest.main()
