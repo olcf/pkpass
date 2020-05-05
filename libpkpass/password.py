@@ -4,7 +4,8 @@ import time
 import os
 import yaml
 from libpkpass.escrow import pk_split_secret
-from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError
+from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError,\
+    X509CertificateError
 import libpkpass.crypto as crypto
 
     #######################################################################
@@ -170,6 +171,10 @@ class PasswordEntry():
                     'derived_key': encrypted_derived_key,
                     'recipient_hash': cert['subjecthash'],
                 }
+            try:
+                distributor_hash = crypto.get_card_subjecthash()
+            except X509CertificateError:
+                distributor_hash = identitydb.iddb[distributor]['subjecthash']
             recipient_entry = {
                 'encrypted_secrets': encrypted_secrets,
                 # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
@@ -177,7 +182,7 @@ class PasswordEntry():
                 'encryption_algorithm': encryption_algorithm,
                 'timestamp': time.time(),
                 'distributor': distributor,
-                'distributor_hash': crypto.get_card_subjecthash(),
+                'distributor_hash': distributor_hash,
             }
             message = self._create_signable_string(recipient_entry)
             recipient_entry['signature'] = crypto.pk_sign_string(
