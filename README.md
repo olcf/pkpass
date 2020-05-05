@@ -1,7 +1,7 @@
 PKPass: Public Key Based Password Manager
 =============
 
-![Python package](https://github.com/olcf/pkpass/workflows/Python%20package/badge.svg)
+![Unit Tests](https://github.com/olcf/pkpass/workflows/Unit%20Tests/badge.svg)
 
 RTD
 ===
