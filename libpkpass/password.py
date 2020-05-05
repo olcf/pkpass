@@ -174,7 +174,7 @@ class PasswordEntry():
             try:
                 distributor_hash = crypto.get_card_subjecthash()
             except X509CertificateError:
-                distributor_hash = identitydb.iddb[distributor]['subjecthash']
+                distributor_hash = identitydb.iddb[distributor]['certs'][0]['subjecthash']
             recipient_entry = {
                 'encrypted_secrets': encrypted_secrets,
                 # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
