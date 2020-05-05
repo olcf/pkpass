@@ -15,6 +15,14 @@ ARGUMENTS = {
         }
     },
 
+    'behalf': {
+        'args': ['-b', '--behalf'],
+        'kwargs': {
+            'help': 'Show passwords for a user using a password as its private key',
+            'type': str,
+        }
+    },
+
     'cabundle': {
         'args': ['--cabundle'],
         'kwargs': {
