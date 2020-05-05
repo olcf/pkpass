@@ -1,7 +1,7 @@
 PKPass: Public Key Based Password Manager
 =============
 
-![Unit Tests](https://github.com/olcf/pkpass/workflows/Unit%20Tests/badge.svg)
+![Unit Tests](https://github.com/olcf/pkpass/workflows/Unit%20Tests/badge.svg) [![Documentation Status](https://readthedocs.org/projects/pkpass/badge/?version=latest)](https://pkpass.readthedocs.io/en/latest/?badge=latest)
 
 RTD
 ===
