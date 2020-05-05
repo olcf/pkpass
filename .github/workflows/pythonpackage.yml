@@ -1,5 +1,5 @@
 ---
-name: Python package
+name: Unit Tests
 
 on: [push]
 
@@ -29,4 +29,4 @@ jobs:
           ls test/pki/ca
           ls test/pki/intermediate
       - name: Test with pytest
-        run: python -m unittest discover
+        run: python -m unittest discover -b
