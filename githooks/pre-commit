@@ -1,6 +1,8 @@
 #!/bin/bash
 echo "Running Unittests"
-python -m unittest discover -b
+git diff --cached --name-only | if grep --quiet ".py"; then
+    python -m unittest discover -b
+fi
 echo "Checking pkpass for dumb comments"
 git diff --cached --name-only | if grep --quiet "pkpass.py"; then
     char=$(cat pkpass.py  | grep 'Exception as err:' | cut -c1)
