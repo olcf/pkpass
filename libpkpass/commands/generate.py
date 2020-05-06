@@ -3,6 +3,7 @@ import re
 import exrex
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError, RulesMapError
+from libpkpass.util import parse_json_arguments
 
     ####################################################################
 class Generate(Command):
@@ -45,7 +46,7 @@ class Generate(Command):
         #######################################################################
     def _validate_args(self):
         #######################################################################
-        self.args['rules_map'] = self._parse_json_arguments('rules_map')
+        self.args['rules_map'] = parse_json_arguments(self.args, 'rules_map')
         for argument in ['pwname', 'keypath', 'rules_map']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(

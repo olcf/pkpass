@@ -1,16 +1,14 @@
 """This module is a generic for all pkpass commands"""
-import sys
-import getpass
-import json
-import os
-import yaml
-import libpkpass.util as util
+from sys import stdout
+from getpass import getpass
+from os import getcwd, path, sep, remove, rename
 from libpkpass.commands.arguments import ARGUMENTS as arguments
-from libpkpass.password import PasswordEntry
-from libpkpass.identities import IdentityDB
 from libpkpass.crypto import print_card_info
-from libpkpass.errors import NullRecipientError, CliArgumentError, FileOpenError, GroupDefinitionError,\
-        PasswordIOError, JsonArgumentError, NotThePasswordOwnerError, ConfigParseError
+from libpkpass.errors import NullRecipientError, CliArgumentError, GroupDefinitionError,\
+        PasswordIOError, NotThePasswordOwnerError
+from libpkpass.identities import IdentityDB
+from libpkpass.password import PasswordEntry
+from libpkpass.util import collect_args, color_prepare
 
     ##########################################################################
 class Command():
@@ -29,27 +27,7 @@ class Command():
         ##################################################################
         self.cli = cli
         #default certpath to none because connect string is allowed
-        self.args = {
-            'ignore_decrypt': False,
-            'identity': getpass.getuser(),
-            'cabundle': './certs/ca-bundle',
-            'keypath': './private',
-            'pwstore': './passwords',
-            'time': 10,
-            'card_slot': None,
-            'certpath': None,
-            'escrow_users': None,
-            'min_escrow': None,
-            'no_cache': False,
-            'noverify': None,
-            'noescrow': False,
-            'overwrite': False,
-            'recovery': False,
-            'rules': 'default',
-            'theme_map': None,
-            'color': True,
-            'verbosity': 0,
-            }
+        self.args = {}
         self.recipient_list = []
         self.escrow_and_recipient_list = []
         self.iddbcached = iddb is not None
@@ -73,66 +51,12 @@ class Command():
         self._run_command_execution()
 
         ##################################################################
-    def _convert_strings_to_list(self, argname):
-        """ convert argparsed strings to lists for an argument """
-        ##################################################################
-        if argname in self.args:
-            self.args[argname] = self.args[argname].split(",") if self.args[argname] else []
-            self.args[argname] = [arg.strip() for arg in self.args[argname] if arg.strip()]
-        elif isinstance(argname, str):
-            argname = argname.split(",") if argname else []
-            return [arg.strip() for arg in argname if arg.strip()]
-        return None
-
-        ##################################################################
-    def _handle_boolean_args(self, argname):
-        ##################################################################
-        if isinstance(self.args[argname], str):
-            return self.args[argname].upper() == 'TRUE'
-        return self.args[argname]
-
-        ##################################################################
-    def _handle_filepath_args(self):
-        """Does filepath expansion for config args"""
-        ##################################################################
-        file_path_args = ['cabundle', 'pwstore', 'certpath', 'keypath']
-        for arg in file_path_args:
-            if arg in self.args and self.args[arg]:
-                self.args[arg] = os.path.expanduser(self.args[arg])
-        if 'connect' in self.args and self.args['connect'] and \
-                'base_directory' in self.args['connect'] and self.args['connect']['base_directory']:
-            self.args['connect']['base_directory'] = os.path.expanduser(self.args['connect']['base_directory'])
-
-        ##################################################################
     def _run_command_setup(self, parsedargs):
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
-
-        # Build a dict out of the argparse args Namespace object and a dict from any
-        # configuration files and merge the two with cli taking priority
-        cli_args = vars(parsedargs)
-
-        config_args = self._get_config_args(cli_args['config'], cli_args)
-        self.args.update(config_args)
-
-        connectmap = self._parse_json_arguments('connect')
-        self._handle_filepath_args()
-
-        fles = ['cabundle', 'pwstore']
-        for key, value in cli_args.items():
-            if value is not None or key not in self.args:
-                self.args[key] = value
-            if key in fles and not os.path.exists(self.args[key]):
-                raise FileOpenError(self.args[key], "No such file or directory")
-
-        # json args
-        self.args['color'] = self._handle_boolean_args('color')
-        self._convert_strings_to_list('groups')
-        self._convert_strings_to_list('users')
-        self._convert_strings_to_list('escrow_users')
+        self.args = collect_args(parsedargs)
         self._validate_combinatorial_args()
         self._validate_args()
-
         verify_on_load = self.args['subparser_name'] in ['listrecipients', 'import', 'interpreter']
 
         # Build the list of recipients that this command will act on
@@ -144,10 +68,11 @@ class Command():
             self.identities.load_certs_from_directory(
                 self.args['certpath'],
                 verify_on_load=verify_on_load,
-                connectmap=connectmap,
+                connectmap=self.args['connect'],
                 nocache=self.args['no_cache']
             )
-            self.identities.load_keys_from_directory(self.args['keypath'])
+            if self.args['keypath']:
+                self.identities.load_keys_from_directory(self.args['keypath'])
             self._validate_identities()
 
         if 'pwname' in self.args and self.args['pwname']:
@@ -160,17 +85,17 @@ class Command():
                                 self.args['verbosity'],
                                 self.args['color'],
                                 self.args['theme_map'])
-            self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
+            self.passphrase = getpass("Enter Pin/Passphrase: ")
 
         ####################################################################
     def _resolve_directory_path(self):
         """This handles how a user inputs the pwname, this tries to be smart
         good luck everybody else"""
         ####################################################################
-        pwd = os.getcwd()
-        pwd_pwname = os.path.normpath(os.path.join(pwd, self.args['pwname']))
+        pwd = getcwd()
+        pwd_pwname = path.normpath(path.join(pwd, self.args['pwname']))
         if self.args['pwstore'] in pwd_pwname:
-            self.args['pwname'] = pwd_pwname.replace(self.args['pwstore'] + os.sep, '')
+            self.args['pwname'] = pwd_pwname.replace(self.args['pwstore'] + sep, '')
 
         ##################################################################
     def safety_check(self):
@@ -178,7 +103,7 @@ class Command():
         ##################################################################
         try:
             password = PasswordEntry()
-            password.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
+            password.read_password_data(path.join(self.args['pwstore'], self.args['pwname']))
             return (self.args['identity'] in password['recipients'].keys(), password['metadata']['creator'])
         except PasswordIOError:
             return (True, None)
@@ -188,7 +113,7 @@ class Command():
         """Fully updated a password record"""
         ##################################################################
         pass_entry = PasswordEntry()
-        pass_entry.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
+        pass_entry.read_password_data(path.join(self.args['pwstore'], self.args['pwname']))
         swap_pass = PasswordEntry()
         swap_pass.add_recipients(secret=pass_value,
                                  distributor=self.args['identity'],
@@ -199,7 +124,7 @@ class Command():
                                  pwstore=self.args['pwstore']
                                 )
         pass_entry['recipients'][self.args['identity']] = swap_pass['recipients'][self.args['identity']]
-        pass_entry.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
+        pass_entry.write_password_data(path.join(self.args['pwstore'], self.args['pwname']),
                                        overwrite=self.args['overwrite'])
 
         ##################################################################
@@ -230,7 +155,7 @@ class Command():
                                 pwstore=self.args['pwstore']
                                )
 
-        password.write_password_data(os.path.join(self.args['pwstore'], self.args['pwname']),
+        password.write_password_data(path.join(self.args['pwstore'], self.args['pwname']),
                                      overwrite=self.args['overwrite'])
 
         ##################################################################
@@ -250,9 +175,9 @@ class Command():
     def delete_pass(self):
         """This deletes a password that the user has created, useful for testing"""
         ##################################################################
-        filepath = os.path.join(self.args['pwstore'], self.args['pwname'])
+        filepath = path.join(self.args['pwstore'], self.args['pwname'])
         try:
-            os.remove(filepath)
+            remove(filepath)
         except OSError:
             raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
 
@@ -260,10 +185,10 @@ class Command():
     def rename_pass(self):
         """This renames a password that the user has created"""
         ##################################################################
-        oldpath = os.path.join(self.args['pwstore'], self.args['pwname'])
-        newpath = os.path.join(self.args['pwstore'], self.args['rename'])
+        oldpath = path.join(self.args['pwstore'], self.args['pwname'])
+        newpath = path.join(self.args['pwstore'], self.args['rename'])
         try:
-            os.rename(oldpath, newpath)
+            rename(oldpath, newpath)
             password = PasswordEntry()
             password.read_password_data(newpath)
             password['metadata']['name'] = self.args['rename']
@@ -308,23 +233,6 @@ class Command():
             raise GroupDefinitionError(str(err))
 
         ##################################################################
-    def _get_config_args(self, config, cli_args):
-        """Return the configuration from the config file"""
-        ##################################################################
-        try:
-            with open(config, 'r') as fname:
-                config_args = yaml.safe_load(fname)
-            if config_args is None:
-                config_args = {}
-            return config_args
-        except IOError:
-            if cli_args['verbosity'] != -1:
-                print("INFO: No .pkpassrc file found")
-            return {}
-        except yaml.parser.ParserError:
-            raise ConfigParseError("Parsing error with config file, please check syntax")
-
-        ##################################################################
     def _validate_args(self):
         ##################################################################
         raise NotImplementedError
@@ -341,7 +249,7 @@ class Command():
         # we want a multi-dim of lists, this way if more combinations come up
         # that would be required in a 1 or more capacity, we just add
         # a list to this list
-        args_list = [['certpath', 'connect'], ['certpath', 'keypath']]
+        args_list = [['certpath', 'connect']]
         for arg_set in args_list:
             valid = False
             for arg in arg_set:
@@ -351,19 +259,6 @@ class Command():
             if not valid:
                 raise CliArgumentError(
                     "'%s' or '%s' is required" % tuple(arg_set))
-
-        ##################################################################
-    def _parse_json_arguments(self, argument):
-        """ Parses the json.loads arguments as dictionaries to use"""
-        ##################################################################
-        try:
-            if argument in self.args and self.args[argument]:
-                if isinstance(self.args[argument], dict):
-                    return self.args[argument]
-                return json.loads(self.args[argument])
-            return None
-        except ValueError as err:
-            raise JsonArgumentError(argument, err)
 
         ##################################################################
     def _validate_identities(self, swap_list=None):
@@ -395,10 +290,9 @@ class Command():
     def color_print(self, string, color_type):
         """Handle the color printing for objects"""
         ##################################################################
-        return util.color_prepare(string,
-                                  color_type,
-                                  self.args['color'],
-                                  self.args['theme_map'])
+        return color_prepare(string, color_type,
+                             self.args['color'],
+                             self.args['theme_map'])
 
         ##################################################################
     def progress_bar(self, value, endvalue, bar_length=50):
@@ -407,5 +301,5 @@ class Command():
         percent = float(value) / endvalue
         arrow = '-' * int(round(percent * bar_length)-1) + '>'
         spaces = ' ' * (bar_length - len(arrow))
-        sys.stdout.write("\rPercent: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
-        sys.stdout.flush()
+        stdout.write("\rPercent: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
+        stdout.flush()

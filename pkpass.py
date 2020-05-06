@@ -6,7 +6,7 @@ if sys.version_info[0] < 3:
 
 # pylint: disable=wrong-import-position
 # Reasoning for the disablement is because we want people to not try to run with python2
-import traceback
+from traceback import format_exception_only
 from libpkpass.errors import PKPassError
 from libpkpass.commands.cli import Cli
 
@@ -24,4 +24,4 @@ except Exception as err: # pylint: disable=broad-except
         print(err)
     else:
         print("Generic exception caught: \n%s" %
-              traceback.format_exception_only(type(err), err)[0])
+              format_exception_only(type(err), err)[0])
