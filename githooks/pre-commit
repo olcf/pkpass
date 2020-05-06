@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Running Unittests"
+python -m unittest discover -b
+echo "Checking pkpass for dumb comments"
+git diff --cached --name-only | if grep --quiet "pkpass.py"; then
+    char=$(cat pkpass.py  | grep 'Exception as err:' | cut -c1)
+    if [[ $char == "#" ]]; then
+        echo "Generic exception appears to be commented out"
+        exit 1
+    fi
+fi
+git reset HEAD test/passwords
+git checkout -- test/passwords
