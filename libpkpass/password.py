@@ -275,7 +275,7 @@ class PasswordEntry():
                 recipient_entry[key] = "{0:12.2f}".format(float(recipient_entry[key]))
             if key not in ['signature', 'encrypted_secrets']:
                 if isinstance(recipient_entry[key], bytes):
-                    recipient_entry[key] = recipient_entry[key].decode('ASCII')
+                    recipient_entry[key] = recipient_entry[key].decode('UTF-8')
                 message = message + str(key) + str(recipient_entry[key])
         return message
 

@@ -45,7 +45,7 @@ class Export(Command):
                 identity=myidentity,
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"])
-            password.recipients[uid]['encrypted_secret'] = plaintext_pw.encode("ASCII")
+            password.recipients[uid]['encrypted_secret'] = plaintext_pw.encode("UTF-8")
             password.write_password_data(self.args['pwfile'],
                                          overwrite=False,
                                          encrypted_export=not self.args['nocrypto'],
