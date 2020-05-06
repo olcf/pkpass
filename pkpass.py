@@ -19,9 +19,9 @@ except KeyboardInterrupt:
 # This is so that users don't see tracebacks, an error will still print out
 # so that we can investigate
 # Comment this out for debugging
-except Exception as err: # pylint: disable=broad-except
-    if str(err):
-        print(err)
-    else:
-        print("Generic exception caught: \n%s" %
-              traceback.format_exception_only(type(err), err)[0])
+# except Exception as err: # pylint: disable=broad-except
+#     if str(err):
+#         print(err)
+#     else:
+#         print("Generic exception caught: \n%s" %
+#               traceback.format_exception_only(type(err), err)[0])
