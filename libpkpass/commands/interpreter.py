@@ -6,15 +6,17 @@
 
 # We need to disable unused import linting because the command classes *are* actually used...
 # pylint: disable=unused-import
-import os
+from os import path, environ, chdir, sep
 import sys
-import glob
-import subprocess
+from glob import glob
+from subprocess import call
 from cmd import Cmd
 from inspect import getmembers, isclass
-import yaml
+from yaml.parser import ParserError
 from libpkpass.commands.command import Command
-import libpkpass.util as util
+from libpkpass.errors import PKPassError, JsonArgumentError
+from libpkpass.identities import IdentityDB
+from libpkpass.util import handle_filepath_args, show_version, collect_args
 import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
 import libpkpass.commands.create as create
@@ -27,14 +29,13 @@ import libpkpass.commands.info as info
 import libpkpass.commands.list as pklist
 import libpkpass.commands.listrecipients as listrecipients
 import libpkpass.commands.modify as modify
+import libpkpass.commands.pkinterface as pkinterface
 import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
-import libpkpass.commands.pkinterface as pkinterface
-from libpkpass.errors import PKPassError
 
-VERSION = util.show_version()
+VERSION = show_version()
 
     ####################################################################
 class Interpreter(Command):
@@ -80,11 +81,11 @@ Type ? to list commands""" % VERSION
 
         pkinterface.PkInterface.__init__(self)
 
-        self.recipients_database = recipients_database
+        self.recipients_database = recipients_database if recipients_database else IdentityDB()
         self.parser.error = pkparse_error
 
         # Hold onto args passed on the command line
-        self.pre_args = args
+        self.args = args
         # change our cwd so users can tab complete
         self._change_pwstore()
 
@@ -109,12 +110,27 @@ Type ? to list commands""" % VERSION
                 sys.stdout.write('\n')
 
         ####################################################################
+    def _load_iddb(self):
+        """load recipient database"""
+        ####################################################################
+        self.recipients_database = IdentityDB()
+        self.recipients_database.cabundle = self.args['cabundle']
+        self.recipients_database.load_certs_from_directory(
+            self.args['certpath'],
+            verify_on_load=True,
+            connectmap=self.args['connect'],
+            nocache=False
+        )
+        if 'keypath' in self.args:
+            self.recipients_database.load_keys_from_directory(self.args['keypath'])
+
+        ####################################################################
     def _change_pwstore(self):
         """Change directory"""
         ####################################################################
-        direc = self.pre_args['pwstore']
-        if 'pwstore' in self.pre_args and direc and os.path.isdir(direc):
-            os.chdir(direc)
+        direc = self.args['pwstore']
+        if 'pwstore' in self.args and direc and path.isdir(direc):
+            chdir(direc)
 
         ####################################################################
     def _reload_config(self):
@@ -122,17 +138,21 @@ Type ? to list commands""" % VERSION
         ####################################################################
         # We still need to be able to reload other things like recipients
         # database
-        config = self.pre_args['config']
+        config = self.args['config']
+        config_args = self.args
         try:
-            with open(config, 'r') as fname:
-                config_args = yaml.safe_load(fname)
-            if config_args is None:
-                config_args = {}
-        except IOError:
-            print("No .pkpassrc file found, consider running ./setup.sh")
+            config_args = collect_args({'config': config})
+            if not config_args:
+                config_args = self.args
+        except ParserError:
+            print("Error parsing config file")
+            config_args = self.args
         finally:
-            self.pre_args['pwstore'] = config_args['pwstore']
+            self.args = config_args
+            self.args['config'] = config
+            self.args = handle_filepath_args(self.args)
             self._change_pwstore()
+            self._load_iddb()
 
         ####################################################################
     def precmd(self, line):
@@ -156,8 +176,8 @@ Type ? to list commands""" % VERSION
     def _append_slash_if_dir(self, path_arg):
         """ Appending slashes for autocomplete_file_path """
         ####################################################################
-        if path_arg and os.path.isdir(path_arg) and path_arg[-1] != os.sep:
-            return path_arg + os.sep
+        if path_arg and path.isdir(path_arg) and path_arg[-1] != sep:
+            return path_arg + sep
         return path_arg
 
         ####################################################################
@@ -173,9 +193,9 @@ Type ? to list commands""" % VERSION
         pattern = arg + '*'
 
         completions = []
-        for path in glob.glob(pattern):
-            path = self._append_slash_if_dir(path)
-            completions.append(path.replace(fixed, "", 1))
+        for fpath in glob(pattern):
+            fpath = self._append_slash_if_dir(fpath)
+            completions.append(fpath.replace(fixed, "", 1))
         return completions
 
         ####################################################################
@@ -203,7 +223,7 @@ Type ? to list commands""" % VERSION
         """Edit your configuration file, with $EDITOR"""
         ####################################################################
         try:
-            subprocess.call([os.environ['EDITOR'], self.pre_args['config']])
+            call([environ['EDITOR'], self.args['config']])
             return False
         except (IOError, SystemExit):
             return False
@@ -212,7 +232,7 @@ Type ? to list commands""" % VERSION
     def do_git(self, line):
         """If your password store is git back, you can control git from here"""
         ####################################################################
-        subprocess.call(["git"] + line.split())
+        call(["git"] + line.split())
         return False
 
     ##############################################################################
