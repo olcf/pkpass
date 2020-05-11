@@ -1,4 +1,5 @@
 #!/bin/bash
+# Dummy helper script to do local install
 
 function print_seperator(){
     echo "**************************************************"
@@ -22,10 +23,6 @@ py3="./venv/bin/python3"
 if [[ -f $py3 ]]; then
     print_seperator "Running Python Installation"
     $py3 setup.py install
-    print_seperator "Starting RC File Generation"
-    $py3 setup.py rcfile
-    print_seperator "Running RC File verification"
-    $py3 setup.py verify
 else
     echo "Python3 venv package not available"
 fi
