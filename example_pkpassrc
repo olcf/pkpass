@@ -18,7 +18,7 @@ pwstore: ~/passdb/passwords/base
 #                               System Resources                                  #
 ###################################################################################
 # card_slot is the pkcs library card to be used, if not specified it will be 0
-card_slot: 1
+# card_slot: 0
 
 # identity is the active user of pkpass, defaults to system username
 identity: ${put_your_cert_name_here}
@@ -43,11 +43,12 @@ time: 30
 # rules_map is used in pkpass's generation functionality, if you ask for a generated password
 # it will by default look at 'default'; if you define in your rc file a value for 'rules'
 # the new default will be that key
-rules_map:
-  default: "[^\\s]{20}"
-  different_pattern: "([a-z]|[A-Z]|[0-9]){15}"
 
-rules: different_pattern
+# rules_map:
+#   default: "[^\\s]{20}"
+#   different_pattern: "([a-z]|[A-Z]|[0-9]){15}"
+
+# rules: different_pattern
 
 ###################################################################################
 #                            Custom PkPass functionality                          #
@@ -63,16 +64,17 @@ rules: different_pattern
 # under 'ExampleConnector' should match what the connector library is expecting
 # there are not global defined keys to use. Consult the library you are importing for what the keys should be
 # base directory tells it where to store the certs locally
+
 # connect:
-  # base_directory: /path/to/local/certs
-  # ExampleConnector:
-    # url_arg: "https://example.com"
-    # id_arg: "567"
-    # key_arg: "super_secret_key"
-    # arbitrary_list_arg:
-      # - "26994"
-  # or an empty map
-  # NoReqConnector: {}
+#   base_directory: /path/to/local/certs
+#   ExampleConnector:
+#     url_arg: "https://example.com"
+#     id_arg: "567"
+#     key_arg: "super_secret_key"
+#     arbitrary_list_arg:
+#       - "26994"
+#   or an empty map
+#   NoReqConnector: {}
 
 ###################################################################################
 #                                     Theming                                     #
@@ -82,12 +84,13 @@ rules: different_pattern
 color: true
 # pkpass also supports the user changing the colors that will appear by providing a 
 # color map using 256 colors
+
 # theme_map:
-  # you can pass in the numerical representation
-  # info: "1"
-  # if you pass a wrong value, it will go with the default color
-  # first_level: "257"
-  # you can pass a hex value
-  # second_level: "#0000FF"
-  # or you could pass the color name
-  # warning: "yellow"
+#   you can pass in the numerical representation
+#   info: "1"
+#   if you pass a wrong value, it will go with the default color
+#   first_level: "257"
+#   you can pass a hex value
+#   second_level: "#0000FF"
+#   or you could pass the color name
+#   warning: "yellow"
