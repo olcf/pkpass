@@ -50,14 +50,19 @@ def pk_encrypt_string(plaintext_string, certificate):
     return (encrypted_string, base64.urlsafe_b64encode(handle_python_strings(ciphertext_derived_key)))
 
     ##############################################################################
+def get_card_info():
+    ##############################################################################
+    command = ['pkcs11-tool', '-L']
+    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    stdout, _ = proc.communicate()
+    return (handle_python_strings(stdout).split(b'Slot'), stdout)
+
+    ##############################################################################
 def print_card_info(card_slot, identity, verbosity, color, theme_map):
     """Inform the user what card is selected"""
     ##############################################################################
     if 'key_path' not in identity:
-        command = ['pkcs11-tool', '-L']
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate()
-        out_list = handle_python_strings(stdout).split(b'Slot')
+        out_list, stdout = get_card_info()
         if verbosity > 1:
             print_all_slots(stdout, color, theme_map)
         for out in out_list[1:]:
@@ -238,6 +243,8 @@ def get_card_element(element):
     command = ['pkcs15-tool', '--read-certificate', '1']
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate()
+    if stdout.decode('utf-8').strip().lower() == 'no smart card readers found.':
+        raise X509CertificateError('Smartcard not detected')
     return get_cert_element(stdout, element)
 
     ##############################################################################
@@ -260,6 +267,12 @@ def get_card_issuer():
     ##############################################################################
     # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
     return ' '.join(get_card_element('issuer').split(' ')[1:])
+
+    ##############################################################################
+def get_card_startdate():
+    """ Return the issuer DN of the x509 certificate of the identity """
+    ##############################################################################
+    return get_card_element('startdate').split('=')[1]
 
     ##############################################################################
 def get_card_enddate():

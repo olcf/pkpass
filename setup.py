@@ -18,6 +18,7 @@ REQUIRED = [
     'pem>=20.1.0',
     'pyperclip>=1.6.0',
     'pyseltongue>=0.3.1',
+    'python-dateutil>=2.8.1',
     'setuptools>=41.2.0',
 ]
 

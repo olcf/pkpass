@@ -5,13 +5,12 @@ from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
 
-
     ####################################################################
 class Info(Command):
-    """This class implements the CLI functionality of creation of passwords"""
+    """This class implements the display of metatdata to users"""
     ####################################################################
     name = 'info'
-    description = 'Create a new password entry and encrypt it for yourself'
+    description = 'Displays metadata about a password'
     selected_args = Command.selected_args + ['pwname', 'pwstore']
 
         ####################################################################
