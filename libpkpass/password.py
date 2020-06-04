@@ -22,7 +22,7 @@ class PasswordEntry():
                          'creator': None,
                          'authorizer': None,
                          'signature': None,
-                         'schemaVersion': 'v1'}
+                         'schemaVersion': 'v2'}
 
         self.metadata.update(kwargs)
         self.recipients = {}

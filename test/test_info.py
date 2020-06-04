@@ -16,7 +16,7 @@ class InfoTests(unittest.TestCase):
                 'Creator': 'r1',
                 'Description': 'y',
                 'Name': 'test',
-                'Schemaversion': 'v1',
+                'Schemaversion': 'v2',
                 'Signature': 'None'
             },
             'Recipients': 'r1',
