@@ -1,7 +1,9 @@
 """This Module defines what a password contains"""
 import uuid
 import time
+from datetime import datetime
 import os
+from dateutil import parser
 import yaml
 from libpkpass.escrow import pk_split_secret
 from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError,\
@@ -237,10 +239,12 @@ class PasswordEntry():
                         passphrase,
                         card_slot)
             except DecryptionError:
+                msg = create_error_message(recipient_entry['timestamp'], card_slot)
                 raise DecryptionError(
-                    "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
-                    self.metadata['name'])
+                    "Error decrypting password named '%s'. %s" %
+                    (self.metadata['name'], msg))
         except DecryptionError:
+            msg = create_error_message(recipient_entry['timestamp'], card_slot)
             raise DecryptionError(
                 "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
                 self.metadata['name'])
@@ -348,3 +352,17 @@ class PasswordEntry():
                     fname.write(yaml.safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)
+
+def create_error_message(recipient_timestamp, card_slot):
+    card_start = crypto.get_card_startdate()
+    card_start = datetime.timestamp(parser.parse(card_start))
+    distribute_time = float(recipient_timestamp)
+    # Slots are indexed at 0 so when enumerating you add 1
+    # There is also an additional information line so add 1 again
+    if int(card_slot) + 2 > len(crypto.get_card_info()[0]):
+        msg = 'Attempting to use card slot that is not connected'
+    elif distribute_time < card_start:
+        msg = 'Password distributed before this certificate was created'
+    else:
+        msg = "Perhaps a bad pin/passphrase?"
+    return msg
