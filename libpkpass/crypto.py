@@ -244,7 +244,7 @@ def get_card_element(element):
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     stdout, _ = proc.communicate()
     if stdout.decode('utf-8').strip().lower() == 'no smart card readers found.':
-        raise DecryptionError('Smartcard not detected')
+        raise X509CertificateError('Smartcard not detected')
     return get_cert_element(stdout, element)
 
     ##############################################################################
