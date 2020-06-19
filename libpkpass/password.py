@@ -245,9 +245,8 @@ class PasswordEntry():
                     (self.metadata['name'], msg))
         except DecryptionError:
             msg = create_error_message(recipient_entry['timestamp'], card_slot)
-            raise DecryptionError(
-                "Error decrypting password named '%s'.  Perhaps a bad pin/passphrase?" %
-                self.metadata['name'])
+            raise DecryptionError("Error decrypting password named '%s'. %s" %
+                                  (self.metadata['name'], msg))
 
         #######################################################################
     def verify_entry(self, uid=None, iddb=None):

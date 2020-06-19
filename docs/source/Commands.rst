@@ -279,7 +279,7 @@ Export allows the current user to migrate all his passwords to one file, this te
 
     usage: pkpass.py export [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR]
-                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--no-cache]
+                            [-i IDENTITY] [--no-cache]
                             [--nocrypto] [--nopassphrase] [-q] [--stdin]
                             [--theme-map THEME_MAP] [-v]
                             [pwfile]
@@ -295,8 +295,6 @@ Export allows the current user to migrate all his passwords to one file, this te
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
       --color COLOR         Disable color or not, accepts true/false
-      --dstpwstore DSTPWSTORE
-                            Path to the destination password store.
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       --no-cache            if using a connector, pull the certs again
@@ -380,7 +378,7 @@ Import allows a user to take an exported password file and import them into a ne
 
     usage: pkpass.py import [-h] [--cabundle CABUNDLE] [-c CARD_SLOT]
                             [--certpath CERTPATH] [--color COLOR]
-                            [--dstpwstore DSTPWSTORE] [-i IDENTITY] [--no-cache]
+                            [-i IDENTITY] [--no-cache]
                             [--nocrypto] [--nopassphrase] [-q] [--stdin]
                             [--theme-map THEME_MAP] [-v]
                             [pwfile]
@@ -396,8 +394,6 @@ Import allows a user to take an exported password file and import them into a ne
       --certpath CERTPATH   Path to directory containing public keys. Certificates
                             must end in '.cert'
       --color COLOR         Disable color or not, accepts true/false
-      --dstpwstore DSTPWSTORE
-                            Path to the destination password store.
       -i IDENTITY, --identity IDENTITY
                             Override identity of user running the program
       --no-cache            if using a connector, pull the certs again
