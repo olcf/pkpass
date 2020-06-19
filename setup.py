@@ -124,7 +124,6 @@ for sanity sake Noah's return values were:
             'card_slot': '',
             'certpath': '',
             'connect': '',
-            'dstpwstore': '',
             'escrow_users': '',
             'groups': '',
             'identity': '',
@@ -206,7 +205,7 @@ class Verify(Command):
         return valid
 
     def check_paths(self, args_dict, valid):
-        args = ['cabundle', 'certpath', 'dstpwstore', 'pwstore']
+        args = ['cabundle', 'certpath', 'pwstore']
         for arg in args:
             if arg in args_dict.keys():
                 if not os.path.exists(args_dict[arg]):
@@ -219,7 +218,7 @@ class Verify(Command):
         import yaml
         valid = True
         args = ['cabundle', 'card_slot', 'certpath',
-                'connect', 'dstpwstore', 'escrow_users',
+                'connect', 'escrow_users',
                 'groups', 'identity', 'keypath',
                 'min_escrow', 'pwstore', 'time',
                 'rules', 'rules_map', 'users',

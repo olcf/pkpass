@@ -11,7 +11,7 @@ class Export(Command):
     ####################################################################
     name = 'export'
     description = 'Export passwords that you have access to and encrypt with aes'
-    selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase', 'dstpwstore',
+    selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase',
                                              'card_slot', 'nocrypto']
 
         ####################################################################

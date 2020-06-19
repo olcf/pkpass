@@ -13,7 +13,7 @@ class Import(Command):
     ####################################################################
     name = 'import'
     description = 'Import passwords that you have saved to a file'
-    selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase', 'dstpwstore',
+    selected_args = Command.selected_args + ['pwfile', 'stdin', 'nopassphrase',
                                              'card_slot', 'nocrypto',]
 
         ####################################################################

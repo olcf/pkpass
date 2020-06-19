@@ -63,14 +63,6 @@ ARGUMENTS = {
         }
     },
 
-    'dstpwstore': {
-        'args': ['--dstpwstore'],
-        'kwargs': {
-            'type': str,
-            'help': 'Path to the destination password store.'
-        }
-    },
-
     'escrow_users': {
         'args':['-e', '--escrow_users'],
         'kwargs': {

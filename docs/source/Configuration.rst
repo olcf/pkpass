@@ -37,7 +37,6 @@ are arguments with 'store_true' or 'store_false' attributes. The following argum
     certpath
     color
     connect
-    dstpwstore
     escrow_users
     groups
     identity

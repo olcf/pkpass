@@ -36,8 +36,12 @@ class PkInterface():
             description='Public Key Password Manager')
         self.parser.set_default_subparser = util.set_default_subparser
         self.parser.add_argument(
-            '--config', type=str, help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
-            default=os.path.join(home, '.pkpassrc'))
+            '--config', type=str,
+            help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
+            default=os.path.join(home, '.pkpassrc')
+        )
+        self.parser.add_argument('--debug', action='store_true',
+                                 help="Errors are more verbose")
         self.subparsers = self.parser.add_subparsers(
             help='sub-commands', dest='subparser_name')
 
