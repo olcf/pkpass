@@ -1,5 +1,6 @@
 """This Module defines what a passworddb should look like"""
 import os
+from fnmatch import fnmatch
 import yaml
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError
@@ -13,6 +14,7 @@ class PasswordDB():
     def __init__(self, mode='Filesystem'):
         self.mode = mode
         self.pwdb = {}
+        self.ignore = '*requirements.txt'
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.__dict__)
@@ -27,7 +29,9 @@ class PasswordDB():
     def load_password_data(self, password_id):
         """ Load and return password from wherever it may be stored"""
     ##############################################################################
-        if not password_id in self.pwdb.keys() and self.mode == 'Filesystem':
+        if fnmatch(password_id, self.ignore):
+            return None
+        if password_id not in self.pwdb.keys() and self.mode == 'Filesystem':
             self.pwdb[password_id] = self.read_password_data_from_file(password_id)
         return self.pwdb[password_id]
 

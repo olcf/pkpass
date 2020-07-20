@@ -42,15 +42,15 @@ class IdentityDB():
             temp_dir = str(gettempdir())
 
         for key, value in connection_map.items():
+            encoded = key
+            connector = encoded.lower()
+            connector = __import__(connector, fromlist=[encoded])
+            connector = getattr(connector, encoded)
+            connector = connector(value)
             dirname = path.join(temp_dir, str(key))
             if not path.exists(dirname):
                 makedirs(dirname)
             if nocache or not listdir(dirname):
-                encoded = key
-                connector = encoded.lower()
-                connector = __import__(connector, fromlist=[encoded])
-                connector = getattr(connector, encoded)
-                connector = connector(value)
                 certs = connector.list_certificates()
                 for name, certlist in certs.items():
                     with open(path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
