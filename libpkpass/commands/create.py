@@ -11,23 +11,28 @@ class Create(Command):
     description = 'Create a new password entry and encrypt it for yourself'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath',
                                              'nopassphrase', 'nosign', 'card_slot', 'escrow_users',
-                                             'min_escrow', 'noescrow']
+                                             'min_escrow', 'noescrow', 'description', 'authorizer']
 
         ####################################################################
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        password1 = getpass.getpass("Enter password to create: ")
-        if password1.strip() == "":
-            raise BlankPasswordError
-        password2 = getpass.getpass("Enter password to create again: ")
-        if password1 != password2:
-            raise PasswordMismatchError
+        if not self.args['stdin']:
+            password1 = getpass.getpass("Enter password to create: ")
+            if password1.strip() == "":
+                raise BlankPasswordError
+            password2 = getpass.getpass("Enter password to create again: ")
+            if password1 != password2:
+                raise PasswordMismatchError
 
-        description = input("Description: ")
-        authorizer = input("Authorizer: ")
-        self.create_or_update_pass(password1, description, authorizer)
-
+            if not self.args['description']:
+                self.args['description'] = input("Description: ")
+            if not self.args['authorizer']:
+                self.args['authorizer'] = input("Authorizer: ")
+            self.create_or_update_pass(password1, self.args['description'], self.args['authorizer'])
+        else:
+            # Validate that stdin gives
+            self.create_or_update_pass(self.args['stdin'], self.args['description'], self.args['authorizer'])
         ####################################################################
     def _validate_args(self):
         ####################################################################

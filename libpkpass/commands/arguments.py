@@ -15,6 +15,14 @@ ARGUMENTS = {
         }
     },
 
+    'authorizer': {
+        'args': ['--authorizer'],
+        'kwargs': {
+            'help': "The person or account authorizing the creation of this secret",
+            'type': str
+        }
+    },
+
     'behalf': {
         'args': ['-b', '--behalf'],
         'kwargs': {
@@ -60,6 +68,14 @@ ARGUMENTS = {
         'kwargs': {
             'type': json.loads,
             'help': "Connection string for the api to retrieve certs"
+        }
+    },
+
+    'description': {
+        'args': ['-d', '--description'],
+        'kwargs': {
+            'help': "A description of this secret",
+            'type': str
         }
     },
 

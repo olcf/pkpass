@@ -13,7 +13,8 @@ class Generate(Command):
     description = 'Generate a new password entry and encrypt it for yourself'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath',
                                              'nopassphrase', 'nosign', 'card_slot', 'escrow_users',
-                                             'min_escrow', 'noescrow', 'rules', 'rules_map']
+                                             'min_escrow', 'noescrow', 'rules', 'rules_map', 'description',
+                                             'authorizer']
 
         ####################################################################
     def _run_command_execution(self):
@@ -23,9 +24,11 @@ class Generate(Command):
         if safe or self.args['overwrite']:
             password = self._generate_pass()
 
-            description = input("Description: ")
-            authorizer = input("Authorizer: ")
-            self.create_or_update_pass(password, description, authorizer)
+            if not self.args['description']:
+                self.args['description'] = input("Description: ")
+            if not self.args['authorizer']:
+                self.args['authorizer'] = input("Authorizer: ")
+            self.create_or_update_pass(password, self.argsp['description'], self.args['authorizer'])
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
