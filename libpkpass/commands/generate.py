@@ -21,13 +21,15 @@ class Generate(Command):
         """ Run function for class.                                      """
         ####################################################################
         safe, owner = self.safety_check()
+        if not self.args['description']:
+            self.args['description'] = input("Description: ")
+
+        if not self.args['authorizer']:
+            self.args['authorizer'] = input("Authorizer: ")
+
         if safe or self.args['overwrite']:
             password = self._generate_pass()
 
-            if not self.args['description']:
-                self.args['description'] = input("Description: ")
-            if not self.args['authorizer']:
-                self.args['authorizer'] = input("Authorizer: ")
             self.create_or_update_pass(password, self.argsp['description'], self.args['authorizer'])
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
