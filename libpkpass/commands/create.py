@@ -1,5 +1,6 @@
 """This module allows for the creation of passwords"""
-import getpass, sys
+import getpass
+import sys
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, PasswordMismatchError, BlankPasswordError
 
@@ -17,11 +18,6 @@ class Create(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        if not self.args['description']:
-            self.args['description'] = input("Description: ")
-
-        if not self.args['authorizer']:
-            self.args['authorizer'] = input("Authorizer: ")
 
         if not self.args['stdin']:
             password1 = getpass.getpass("Enter password to create: ")
@@ -32,6 +28,12 @@ class Create(Command):
                 raise PasswordMismatchError
         else:
             password1 = sys.stdin.read()
+
+        if not self.args['description']:
+            self.args['description'] = input("Description: ")
+
+        if not self.args['authorizer']:
+            self.args['authorizer'] = input("Authorizer: ")
 
         self.create_or_update_pass(password1, self.args['description'], self.args['authorizer'])
         ####################################################################
