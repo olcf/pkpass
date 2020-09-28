@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This module tests the distribute module"""
 import builtins
 import unittest

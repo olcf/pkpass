@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """General Utility file for common functionality"""
 from os import path
 from json import loads
