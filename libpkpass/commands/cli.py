@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This Module implements a CLI"""
 import libpkpass.util as util
 import libpkpass.commands.pkinterface as pkinterface

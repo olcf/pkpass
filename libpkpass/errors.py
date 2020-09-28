@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 """This Module is the base module for custom errors to allow for reduced tracebacks and
 more actionable items on the user's side"""
 

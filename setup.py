@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Note: to use the 'upload' functionality of this file, you must:
 # $ pip install twine
 import os

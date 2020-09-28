@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This module tests the list module"""
 import unittest
 import yaml

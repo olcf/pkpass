@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This Module tests the passworddb module"""
 import unittest
 from libpkpass.passworddb import PasswordDB

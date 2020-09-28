@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This module provides base testing capabilites"""
 import sys
 import argparse

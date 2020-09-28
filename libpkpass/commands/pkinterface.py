@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This is a super class to handle commonalities between the cli and interpreter"""
 import argparse
 import os

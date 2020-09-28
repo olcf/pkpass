@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This Module handles the crypto functions i.e. encryption and decryption"""
 import base64
 import tempfile
