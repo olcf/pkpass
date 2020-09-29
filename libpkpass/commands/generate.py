@@ -31,7 +31,7 @@ class Generate(Command):
             if 'authorizer' not in self.args:
                 self.args['authorizer'] = input("Authorizer: ")
 
-            self.create_or_update_pass(password, self.argsp['description'], self.args['authorizer'])
+            self.create_or_update_pass(password, self.args['description'], self.args['authorizer'])
         else:
             raise NotThePasswordOwnerError(self.args['identity'], owner, self.args['pwname'])
 
