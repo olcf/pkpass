@@ -155,6 +155,7 @@ def collect_args(parsedargs):
         'overwrite': False,
         'recovery': False,
         'rules': 'default',
+        'stdin': False,
         'theme_map': None,
         'color': True,
         'verbosity': 0,
