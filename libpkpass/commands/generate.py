@@ -25,10 +25,10 @@ class Generate(Command):
         if safe or self.args['overwrite']:
             password = self._generate_pass()
 
-            if 'description' not in self.args:
+            if 'description' not in self.args or not self.args['description']:
                 self.args['description'] = input("Description: ")
 
-            if 'authorizer' not in self.args:
+            if 'authorizer' not in self.args or not self.args['authorizer']:
                 self.args['authorizer'] = input("Authorizer: ")
 
             self.create_or_update_pass(password, self.args['description'], self.args['authorizer'])
