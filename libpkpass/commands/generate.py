@@ -28,7 +28,7 @@ class Generate(Command):
             if 'description' not in self.args:
                 self.args['description'] = input("Description: ")
 
-            if not self.args['authorizer']:
+            if 'authorizer' not in self.args:
                 self.args['authorizer'] = input("Authorizer: ")
 
             self.create_or_update_pass(password, self.argsp['description'], self.args['authorizer'])
