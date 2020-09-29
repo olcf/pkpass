@@ -29,7 +29,7 @@ class Create(Command):
         else:
             password1 = sys.stdin.read()
 
-        if not self.args['description']:
+        if 'description' not in self.args:
             self.args['description'] = input("Description: ")
 
         if not self.args['authorizer']:
