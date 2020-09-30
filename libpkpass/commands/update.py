@@ -59,7 +59,7 @@ class Update(Command):
         breaker = False
         while not breaker:
             self.recipient_list = input("Please enter a comma delimited list: ")
-            self.recipient_list = list(set(self._convert_strings_to_list(self.recipient_list)))
+            self.recipient_list = list({x.strip() for x in self.recipient_list.split(",")})
             print(self.recipient_list)
             try:
                 self._validate_identities(self.recipient_list)
