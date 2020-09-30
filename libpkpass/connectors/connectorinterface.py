@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This is a base class interface for cert connectors"""
 from abc import ABCMeta
 
     ##############################################################################
-class ConnectorInterface(object):
+class ConnectorInterface():
     """Simple interface for a Connector"""
     ##############################################################################
     __metaclass__ = ABCMeta

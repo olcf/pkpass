@@ -27,15 +27,18 @@ class Distribute(Command):
             passworddb.pwdb,
             [self.args['identity'], 'recipients']
         )
+        self.recipient_list.append(str(self.args['identity']))
+        self.recipient_list = list(set(self.recipient_list))
+        print("The following users will receive the password:")
+        print(", ".join(self.recipient_list))
         print("The following password files have matched:")
         print(*filtered_pdb.keys(), sep="\n")
-        correct_distribution = input("Is this list correct? (y/N) ")
+        correct_distribution = input("Are these lists correct? (y/N) ")
         if correct_distribution and correct_distribution.lower()[0] == 'y':
             passworddb.pwdb = filtered_pdb
             db_len = len(passworddb.pwdb.keys())
             i = 0
             self.progress_bar(i, db_len)
-            self.recipient_list.append(str(self.args['identity']))
             for dist_pass, _ in passworddb.pwdb.items():
                 password = PasswordEntry()
                 password.read_password_data(dist_pass)
