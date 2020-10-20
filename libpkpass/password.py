@@ -243,6 +243,10 @@ class PasswordEntry():
                 raise DecryptionError(
                     "Error decrypting password named '%s'. %s" %
                     (self.metadata['name'], msg))
+            except KeyError:
+                raise DecryptionError(
+                    "Error decrypting password named '%s'. Appropriate private key not found" %
+                    self.metadata['name'])
         except DecryptionError:
             msg = create_error_message(recipient_entry['timestamp'], card_slot)
             raise DecryptionError("Error decrypting password named '%s'. %s" %
