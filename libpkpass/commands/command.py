@@ -63,7 +63,7 @@ class Command():
         self._build_recipient_list()
 
         # If there are defined repositories of keys and certificates, load them
-        if not self.iddbcached:
+        if not self.iddbcached or self.args['no_cache']:
             self.identities.cabundle = self.args['cabundle']
             self.identities.load_certs_from_directory(
                 self.args['certpath'],

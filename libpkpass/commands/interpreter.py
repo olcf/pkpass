@@ -168,7 +168,7 @@ Type ? to list commands""" % VERSION
         """ Fix command line arguments, this is a hack to allow argparse
         function as we expect """
         ####################################################################
-        if str(line) == "edit":
+        if str(line) == "edit" or '--no-cache' in line:
             self._reload_config()
         return Cmd.postcmd(self, stop, line)
 
