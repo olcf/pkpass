@@ -21,8 +21,9 @@ class VerifyInstall(Command):
         print_messages(check_passdb, "passdb check",
                        cabundle=path.realpath(self.args['cabundle']),
                        pwstore=path.realpath(self.args['pwstore']),
-                       keypath=path.realpath(self.args['keypath']),
-                       certpath=path.realpath(self.args['certpath']))
+                       keypath=path.realpath(self.args['keypath']) if self.args['keypath'] else None,
+                       certpath=path.realpath(self.args['certpath']) if self.args['certpath'] else None,
+                       connect=self.args['connect'])
 
         ####################################################################
     def _validate_args(self):
@@ -61,13 +62,18 @@ def check_required_software():
     return "Successful installed software check"
 
     ####################################################################
-def check_passdb(cabundle, pwstore, certpath=None, keypath=None):
+def check_passdb(cabundle, pwstore, certpath=None, keypath=None, connect=None):
     ####################################################################
     ret_msg = []
     if not path.isfile(cabundle):
-        ret_msg.append("\tCabundle is not a file")
+        ret_msg.append("Cabundle is not a file")
     if not path.isdir(pwstore):
         ret_msg.append("pwstore is not a directory")
-    if not path.isdir(certpath) and not path.isdir(keypath):
-        ret_msg.append("Neither certpath nor keypath are directories")
-    return "\n\t".join(ret_msg)
+    if connect and certpath:
+        ret_msg.append("certpath or keypath is defined while using a connector")
+    if certpath and not path.isdir(certpath):
+        ret_msg.append("certpath is not a directory %s" % certpath)
+    if keypath and not path.isdir(keypath):
+        ret_msg.append("Keypath is not a directory: %s" % keypath)
+    ret_msg.append("Completed passdb check")
+    return "\n".join(ret_msg)

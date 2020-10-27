@@ -1,6 +1,6 @@
 """This module allows for inspecting metadata passwords"""
-import os
-import datetime
+from os import path
+from datetime import datetime
 from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
@@ -18,7 +18,7 @@ class Info(Command):
         """ Run function for class.                                      """
         ####################################################################
         password = PasswordEntry()
-        password.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
+        password.read_password_data(path.join(self.args['pwstore'], self.args['pwname']))
 
         # Metadata
         print(self.color_print("Metadata:", "first_level"))
@@ -42,7 +42,7 @@ class Info(Command):
                 timestamp_list = [x['timestamp'] for x in list(group_value['recipients'].values()) if 'timestamp' in x]
                 if timestamp_list:
                     timestamp = int(round(float(min(timestamp_list))))
-                    timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                    timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
                     print("    %s %s" % (self.color_print("Group creation time:", "third_level"),
                                          timestamp))
 
@@ -52,7 +52,7 @@ class Info(Command):
         print("%s %s" % (self.color_print("Total Recipients:", "first_level"),
                          len(list(password.recipients.keys()))))
         rec_timestamp = int(round(float(min([x['timestamp'] for x in list(password.recipients.values()) if 'timestamp' in x]))))
-        rec_timestamp = datetime.datetime.fromtimestamp(rec_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        rec_timestamp = datetime.fromtimestamp(rec_timestamp).strftime('%Y-%m-%d %H:%M:%S')
         print("%s %s" % (self.color_print("Earliest distribute timestamp:", "first_level"),
                          rec_timestamp))
 

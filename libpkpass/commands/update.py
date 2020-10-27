@@ -1,6 +1,6 @@
 """This module allows for the updating of passwords"""
 import getpass
-import os
+from os import path
 import libpkpass.util as util
 from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command
@@ -22,7 +22,7 @@ class Update(Command):
         """ Run function for class.                                      """
         ####################################################################
         password = PasswordEntry()
-        password.read_password_data(os.path.join(
+        password.read_password_data(path.join(
             self.args['pwstore'], self.args['pwname']))
         safe, owner = self.safety_check()
         if safe or self.args['overwrite']:

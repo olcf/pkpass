@@ -1,7 +1,7 @@
 """This Module allows for the import of passwords"""
 import getpass
 import os.path
-import yaml
+from yaml import safe_load, scanner
 import libpkpass.crypto as crypto
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
@@ -44,8 +44,8 @@ class Import(Command):
         """This function handles the contents of a file"""
         ####################################################################
         try:
-            self._yaml_file(yaml.safe_load(string))
-        except (TypeError, yaml.scanner.ScannerError):
+            self._yaml_file(safe_load(string))
+        except (TypeError, scanner.ScannerError):
             try:
                 self._flat_file(string.strip().split("\n"))
             except TypeError:

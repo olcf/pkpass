@@ -1,6 +1,6 @@
 """This module is used to process the decryption of keys"""
-import os
-import fnmatch
+from os import path, unlink, walk
+from fnmatch import fnmatch
 from tempfile import gettempdir
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
@@ -47,10 +47,10 @@ class Show(Command):
     def _behalf_prep(self, password, myidentity):
         """Create necessary temporary file for rsa key"""
         ####################################################################
-        password.read_password_data(os.path.join(self.args['pwstore'], self.args['behalf']))
+        password.read_password_data(path.join(self.args['pwstore'], self.args['behalf']))
         # allows the password to be stored outside the root of the password directory
         self.args['behalf'] = self.args['behalf'].split('/')[-1]
-        temp_key = os.path.join(gettempdir(), '%s.key' % self.args['behalf'])
+        temp_key = path.join(gettempdir(), '%s.key' % self.args['behalf'])
         plaintext_pw = password.decrypt_entry(
             identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
         with open(temp_key, 'w') as fname:
@@ -70,17 +70,17 @@ class Show(Command):
         self.args['key_path'] = temp_key
         myidentity['key_path'] = temp_key
         self._show_wrapper(password, myidentity)
-        os.unlink(temp_key)
+        unlink(temp_key)
 
         ####################################################################
     def _walk_dir(self, directory, password, myidentity, ignore_decrypt=False):
         """Walk our directory searching for passwords"""
         ####################################################################
-        # os.walk returns root, dirs, and files we just need files
-        for root, _, pwnames in os.walk(directory):
+        # walk returns root, dirs, and files we just need files
+        for root, _, pwnames in walk(directory):
             for pwname in pwnames:
                 if self.args['pwname'] is None or\
-                        fnmatch.fnmatch(os.path.join(root, pwname), self.args['pwname']):
+                        fnmatch(path.join(root, pwname), self.args['pwname']):
                     try:
                         self._decrypt_wrapper(
                             root, password, myidentity, pwname)
@@ -107,7 +107,7 @@ class Show(Command):
     def _decrypt_wrapper(self, directory, password, myidentity, pwname):
         """Decide whether to decrypt normally or for escrow"""
         ####################################################################
-        password.read_password_data(os.path.join(directory, pwname))
+        password.read_password_data(path.join(directory, pwname))
         myescrow = []
         if self.args['recovery']:
             myescrow = self._handle_escrow_show(password, myidentity)

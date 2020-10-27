@@ -187,9 +187,7 @@ def get_config_args(config, cli_args):
     try:
         with open(config, 'r') as fname:
             config_args = safe_load(fname)
-        if config_args is None:
-            config_args = {}
-        return config_args
+        return config_args if config_args else {}
     except IOError:
         if cli_args['verbosity'] != -1:
             print("INFO: No .pkpassrc file found")

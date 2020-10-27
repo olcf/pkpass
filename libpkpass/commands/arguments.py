@@ -1,5 +1,5 @@
 """This Module defines the arguments that argparse will accept from the CLI"""
-import json
+from json import loads
 
 ARGUMENTS = {
     ############################################################################
@@ -66,7 +66,7 @@ ARGUMENTS = {
     'connect': {
         'args': ['--connect'],
         'kwargs': {
-            'type': json.loads,
+            'type': loads,
             'help': "Connection string for the api to retrieve certs"
         }
     },
@@ -267,7 +267,7 @@ ARGUMENTS = {
     'rules_map' :{
         'args': ['--rules-map'],
         'kwargs': {
-            'type': json.loads,
+            'type': loads,
             'help': 'Map of rules used for automated generation of passwords'
         }
     },
@@ -291,7 +291,7 @@ ARGUMENTS = {
     'theme_map': {
         'args': ['--theme-map'],
         'kwargs': {
-            'type': json.loads,
+            'type': loads,
             'help': 'Map of colors to use for colorized output'
         }
     },

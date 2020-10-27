@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """This is a super class to handle commonalities between the cli and interpreter"""
-import argparse
-import os
+from argparse import ArgumentParser
+from os import path
 import libpkpass.util as util
 import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
@@ -19,6 +19,7 @@ import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
 import libpkpass.commands.update as update
+import libpkpass.commands.verifyinstall as verifyinstall
 
     ##############################################################################
 class PkInterface():
@@ -31,14 +32,14 @@ class PkInterface():
         ####################################################################
         # Hash of registered subparser actions, mapping string to actual subparser
         self.actions = {}
-        home = os.path.expanduser("~")
-        self.parser = argparse.ArgumentParser(
+        home = path.expanduser("~")
+        self.parser = ArgumentParser(
             description='Public Key Password Manager')
         self.parser.set_default_subparser = util.set_default_subparser
         self.parser.add_argument(
             '--config', type=str,
             help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
-            default=os.path.join(home, '.pkpassrc')
+            default=path.join(home, '.pkpassrc')
         )
         self.parser.add_argument('--debug', action='store_true',
                                  help="Errors are more verbose")
@@ -61,6 +62,7 @@ class PkInterface():
         rename.Rename(self)
         show.Show(self)
         update.Update(self)
+        verifyinstall.VerifyInstall(self)
 
         ####################################################################
     def register(self, command_obj, command_name, command_description):

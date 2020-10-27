@@ -1,4 +1,4 @@
-"""This module allows for the creation of passwords"""
+"""This module allows for the renaming of passwords"""
 import os
 import sys
 from libpkpass.commands.command import Command
@@ -7,7 +7,7 @@ from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError
 
     ####################################################################
 class Rename(Command):
-    """This class implements the CLI functionality of deletion of passwords"""
+    """This class implements the CLI functionality of renaming of passwords"""
     ####################################################################
     name = 'rename'
     description = 'Rename a password in the repository'

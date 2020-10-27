@@ -1,5 +1,5 @@
 """This Modules allows for distributing created passwords to other users"""
-import os
+from os import path
 import libpkpass.util as util
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
@@ -23,7 +23,7 @@ class Distribute(Command):
         passworddb = PasswordDB()
         passworddb.load_from_directory(self.args['pwstore'])
         filtered_pdb = util.dictionary_filter(
-            os.path.join(self.args['pwstore'], self.args['pwname']),
+            path.join(self.args['pwstore'], self.args['pwname']),
             passworddb.pwdb,
             [self.args['identity'], 'recipients']
         )

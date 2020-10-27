@@ -1,5 +1,5 @@
 """This Module allows for the export of passwords for the purpose of importing to a new card"""
-import os
+from os import path, walk
 import getpass
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
@@ -21,9 +21,9 @@ class Export(Command):
         myidentity = self.identities.iddb[self.args['identity']]
         passworddb = PasswordDB()
         crypt_pass = False
-        for path, _, files in os.walk(self.args['pwstore']):
+        for fpath, _, files in walk(self.args['pwstore']):
             for passwordname in files:
-                passwordpath = os.path.join(path, passwordname)
+                passwordpath = path.join(fpath, passwordname)
                 passworddb.load_password_data(passwordpath)
         if not self.args['nocrypto']:
             crypt_pass = getpass.getpass("Please enter a password for the encryption: ")

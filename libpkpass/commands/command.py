@@ -1,6 +1,6 @@
 """This module is a generic for all pkpass commands"""
 from sys import stdout
-from getpass import getpass
+import getpass
 from os import getcwd, path, sep, remove, rename
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.crypto import print_card_info
@@ -85,7 +85,7 @@ class Command():
                                 self.args['verbosity'],
                                 self.args['color'],
                                 self.args['theme_map'])
-            self.passphrase = getpass("Enter Pin/Passphrase: ")
+            self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
         ####################################################################
     def _resolve_directory_path(self):

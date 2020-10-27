@@ -1,5 +1,5 @@
 """This Module allows for editing metadata of passwords"""
-import os
+from os import path
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
@@ -16,7 +16,7 @@ class Modify(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        full_path = os.path.join(self.args['pwstore'], self.args['pwname'])
+        full_path = path.join(self.args['pwstore'], self.args['pwname'])
         password = PasswordEntry()
         password.read_password_data(full_path)
         editable = ['authorizer', 'description']
