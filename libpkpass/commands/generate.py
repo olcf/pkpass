@@ -1,6 +1,7 @@
 """This module allows for the automated generation of passwords"""
-import re
-import exrex
+from re import search
+from re import error as re_error
+from exrex import getone
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError, RulesMapError
 from libpkpass.util import parse_json_arguments
@@ -41,12 +42,12 @@ class Generate(Command):
         #######################################################################
         try:
             regex_rule = self.args['rules_map'][self.args['rules']]
-            password = exrex.getone(regex_rule)
+            password = getone(regex_rule)
             # The following regex search verifies it finds a match from exrex
-            return re.search(regex_rule, password).group(0)
+            return search(regex_rule, password).group(0)
         except TypeError:
             raise RulesMapError("Poorly formatted Rules Map, please check it is in json format")
-        except re.error:
+        except re_error:
             raise RulesMapError("Poorly formatted regex, or unsupported")
 
         #######################################################################

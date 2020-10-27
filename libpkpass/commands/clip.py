@@ -1,7 +1,7 @@
 """This Module allows for copying a password directly to the clipboard"""
-import time
-import os
-import pyperclip
+from time import sleep
+from os import path
+from pyperclip import copy, paste
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
@@ -21,7 +21,7 @@ class Clip(Command):
         """ Run function for class.                                      """
         ####################################################################
         password = PasswordEntry()
-        password.read_password_data(os.path.join(
+        password.read_password_data(path.join(
             self.args['pwstore'], self.args['pwname']))
         myidentity = self.identities.iddb[self.args['identity']]
 
@@ -40,14 +40,14 @@ class Clip(Command):
                 print("Warning:  Could not verify the certificate authenticity of user '%s'." %
                       result['distributor'])
 
-        oldclip = pyperclip.paste()
+        oldclip = paste()
         try:
-            pyperclip.copy(plaintext_pw)
+            copy(plaintext_pw)
             print("Password copied into paste buffer for %s seconds" %
                   self.args['time'])
-            time.sleep(self.args['time'])
+            sleep(self.args['time'])
         finally:
-            pyperclip.copy(oldclip)
+            copy(oldclip)
 
         ####################################################################
     def _validate_args(self):

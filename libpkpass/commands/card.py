@@ -1,11 +1,10 @@
-"""This Module allows for the listing of users passwords"""
+"""This Module allows for the listing of users cards"""
 from libpkpass.commands.command import Command
 from libpkpass.crypto import print_card_info
 
-
     ####################################################################
 class Card(Command):
-    """This class implements the cli list"""
+    """This class implements the cli card command"""
     ####################################################################
     name = 'card'
     description = 'List the available cards and which card you have selected'

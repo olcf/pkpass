@@ -1,7 +1,7 @@
 """This Module defines what a passworddb should look like"""
-import os
+from os import walk, path, makedirs
 from fnmatch import fnmatch
-import yaml
+from yaml import safe_load, dump
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError
 
@@ -39,9 +39,9 @@ class PasswordDB():
     def load_from_directory(self, pwstore):
         """ Load all passwords from directory """
     #############################################################################
-        for path, _, files in os.walk(pwstore):
+        for fpath, _, files in walk(pwstore):
             for passwordname in files:
-                passwordpath = os.path.join(path, passwordname)
+                passwordpath = path.join(fpath, passwordname)
                 self.load_password_data(passwordpath)
 
     ##############################################################################
@@ -58,7 +58,7 @@ class PasswordDB():
     ##############################################################################
         try:
             with open(filename, 'r') as fname:
-                password_data = yaml.safe_load(fname)
+                password_data = safe_load(fname)
                 password_entry = PasswordEntry()
                 password_entry.metadata = password_data['metadata']
                 password_entry.recipients = password_data['recipients']
@@ -74,11 +74,11 @@ class PasswordDB():
         """ Write password data and metadata to the appropriate password file """
     ##############################################################################
         try:
-            if not os.path.isdir(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
+            if not path.isdir(path.dirname(filename)):
+                makedirs(path.dirname(filename))
             with open(filename, 'w+') as fname:
                 passdata = {key: value for key, value in password_data.todict().items() if value}
-                fname.write(yaml.dump(passdata,
-                                      default_flow_style=False))
+                fname.write(dump(passdata,
+                                 default_flow_style=False))
         except (OSError, IOError):
             raise PasswordIOError("Error creating '%s'" % filename)

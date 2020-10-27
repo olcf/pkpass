@@ -1,8 +1,8 @@
 """This Module defines what a password contains"""
-import uuid
-import time
+from uuid import uuid1
+from time import time
 from datetime import datetime
-import os
+from os import path, makedirs
 from dateutil import parser
 import yaml
 from libpkpass.escrow import pk_split_secret
@@ -63,7 +63,7 @@ class PasswordEntry():
             minimum=None):
         """Process the escrow user map into escrow users"""
         #######################################################################
-        escrow_guid = str(uuid.uuid1()).replace('-', '')
+        escrow_guid = str(uuid1()).replace('-', '')
         if escrow_map:
             for key, value in escrow_map.items():
                 if set(value['recipients']) == set(escrow_users):
@@ -94,7 +94,7 @@ class PasswordEntry():
         """ Add escrow users to the recipient list of this password object"""
         #######################################################################
         split_secret = pk_split_secret(secret, escrow_users, minimum)
-        return (self.read_escrow(os.path.join(pwstore, self.metadata['name'])), split_secret)
+        return (self.read_escrow(path.join(pwstore, self.metadata['name'])), split_secret)
 
         #######################################################################
     def add_recipients(
@@ -179,10 +179,8 @@ class PasswordEntry():
                 distributor_hash = identitydb.iddb[distributor]['certs'][0]['subjecthash']
             recipient_entry = {
                 'encrypted_secrets': encrypted_secrets,
-                # 'distributor_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[distributor] ),
-                # 'recipient_fingerprint': crypto.get_cert_fingerprint( identitydb.iddb[recipient] ),
                 'encryption_algorithm': encryption_algorithm,
-                'timestamp': time.time(),
+                'timestamp': time(),
                 'distributor': distributor,
                 'distributor_hash': distributor_hash,
             }
@@ -338,11 +336,11 @@ class PasswordEntry():
         ############################################################################################
         self.validate()
         # check if the file is in the base password directory
-        incwd = os.path.basename(filename) == filename
+        incwd = path.basename(filename) == filename
         # if not ensure path exists
         try:
-            if not incwd and not os.path.isdir(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
+            if not incwd and not path.isdir(path.dirname(filename)):
+                makedirs(path.dirname(filename))
             passdata = {key: value for key, value in self.todict().items() if value}
             open_method = 'a' if export else 'w'
             with open(filename, open_method) as fname:

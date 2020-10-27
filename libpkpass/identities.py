@@ -42,11 +42,7 @@ class IdentityDB():
             temp_dir = str(gettempdir())
 
         for key, value in connection_map.items():
-            encoded = key
-            connector = encoded.lower()
-            connector = __import__(connector, fromlist=[encoded])
-            connector = getattr(connector, encoded)
-            connector = connector(value)
+            connector = getattr(__import__(key.lower(), fromlist=[key]), key)(value)
             dirname = path.join(temp_dir, str(key))
             if not path.exists(dirname):
                 makedirs(dirname)
@@ -84,10 +80,10 @@ class IdentityDB():
                                   nocache=False):
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
-        if connectmap:
-            self._load_certs_from_external(connectmap, nocache)
         if certpath:
             self._load_from_directory(certpath, 'certificate')
+        if connectmap:
+            self._load_certs_from_external(connectmap, nocache)
         if verify_on_load:
             threads = []
             for identity, _ in self.iddb.items():
@@ -98,7 +94,8 @@ class IdentityDB():
                 thread.join()
 
         #######################################################################
-    def verify_identity(self, identity, results):
+        # we need the results parameter because of the threading
+    def verify_identity(self, identity, results): #pylint: disable=unused-argument
         """ Read in all rsa keys from directory and name them as found
         results is a meaningless parameter, but is required to make threading work
         """

@@ -1,6 +1,6 @@
 """This module allows for the creation of passwords"""
 import getpass
-import sys
+from sys import stdin
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, PasswordMismatchError, BlankPasswordError
 
@@ -27,7 +27,7 @@ class Create(Command):
             if password1 != password2:
                 raise PasswordMismatchError
         else:
-            password1 = sys.stdin.read()
+            password1 = stdin.read()
 
         if 'description' not in self.args or not self.args['description']:
             self.args['description'] = input("Description: ")

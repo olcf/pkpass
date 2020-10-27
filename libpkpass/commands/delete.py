@@ -1,10 +1,12 @@
-"""This module allows for the creation of passwords"""
-import sys
+"""This module allows for the deletion of passwords"""
+from sys import exit as sysexit
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError
 
+    ####################################################################
 class Delete(Command):
     """This class implements the CLI functionality of deletion of passwords"""
+    ####################################################################
     name = 'delete'
     description = 'Delete a password in the repository'
     selected_args = Command.selected_args + ['pwname', 'pwstore', 'overwrite', 'stdin', 'keypath', 'card_slot']
@@ -30,7 +32,7 @@ class Delete(Command):
         if confirmation.lower() in yes:
             self.delete_pass()
         elif confirmation.lower() in deny:
-            sys.exit()
+            sysexit()
         else:
             print("please respond with yes or no")
             self._confirmation()
