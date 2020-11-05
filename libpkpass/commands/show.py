@@ -61,7 +61,7 @@ class Show(Command):
                         '-----BEGIN RSA PRIVATE KEY-----', ''
                     ).replace(
                         ' -----END RSA PRIVATE KEY----', ''
-                    ).replace(' ', '\n'),
+                    ).replace(' ', '\n').strip(),
                     '-----END RSA PRIVATE KEY-----'
                 )
             )
@@ -69,6 +69,7 @@ class Show(Command):
         myidentity = self.identities.iddb[self.args['identity']]
         self.args['key_path'] = temp_key
         myidentity['key_path'] = temp_key
+        print(myidentity)
         self._show_wrapper(password, myidentity)
         unlink(temp_key)
 
