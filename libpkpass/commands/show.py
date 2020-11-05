@@ -69,7 +69,6 @@ class Show(Command):
         myidentity = self.identities.iddb[self.args['identity']]
         self.args['key_path'] = temp_key
         myidentity['key_path'] = temp_key
-        print(myidentity)
         self._show_wrapper(password, myidentity)
         unlink(temp_key)
 
