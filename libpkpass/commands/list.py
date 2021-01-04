@@ -44,7 +44,7 @@ class List(Command):
             result = dictionary_filter(self.args['filter'], result)
 
         print("Passwords for '%s':" % self.args['identity'])
-        for key, value in result.items():
+        for key, value in sorted(result.items()):
             print("%s\n  %s\n  %s" %
                   (
                       self.color_print(key + ":",

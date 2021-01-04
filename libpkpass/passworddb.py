@@ -1,5 +1,6 @@
 """This Module defines what a passworddb should look like"""
 from os import walk, path, makedirs
+from multiprocessing import Pool, Process, Manager
 from fnmatch import fnmatch
 from yaml import safe_load, dump
 from libpkpass.password import PasswordEntry
@@ -26,23 +27,35 @@ class PasswordDB():
         return len(self.pwdb)
 
     ##############################################################################
-    def load_password_data(self, password_id):
+    def load_password_data(self, password_id, pwdb=None):
         """ Load and return password from wherever it may be stored"""
     ##############################################################################
         if fnmatch(password_id, self.ignore):
             return None
         if password_id not in self.pwdb.keys() and self.mode == 'Filesystem':
             self.pwdb[password_id] = self.read_password_data_from_file(password_id)
+        if pwdb is not None:
+            pwdb[password_id] = self.pwdb[password_id]
         return self.pwdb[password_id]
 
     #############################################################################
     def load_from_directory(self, pwstore):
         """ Load all passwords from directory """
     #############################################################################
-        for fpath, _, files in walk(pwstore):
-            for passwordname in files:
-                passwordpath = path.join(fpath, passwordname)
-                self.load_password_data(passwordpath)
+        jobs = []
+        with Manager() as manager:
+            pwdb = manager.dict()
+            for fpath, _, files in walk(pwstore):
+                jobs.append(Process(target=self.parallel_loader, args=(files, fpath, pwdb)))
+                jobs[-1].start()
+            for job in jobs:
+                job.join()
+            self.pwdb = dict(pwdb)
+
+    def parallel_loader(self, files, fpath, pwdb):
+        for passwordname in files:
+            passwordpath = path.join(fpath, passwordname)
+            self.load_password_data(passwordpath, pwdb)
 
     ##############################################################################
     def save_password_data(self, password_id, overwrite=False):
