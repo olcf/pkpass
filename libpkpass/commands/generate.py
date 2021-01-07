@@ -45,10 +45,10 @@ class Generate(Command):
             password = getone(regex_rule)
             # The following regex search verifies it finds a match from exrex
             return search(regex_rule, password).group(0)
-        except TypeError:
-            raise RulesMapError("Poorly formatted Rules Map, please check it is in json format")
-        except re_error:
-            raise RulesMapError("Poorly formatted regex, or unsupported")
+        except TypeError as err:
+            raise RulesMapError("Poorly formatted Rules Map, please check it is in json format") from err
+        except re_error as err:
+            raise RulesMapError("Poorly formatted regex, or unsupported") from err
 
         #######################################################################
     def _validate_args(self):

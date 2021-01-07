@@ -1,6 +1,6 @@
 """This Module defines what a passworddb should look like"""
 from os import walk, path, makedirs
-from multiprocessing import Pool, Process, Manager
+from multiprocessing import Process, Manager
 from fnmatch import fnmatch
 from yaml import safe_load, dump
 from libpkpass.password import PasswordEntry
@@ -79,8 +79,10 @@ class PasswordDB():
                     password_entry.escrow = password_data['escrow']
             password_entry.validate()
             return password_entry
-        except (OSError, IOError, TypeError):
-            raise PasswordIOError("Error reading '%s' perhaps a path error for the db, or malformed file" % filename)
+        except (OSError, IOError, TypeError) as err:
+            raise PasswordIOError(
+                "Error reading '%s' perhaps a path error for the db, or malformed file" % filename
+            ) from err
 
     #############################################################################
     def write_password_data_to_file(self, password_data, filename, overwrite=False):
@@ -93,5 +95,5 @@ class PasswordDB():
                 passdata = {key: value for key, value in password_data.todict().items() if value}
                 fname.write(dump(passdata,
                                  default_flow_style=False))
-        except (OSError, IOError):
-            raise PasswordIOError("Error creating '%s'" % filename)
+        except (OSError, IOError) as err:
+            raise PasswordIOError("Error creating '%s'" % filename) from err

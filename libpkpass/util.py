@@ -131,7 +131,7 @@ def parse_json_arguments(args, argument):
             return loads(args[argument])
         return None
     except ValueError as err:
-        raise JsonArgumentError(argument, err)
+        raise JsonArgumentError(argument, err) from err
 
     ##################################################################
 def collect_args(parsedargs):
@@ -192,5 +192,5 @@ def get_config_args(config, cli_args):
         if cli_args['verbosity'] != -1:
             print("INFO: No .pkpassrc file found")
         return {}
-    except (ParserError, ScannerError):
-        raise ConfigParseError("Parsing error with config file, please check syntax")
+    except (ParserError, ScannerError) as err:
+        raise ConfigParseError("Parsing error with config file, please check syntax") from err

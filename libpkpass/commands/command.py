@@ -1,5 +1,4 @@
 """This module is a generic for all pkpass commands"""
-from sys import stdout
 import getpass
 from os import getcwd, path, sep, remove, rename
 from libpkpass.commands.arguments import ARGUMENTS as arguments
@@ -178,8 +177,8 @@ class Command():
         filepath = path.join(self.args['pwstore'], self.args['pwname'])
         try:
             remove(filepath)
-        except OSError:
-            raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
+        except OSError as err:
+            raise PasswordIOError("Password '%s' not found" % self.args['pwname']) from err
 
         ##################################################################
     def rename_pass(self):
@@ -194,8 +193,8 @@ class Command():
             password['metadata']['name'] = self.args['rename']
             password.write_password_data(newpath)
 
-        except OSError:
-            raise PasswordIOError("Password '%s' not found" % self.args['pwname'])
+        except OSError as err:
+            raise PasswordIOError("Password '%s' not found" % self.args['pwname']) from err
 
         ##################################################################
     def _run_command_execution(self):
@@ -230,7 +229,7 @@ class Command():
                 member_list += [user.strip() for user in self.args[group.strip()].split(",") if user.strip()]
             return member_list
         except KeyError as err:
-            raise GroupDefinitionError(str(err))
+            raise GroupDefinitionError(str(err)) from err
 
         ##################################################################
     def _validate_args(self):
@@ -293,13 +292,3 @@ class Command():
         return color_prepare(string, color_type,
                              self.args['color'],
                              self.args['theme_map'])
-
-        ##################################################################
-    def progress_bar(self, value, endvalue, bar_length=50):
-        """Allow a command to print off a progress bar"""
-        ##################################################################
-        percent = float(value) / endvalue
-        arrow = '-' * int(round(percent * bar_length)-1) + '>'
-        spaces = ' ' * (bar_length - len(arrow))
-        stdout.write("\rPercent: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
-        stdout.flush()

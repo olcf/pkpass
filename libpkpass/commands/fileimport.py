@@ -2,6 +2,7 @@
 import getpass
 import os.path
 from yaml import safe_load, scanner
+from tqdm import tqdm
 import libpkpass.crypto as crypto
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
@@ -28,16 +29,11 @@ class Import(Command):
                 self._file_handler(contents)
             else:
                 passwd = getpass.getpass("Please enter the password for the file: ")
-                i = 1
                 passwords = contents.split("\n")
-                db_len = len(passwords)
-                for password in passwords:
+                for password in tqdm(passwords):
                     self._file_handler(crypto.sk_decrypt_string(password, passwd))
-                    self.progress_bar(i, db_len)
-                    i += 1
-            print("")
-        except IOError:
-            raise FileOpenError(self.args['pwfile'], "No such file or directory")
+        except IOError as err:
+            raise FileOpenError(self.args['pwfile'], "No such file or directory") from err
 
         ####################################################################
     def _file_handler(self, string):
@@ -48,8 +44,8 @@ class Import(Command):
         except (TypeError, scanner.ScannerError):
             try:
                 self._flat_file(string.strip().split("\n"))
-            except TypeError:
-                raise LegacyImportFormatError
+            except TypeError as err:
+                raise LegacyImportFormatError from err
 
         ####################################################################
     def _flat_file(self, passwords):
@@ -57,17 +53,12 @@ class Import(Command):
         ####################################################################
         print("INFO: Flat password file detected, using 'imported' as description \
 you can manually change the description in the file if you would like")
-        db_len = len(passwords)
-        i = 0
-        for password in passwords:
+        for password in tqdm(passwords):
             psplit = password.split(":")
             fname = psplit[0].strip()
             pvalue = psplit[1].strip()
             self.args['pwname'] = fname
             self.create_or_update_pass(pvalue, "imported", self.args['identity'])
-            self.progress_bar(i, db_len)
-            i += 1
-        print("")
 
         ####################################################################
     def _yaml_file(self, password):
