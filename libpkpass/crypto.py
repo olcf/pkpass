@@ -104,8 +104,8 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         unlink(fname.name)
         try:
             plaintext_derived_key = stdout
-        except IndexError:
-            raise DecryptionError(stdout)
+        except IndexError as err:
+            raise DecryptionError(stdout) from err
 
     if proc.returncode != 0:
         raise DecryptionError(stdout)
@@ -228,8 +228,8 @@ def get_cert_element(cert, element):
 
     try:
         return stdout.decode("UTF-8").rstrip()
-    except IndexError:
-        raise X509CertificateError(stdout)
+    except IndexError as err:
+        raise X509CertificateError(stdout) from err
 
     ##############################################################################
 def get_card_element(element):
@@ -309,8 +309,8 @@ def sk_decrypt_string(ciphertext_string, key):
         try:
             plaintext_string = fern.decrypt(ciphertext_string)
             return plaintext_string.decode("UTF-8")
-        except InvalidToken:
-            raise DecryptionError("Incorrect Password")
+        except InvalidToken as err:
+            raise DecryptionError("Incorrect Password") from err
 
     ##############################################################################
 def hash_password(password):

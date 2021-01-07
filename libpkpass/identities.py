@@ -70,7 +70,7 @@ class IdentityDB():
                                     "%s_path" % filetype: filepath}
                         self.iddb[identity['uid']] = identity
         except OSError as error:
-            raise FileOpenError(fpath, str(error.strerror))
+            raise FileOpenError(fpath, str(error.strerror)) from error
 
         #######################################################################
     def load_certs_from_directory(self,
@@ -115,9 +115,9 @@ class IdentityDB():
                 cert_dict['issuerhash'] = get_cert_issuerhash(cert)
                 cert_dict['subjecthash'] = get_cert_subjecthash(cert)
                 self.iddb[identity]['certs'].append(cert_dict)
-        except KeyError:
+        except KeyError as err:
             raise CliArgumentError(
-                "Error: Recipient '%s' is not in the recipient database" % identity)
+                "Error: Recipient '%s' is not in the recipient database" % identity) from err
 
         #######################################################################
     def load_keys_from_directory(self, fpath):

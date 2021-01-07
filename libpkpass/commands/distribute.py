@@ -1,5 +1,6 @@
 """This Modules allows for distributing created passwords to other users"""
 from os import path
+from tqdm import tqdm
 import libpkpass.util as util
 from libpkpass.commands.command import Command
 from libpkpass.passworddb import PasswordDB
@@ -36,10 +37,7 @@ class Distribute(Command):
         correct_distribution = input("Are these lists correct? (y/N) ")
         if correct_distribution and correct_distribution.lower()[0] == 'y':
             passworddb.pwdb = filtered_pdb
-            db_len = len(passworddb.pwdb.keys())
-            i = 0
-            self.progress_bar(i, db_len)
-            for dist_pass, _ in passworddb.pwdb.items():
+            for dist_pass, _ in tqdm(passworddb.pwdb.items()):
                 password = PasswordEntry()
                 password.read_password_data(dist_pass)
                 if self.args['identity'] in password.recipients.keys():
@@ -62,10 +60,6 @@ class Distribute(Command):
                                            )
 
                     password.write_password_data(dist_pass)
-                    i += 1
-                    self.progress_bar(i, db_len)
-            # format the progress bar appropriately after the loop
-            print("")
         else:
             print("Exiting due to wrong password list")
 

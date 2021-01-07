@@ -5,6 +5,7 @@ from datetime import datetime
 from os import path, makedirs
 from dateutil import parser
 import yaml
+from tqdm import tqdm
 from libpkpass.escrow import pk_split_secret
 from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError,\
     X509CertificateError
@@ -116,7 +117,7 @@ class PasswordEntry():
 
         new_recipients = {r:self._add_recipient(
             r, secret, distributor, identitydb, encryption_algorithm, passphrase, card_slot
-        ) for r in recipients}
+        ) for r in tqdm(recipients, leave=False)}
         self.recipients.update(new_recipients)
         if escrow_users:
             #escrow_users may now be none after the set operations
@@ -192,10 +193,10 @@ class PasswordEntry():
             )
 
             return recipient_entry
-        except KeyError:
+        except KeyError as err:
             raise NotARecipientError(
                 "Identity '%s' is not on the recipient list for password '%s'" %
-                (recipient, self.metadata['name']))
+                (recipient, self.metadata['name'])) from err
 
         #######################################################################
     def decrypt_entry(self, identity=None, passphrase=None, card_slot=None):
@@ -204,10 +205,10 @@ class PasswordEntry():
         #######################################################################
         try:
             recipient_entry = self.recipients[identity['uid']]
-        except KeyError:
+        except KeyError as err:
             raise NotARecipientError(
                 "Identity '%s' is not on the recipient list for password '%s'" %
-                (identity['uid'], self.metadata['name']))
+                (identity['uid'], self.metadata['name'])) from err
 
         try:
             # support old yaml format
@@ -236,19 +237,19 @@ class PasswordEntry():
                         identity,
                         passphrase,
                         card_slot)
-            except DecryptionError:
+            except DecryptionError as err:
                 msg = create_error_message(recipient_entry['timestamp'], card_slot)
                 raise DecryptionError(
                     "Error decrypting password named '%s'. %s" %
-                    (self.metadata['name'], msg))
-            except KeyError:
+                    (self.metadata['name'], msg)) from err
+            except KeyError as err:
                 raise DecryptionError(
                     "Error decrypting password named '%s'. Appropriate private key not found" %
-                    self.metadata['name'])
-        except DecryptionError:
+                    self.metadata['name']) from err
+        except DecryptionError as err:
             msg = create_error_message(recipient_entry['timestamp'], card_slot)
             raise DecryptionError("Error decrypting password named '%s'. %s" %
-                                  (self.metadata['name'], msg))
+                                  (self.metadata['name'], msg)) from err
 
         #######################################################################
     def verify_entry(self, uid=None, iddb=None):
@@ -323,9 +324,9 @@ class PasswordEntry():
         except (OSError, IOError) as error:
             raise PasswordIOError(
                 "Error Opening %s due to %s" %
-                (filename, error.strerror))
+                (filename, error.strerror)) from error
         except (yaml.scanner.ScannerError, yaml.parser.ParserError) as error:
-            raise YamlFormatError(str(error.problem_mark), error.problem)
+            raise YamlFormatError(str(error.problem_mark), error.problem) from error
 
         ############################################################################################
     def write_password_data(self, filename, overwrite=False,
@@ -351,8 +352,8 @@ class PasswordEntry():
                     fname.write(encrypted.decode() + "\n")
                 else:
                     fname.write(yaml.safe_dump(passdata, default_flow_style=False))
-        except (OSError, IOError):
-            raise PasswordIOError("Error creating '%s'" % filename)
+        except (OSError, IOError) as error:
+            raise PasswordIOError("Error creating '%s'" % filename) from error
 
 def create_error_message(recipient_timestamp, card_slot):
     card_start = crypto.get_card_startdate()

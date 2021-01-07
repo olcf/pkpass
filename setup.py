@@ -20,6 +20,7 @@ REQUIRED = [
     'pyseltongue>=0.3.1',
     'python-dateutil>=2.8.1',
     'setuptools>=41.2.0',
+    'tqdm>=4.55.1',
 ]
 
 HOME = os.path.expanduser("~")
