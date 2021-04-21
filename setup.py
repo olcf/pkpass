@@ -11,16 +11,17 @@ from setuptools import setup, Command
 import versioneer
 
 REQUIRED = [
-    'PyYAML>=4.2b1',
-    'colored>=1.4.0',
-    'cryptography>=2.3',
-    'exrex>=0.10.5',
-    'pem>=20.1.0',
-    'pyperclip>=1.6.0',
-    'pyseltongue>=0.3.1',
-    'python-dateutil>=2.8.1',
-    'setuptools>=41.2.0',
-    'tqdm>=4.55.1',
+    'colored==1.4.2',
+    'cryptography==3.4.7',
+    'exrex==0.10.5',
+    'mock==4.0.3',
+    'pem==21.2.0',
+    'pyperclip==1.8.2',
+    'pyseltongue==1.0.0',
+    'python-dateutil==2.8.1',
+    'PyYAML==5.4.1',
+    'setuptools==56.0.0',
+    'tqdm==4.60.0',
 ]
 
 HOME = os.path.expanduser("~")
