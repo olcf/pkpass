@@ -7,6 +7,7 @@ RTD
 ===
 https://pkpass.readthedocs.io/en/latest/
 
+Requires >= Python 3.6
 
 Overview
 --------
