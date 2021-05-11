@@ -34,16 +34,19 @@ class PkInterface():
         # Hash of registered subparser actions, mapping string to actual subparser
         self.actions = {}
         home = path.expanduser("~")
+        defaultrc = None
         for file in ['.pkpassrc', '.pkpassrc.yml', '.pkpassrc.yaml']:
             if path.isfile(path.join(home, file)):
-                default = path.join(home, file)
+                defaultrc = path.join(home, file)
+        if not defaultrc:
+            defaultrc = path.join(home, '.pkpassrc')
         self.parser = ArgumentParser(
             description='Public Key Password Manager')
         self.parser.set_default_subparser = util.set_default_subparser
         self.parser.add_argument(
             '--config', type=str,
             help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc{,.yml,.yaml}'",
-            default=default
+            default=defaultrc
         )
         self.parser.add_argument('--debug', action='store_true',
                                  help="Errors are more verbose")
