@@ -22,13 +22,15 @@ REQUIRED = [
     'PyYAML==5.4.1',
     'setuptools==56.0.0',
     'tqdm==4.60.0',
+    'ruamel.yaml==0.17.4',
+    'ruamel.yaml.clib==0.2.2',
 ]
 
 HOME = os.path.expanduser("~")
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 def rcfile_check():
-    rc_location = os.path.join(HOME, ".pkpassrc")
+    rc_location = os.path.join(HOME, ".pkpassrc.yaml")
     example_location = os.path.join(HERE, 'example_pkpassrc')
     if os.path.exists(rc_location):
         if os.path.isdir(rc_location):

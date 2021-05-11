@@ -3,7 +3,7 @@ Configuration
 
 Password Repository
 -------------------
-Passwords are created on the file system, so any destination may be specified.  For passwords that need to be distributed to other users, convention suggests putting these into a hierarchy with the root in 'passwords'.  To make the repository as flat as possible, the top level will contain mostly groupings of passwords, with the next level containing the passwords themselves.  
+Passwords are created on the file system, so any destination may be specified.  For passwords that need to be distributed to other users, convention suggests putting these into a hierarchy with the root in 'passwords'.  To make the repository as flat as possible, the top level will contain mostly groupings of passwords, with the next level containing the passwords themselves.
 Examples of groups may include "security-team", "database-users", "passwords/general", etc.  It is up to each organization to determine the best hierarchy for storing passwords.  The 'list' command and 'showall' commands will crawl the hierarchy starting at the root regardless of structure.
 
 You may distribute passwords to a specified group defined in your pkpassrc file. These groups may be arbitrary
@@ -19,7 +19,7 @@ you may also specify on the command line which groups to use: ``pkpass.py distri
 Cert Repository
 ---------------
 Certs are read into PkPass and are used in many of the processes. This can be presented to pkpass as a directory structure, repository, or
-by means of it's ``connector`` functionality. 
+by means of it's ``connector`` functionality.
 
 CA Bundle
 ---------
@@ -27,7 +27,7 @@ The CA bundle is used to verify valid certs
 
 Arguments
 ---------
-The RC file can take the majority of PkPass's arguments so that you do not need to pass them through. The only ones that should not be relied upon to work properly
+The RC file (location ~/.pkpassrc, ~/.pkpassrc.yaml, or ~/.pkpassrc.yml) can take the majority of PkPass's arguments so that you do not need to pass them through. The only ones that should not be relied upon to work properly
 are arguments with 'store_true' or 'store_false' attributes. The following arguments should work in a pkpassrc file
 
 .. code-block:: bash
@@ -76,3 +76,28 @@ Example:
     pkpass show password_i_dont_have_direct_access_to -b rsa_user
 
 the argument `rsa_user` needs to be both the username and the password name for the password that store's this user's rsa key
+
+Populate other data stores
+--------------------------
+Currently Pkpass can populate puppet-eyaml given appropriate configurations:
+
+It is suggested to have a `~/.eyaml/config.yaml` setup with `pkcs7_public_key:` defined at the highest level of that file.
+
+To completely configure this integration on the pkpass side please add values to your rc file that looks similar to the following
+
+.. code-block:: yaml
+    populate:
+      # puppet_eyaml is the definition for the `type`
+      puppet_eyaml:
+        # `bin` is the location of the binary for `eyaml`
+        bin: /opt/puppetlabs/pdk/share/cache/ruby/2.5.0/bin/eyaml
+        # `directory` is the directory of your puppet repo
+        directory: ~/git/puppet
+        passwords:
+          # This level entry (`ops/password`) represents a pkpass password name
+          ops/password:
+            # This level entry (`data/team/security.yaml`) represents the rest of the file path for the heira file
+            data/team/security.yaml:
+              # The following list represents the keys that need to be replaced in the heira file
+              - some::server::password
+              - some:other::server

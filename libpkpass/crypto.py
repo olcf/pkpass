@@ -320,3 +320,12 @@ def hash_password(password):
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
                      iterations=100000, backend=default_backend())
     return urlsafe_b64encode(handle_python_strings(kdf.derive(password)))
+
+    ##############################################################################
+def puppet_password(eyaml, password):
+    """Give eyaml password"""
+    ##############################################################################
+    command = [eyaml, 'encrypt', '-s', password, '-o', 'string']
+    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    stdout, _ = proc.communicate()
+    return stdout.decode().strip()

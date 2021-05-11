@@ -33,6 +33,7 @@ import libpkpass.commands.pkinterface as pkinterface
 import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
+import libpkpass.commands.populate as populate
 import libpkpass.commands.update as update
 
 VERSION = show_version()
@@ -274,5 +275,5 @@ for command in [('card', 'Card'), ('clip', 'Clip'), ('create', 'Create'), ('dele
                 ('generate', 'Generate'), ('pkimport', 'Import'), ('info', 'Info'),
                 ('pklist', 'List'), ('listrecipients', 'Listrecipients'),
                 ('modify', 'Modify'), ('recover', 'Recover'), ('rename', 'Rename'),
-                ('show', 'Show'), ('update', 'Update')]:
+                ('show', 'Show'), ('populate', 'Populate'), ('update', 'Update')]:
     add_dynamic_function(command[0], command[1])

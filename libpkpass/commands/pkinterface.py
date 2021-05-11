@@ -18,6 +18,7 @@ import libpkpass.commands.modify as modify
 import libpkpass.commands.recover as recover
 import libpkpass.commands.rename as rename
 import libpkpass.commands.show as show
+import libpkpass.commands.populate as populate
 import libpkpass.commands.update as update
 import libpkpass.commands.verifyinstall as verifyinstall
 
@@ -33,13 +34,16 @@ class PkInterface():
         # Hash of registered subparser actions, mapping string to actual subparser
         self.actions = {}
         home = path.expanduser("~")
+        for file in ['.pkpassrc', '.pkpassrc.yml', '.pkpassrc.yaml']:
+            if path.isfile(path.join(home, file)):
+                default = path.join(home, file)
         self.parser = ArgumentParser(
             description='Public Key Password Manager')
         self.parser.set_default_subparser = util.set_default_subparser
         self.parser.add_argument(
             '--config', type=str,
-            help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc'",
-            default=path.join(home, '.pkpassrc')
+            help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc{,.yml,.yaml}'",
+            default=default
         )
         self.parser.add_argument('--debug', action='store_true',
                                  help="Errors are more verbose")
@@ -61,6 +65,7 @@ class PkInterface():
         recover.Recover(self)
         rename.Rename(self)
         show.Show(self)
+        populate.Populate(self)
         update.Update(self)
         verifyinstall.VerifyInstall(self)
 

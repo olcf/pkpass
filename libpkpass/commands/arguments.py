@@ -295,12 +295,27 @@ ARGUMENTS = {
             'help': 'Map of colors to use for colorized output'
         }
     },
+    'type': {
+        'args': ['--type'],
+        'kwargs': {
+            'type': str,
+            'help': 'Type of password integration used'
+        }
+    },
 
     'users': {
         'args': ['-u', '--users'],
         'kwargs': {
             'type': str,
             'help': 'Comma seperated list of recipients'
+        }
+    },
+
+    'value': {
+        'args': ['--value'],
+        'kwargs': {
+            'action': 'store_true',
+            'help': "Don't update files directly, just dump value onto screen"
         }
     },
 
