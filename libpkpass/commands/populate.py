@@ -1,6 +1,5 @@
 """This module allows for the population of external password stores"""
 from os import path
-# from yaml import safe_load, dump
 from ruamel.yaml import YAML
 from libpkpass.commands.show import Show
 from libpkpass.crypto import puppet_password
@@ -45,9 +44,12 @@ class Populate(Show):
     def _handle_puppet(self, plaintext_pw):
         ####################################################################
         directory = path.expanduser(self.args['populate']['puppet_eyaml']['directory'])
-        pkcs7_pass = puppet_password(
-            path.expanduser(self.args['populate']['puppet_eyaml']['bin']),
-            plaintext_pw)
+        if not path.isdir(directory):
+            raise CliArgumentError("'%s' is not a directory" % directory)
+        puppet_bin = path.expanduser(self.args['populate']['puppet_eyaml']['bin'])
+        if not path.isfile(puppet_bin):
+            raise CliArgumentError("'%s' is not a file" % puppet_bin)
+        pkcs7_pass = puppet_password(puppet_bin, plaintext_pw)
         if self.args['value']:
             print(pkcs7_pass)
         else:
@@ -57,13 +59,11 @@ class Populate(Show):
                     yaml = YAML()
                     yaml.indent(mapping=2, sequence=2, offset=2)
                     hiera_yaml = yaml.load(data_file.read())
-                    # hiera_yaml = safe_load(data_file.read())
                     for name in names:
                         print("Updating: %s" % name)
                         hiera_yaml[name] = pkcs7_pass
                 with open(path.join(directory, hiera_file), 'w') as data_file:
                     yaml.dump(hiera_yaml, data_file)
-                    # data_file.write(YAML().dump(hiera_yaml))
 
         ####################################################################
     def _validate_args(self):
