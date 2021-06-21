@@ -27,7 +27,7 @@ class Populate(Show):
             raise CliArgumentError("'%s' is an unsupported population type" % pop_type)
 
         if self.args['pwname'] not in self.args['populate'][pop_type]['passwords'].keys():
-            raise CliArgumentError("'%s' doesn't have a mapping" % pop_type)
+            raise CliArgumentError("'%s' doesn't have a mapping in %s" % (self.args['pwname'], pop_type))
 
         password = PasswordEntry()
         myidentity = self.identities.iddb[self.args['identity']]
@@ -57,7 +57,8 @@ class Populate(Show):
                 with open(path.join(directory, hiera_file), 'r') as data_file:
                     print("Updating: %s" % hiera_file)
                     yaml = YAML()
-                    yaml.indent(mapping=2, sequence=2, offset=2)
+                    yaml.indent(mapping=2, sequence=4, offset=2)
+                    yaml.preserve_quotes = True
                     hiera_yaml = yaml.load(data_file.read())
                     for name in names:
                         print("Updating: %s" % name)
@@ -71,7 +72,8 @@ class Populate(Show):
         for argument in ['pwname', 'keypath', 'type']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                    "'%s' is a required argument" % argument
+                )
 
         ####################################################################
     def _decrypt_wrapper(self, directory, password, myidentity, pwname):
@@ -85,10 +87,12 @@ class Populate(Show):
         """This decrypts a given password entry"""
         ####################################################################
         plaintext_pw = password.decrypt_entry(
-            identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
+            identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot']
+        )
         if not self.args['noverify']:
             result = password.verify_entry(
-                myidentity['uid'], self.identities)
+                myidentity['uid'], self.identities
+            )
             if not result['sigOK']:
                 print("warning: could not verify that '%s' correctly signed your password entry." %
                       result['distributor'])

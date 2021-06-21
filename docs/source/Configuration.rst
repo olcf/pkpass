@@ -101,3 +101,5 @@ To completely configure this integration on the pkpass side please add values to
               # The following list represents the keys that need to be replaced in the heira file
               - some::server::password
               - some:other::server
+
+other data endpoints may be requested
