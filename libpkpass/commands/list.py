@@ -1,7 +1,6 @@
 """This Module allows for the listing of users passwords"""
 from libpkpass.util import dictionary_filter
 from libpkpass.commands.command import Command
-from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError
 
     ####################################################################
@@ -16,12 +15,8 @@ class List(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-
-        passworddb = PasswordDB()
-        passworddb.load_from_directory(self.args['pwstore'])
-
         result = {}
-        for pwname, passwordentry in passworddb.pwdb.items():
+        for pwname, passwordentry in self.passworddb.pwdb.items():
             if self.args['recovery'] and passwordentry.escrow:
                 for rec_list in passwordentry.escrow.keys():
                     recipients = passwordentry.escrow[rec_list]['recipients']

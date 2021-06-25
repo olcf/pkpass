@@ -3,7 +3,6 @@ from os import path
 from tqdm import tqdm
 import libpkpass.util as util
 from libpkpass.commands.command import Command
-from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
 
@@ -21,11 +20,9 @@ class Distribute(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        passworddb = PasswordDB()
-        passworddb.load_from_directory(self.args['pwstore'])
         filtered_pdb = util.dictionary_filter(
             path.join(self.args['pwstore'], self.args['pwname']),
-            passworddb.pwdb,
+            self.passworddb.pwdb,
             [self.args['identity'], 'recipients']
         )
         self.recipient_list.append(str(self.args['identity']))
@@ -36,8 +33,8 @@ class Distribute(Command):
         print(*filtered_pdb.keys(), sep="\n")
         correct_distribution = input("Are these lists correct? (y/N) ")
         if correct_distribution and correct_distribution.lower()[0] == 'y':
-            passworddb.pwdb = filtered_pdb
-            for dist_pass, _ in tqdm(passworddb.pwdb.items()):
+            self.passworddb.pwdb = filtered_pdb
+            for dist_pass, _ in tqdm(self.passworddb.pwdb.items()):
                 password = PasswordEntry()
                 password.read_password_data(dist_pass)
                 if self.args['identity'] in password.recipients.keys():

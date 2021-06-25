@@ -16,6 +16,7 @@ from yaml.parser import ParserError
 from libpkpass.commands.command import Command
 from libpkpass.errors import PKPassError, JsonArgumentError
 from libpkpass.identities import IdentityDB
+from libpkpass.passworddb import PasswordDB
 from libpkpass.util import handle_filepath_args, show_version, collect_args
 import libpkpass.commands.card as card
 import libpkpass.commands.clip as clip
@@ -51,7 +52,9 @@ class Interpreter(Command):
     def _run_command_execution(self):
         """ Run function for class. """
         ####################################################################
-        Interactive(self.args, self.identities).cmdloop_with_keyboard_interrupt()
+        passworddb = PasswordDB()
+        passworddb.load_from_directory(self.args['pwstore'])
+        Interactive(self.args, self.identities, passworddb).cmdloop_with_keyboard_interrupt()
 
         ####################################################################
     def _validate_args(self):
@@ -73,7 +76,7 @@ Type ? to list commands""" % VERSION
     ####################################################################
 
         ####################################################################
-    def __init__(self, args, recipients_database):
+    def __init__(self, args, recipients_database, pwdb):
         ####################################################################
         Cmd.__init__(self)
         # manually remove interpreter from command line so that argparse doesn't try to use it
@@ -83,6 +86,7 @@ Type ? to list commands""" % VERSION
         pkinterface.PkInterface.__init__(self)
 
         self.recipients_database = recipients_database if recipients_database else IdentityDB()
+        self.pwdb = pwdb if pwdb else PasswordDB()
         self.parser.error = pkparse_error
 
         # Hold onto args passed on the command line
@@ -114,6 +118,7 @@ Type ? to list commands""" % VERSION
     def _load_iddb(self):
         """load recipient database"""
         ####################################################################
+        print("Reloading Identity database")
         self.recipients_database = IdentityDB()
         self.recipients_database.cabundle = self.args['cabundle']
         self.recipients_database.load_certs_from_directory(
@@ -124,6 +129,14 @@ Type ? to list commands""" % VERSION
         )
         if 'keypath' in self.args:
             self.recipients_database.load_keys_from_directory(self.args['keypath'])
+
+        ####################################################################
+    def _load_pwdb(self):
+        """reload passworddb"""
+        ####################################################################
+        print("Reloading Password Database")
+        self.pwdb = PasswordDB()
+        self.pwdb.load_from_directory(self.args['pwstore'])
 
         ####################################################################
     def _change_pwstore(self):
@@ -154,6 +167,7 @@ Type ? to list commands""" % VERSION
             self.args = handle_filepath_args(self.args)
             self._change_pwstore()
             self._load_iddb()
+            self._load_pwdb()
 
         ####################################################################
     def precmd(self, line):
@@ -171,6 +185,8 @@ Type ? to list commands""" % VERSION
         ####################################################################
         if str(line) == "edit" or '--no-cache' in line:
             self._reload_config()
+        if str(line) in ['create', 'delete', 'import', 'generate', 'rename']:
+            self._load_pwdb()
         return Cmd.postcmd(self, stop, line)
 
         ####################################################################
@@ -253,7 +269,7 @@ def add_dynamic_function(module_name, class_name):
         try:
             pk_class = [o for o in getmembers(globals()[module_name], isclass)
                         if str(o[0]) == class_name][0][1]
-            pk_class(self, iddb=self.recipients_database)
+            pk_class(self, iddb=self.recipients_database, pwdb=self.pwdb)
             self.actions[swap_name].run(self.parser.parse_args())
             return False
         except PKPassError as err:

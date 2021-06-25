@@ -1,9 +1,7 @@
 """This Module allows for the export of passwords for the purpose of importing to a new card"""
-from os import path, walk
 import getpass
 from tqdm import tqdm
 from libpkpass.commands.command import Command
-from libpkpass.passworddb import PasswordDB
 from libpkpass.errors import CliArgumentError, PasswordMismatchError
 
     ####################################################################
@@ -20,19 +18,14 @@ class Export(Command):
         """ Run function for class.                                      """
         ####################################################################
         myidentity = self.identities.iddb[self.args['identity']]
-        passworddb = PasswordDB()
         crypt_pass = False
-        for fpath, _, files in walk(self.args['pwstore']):
-            for passwordname in files:
-                passwordpath = path.join(fpath, passwordname)
-                passworddb.load_password_data(passwordpath)
         if not self.args['nocrypto']:
             crypt_pass = getpass.getpass("Please enter a password for the encryption: ")
             verify_pass = getpass.getpass("Please enter again for verification: ")
             if crypt_pass != verify_pass:
                 raise PasswordMismatchError()
 
-        self._iterate_pdb(myidentity, passworddb, crypt_pass)
+        self._iterate_pdb(myidentity, self.passworddb, crypt_pass)
 
         ####################################################################
     def _iterate_pdb(self, myidentity, passworddb, crypt_pass=False):

@@ -6,6 +6,7 @@ from libpkpass.crypto import print_card_info
 from libpkpass.errors import NullRecipientError, CliArgumentError, GroupDefinitionError,\
         PasswordIOError, NotThePasswordOwnerError
 from libpkpass.identities import IdentityDB
+from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
 from libpkpass.util import collect_args, color_prepare
 
@@ -21,7 +22,7 @@ class Command():
     passphrase = None
 
         ##################################################################
-    def __init__(self, cli, iddb=None):
+    def __init__(self, cli, iddb=None, pwdb=None):
         """ Intialization function for class. Register with argparse   """
         ##################################################################
         self.cli = cli
@@ -31,6 +32,8 @@ class Command():
         self.escrow_and_recipient_list = []
         self.iddbcached = iddb is not None
         self.identities = iddb if iddb else IdentityDB()
+        self.pwdbcached = pwdb is not None
+        self.passworddb = pwdb if pwdb else PasswordDB()
         cli.register(self, self.name, self.description)
 
         ##################################################################
@@ -74,6 +77,8 @@ class Command():
                 self.identities.load_keys_from_directory(self.args['keypath'])
             self._validate_identities()
 
+        if self.args['subparser_name'] in ['list', 'interpreter', 'distribute', 'export'] and not self.pwdbcached:
+            self.passworddb.load_from_directory(self.args['pwstore'])
         if 'pwname' in self.args and self.args['pwname']:
             self._resolve_directory_path()
         self.args['card_slot'] = self.args['card_slot'] if self.args['card_slot'] else 0
