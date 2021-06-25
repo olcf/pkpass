@@ -1,6 +1,6 @@
 """This Module defines what a passworddb should look like"""
 from os import walk, path, makedirs
-from multiprocessing import Process, Manager
+from multiprocessing import Manager, cpu_count, Pool
 from fnmatch import fnmatch
 from yaml import safe_load, dump
 from libpkpass.password import PasswordEntry
@@ -42,17 +42,20 @@ class PasswordDB():
     def load_from_directory(self, pwstore):
         """ Load all passwords from directory """
     #############################################################################
-        jobs = []
         with Manager() as manager:
+            num_workers = cpu_count()
+            pool = Pool(num_workers)
             pwdb = manager.dict()
             for fpath, _, files in walk(pwstore):
-                jobs.append(Process(target=self.parallel_loader, args=(files, fpath, pwdb)))
-                jobs[-1].start()
-            for job in jobs:
-                job.join()
+                pool.apply_async(self.parallel_loader, args=(files, fpath, pwdb))
+            pool.close()
+            pool.join()
             self.pwdb = dict(pwdb)
 
+    ##############################################################################
     def parallel_loader(self, files, fpath, pwdb):
+        """Function to allow multiprocessing to be utilize to read passwords"""
+    ##############################################################################
         for passwordname in files:
             passwordpath = path.join(fpath, passwordname)
             self.load_password_data(passwordpath, pwdb)
@@ -63,7 +66,8 @@ class PasswordDB():
     ##############################################################################
         if self.mode == 'Filesystem':
             self.write_password_data_to_file(
-                self.pwdb[password_id], password_id, overwrite)
+                self.pwdb[password_id], password_id, overwrite
+            )
 
     ##############################################################################
     def read_password_data_from_file(self, filename):
