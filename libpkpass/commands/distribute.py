@@ -33,8 +33,7 @@ class Distribute(Command):
         print(*filtered_pdb.keys(), sep="\n")
         correct_distribution = input("Are these lists correct? (y/N) ")
         if correct_distribution and correct_distribution.lower()[0] == 'y':
-            self.passworddb.pwdb = filtered_pdb
-            for dist_pass, _ in tqdm(self.passworddb.pwdb.items()):
+            for dist_pass, _ in tqdm(filtered_pdb.items()):
                 password = PasswordEntry()
                 password.read_password_data(dist_pass)
                 if self.args['identity'] in password.recipients.keys():

@@ -185,7 +185,7 @@ Type ? to list commands""" % VERSION
         ####################################################################
         if str(line) == "edit" or '--no-cache' in line:
             self._reload_config()
-        if str(line) in ['create', 'delete', 'import', 'generate', 'rename']:
+        elif str(line.split()[0]) in ['create', 'delete', 'import', 'generate', 'rename']:
             self._load_pwdb()
         return Cmd.postcmd(self, stop, line)
 
