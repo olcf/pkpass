@@ -102,4 +102,37 @@ To completely configure this integration on the pkpass side please add values to
               - some::server::password
               - some:other::server
 
+
+To populate kubernetes you need a similar block
+Currently pkpass can only generate a single encrypted value per secret. It places the value stored in pkpass in the map where it's name is matched.
+
+in the following example you will see this, so for `testpass` pkpass will decrypt `testpass` and place the value of that password in `data/password` because in the configuration file the value of `data/password` is `testpass`
+
+Pkpass will then base64 encode all values in the `data` map and dump it as a yaml file in where `output` is defined, in this case `/tmp/secrets.yaml`
+
+.. code-block:: yaml
+  populate:
+    kubernetes:
+      output: /tmp/secrets.yaml
+      passwords:
+        testpass:
+          - apiVersion: v1
+            type: Opaque
+            metadata:
+              name: test
+              namespace: testing
+            data:
+              password: testpass
+              username: someuser
+          - apiVersion: v1
+            type: Opaque
+            metadata:
+              name: test
+              namespace: testing2
+            data:
+              password: testpass
+              username: someuser
+
+It is not recommended to store the kubernetes output file anywhere, since kubernetes secrets are just base64 encoded, they are not secure!
+
 other data endpoints may be requested
