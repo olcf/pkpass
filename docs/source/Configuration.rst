@@ -86,6 +86,7 @@ It is suggested to have a `~/.eyaml/config.yaml` setup with `pkcs7_public_key:` 
 To completely configure this integration on the pkpass side please add values to your rc file that looks similar to the following
 
 .. code-block:: yaml
+
     populate:
       # puppet_eyaml is the definition for the `type`
       puppet_eyaml:
@@ -111,27 +112,29 @@ in the following example you will see this, so for `testpass` pkpass will decryp
 Pkpass will then base64 encode all values in the `data` map and dump it as a yaml file in where `output` is defined, in this case `/tmp/secrets.yaml`
 
 .. code-block:: yaml
-  populate:
-    kubernetes:
-      output: /tmp/secrets.yaml
-      passwords:
-        testpass:
-          - apiVersion: v1
-            type: Opaque
-            metadata:
-              name: test
-              namespace: testing
-            data:
-              password: testpass
-              username: someuser
-          - apiVersion: v1
-            type: Opaque
-            metadata:
-              name: test
-              namespace: testing2
-            data:
-              password: testpass
-              username: someuser
+
+    populate:
+      kubernetes:
+        output: /tmp/secrets.yaml
+        passwords:
+          testpass:
+            - apiVersion: v1
+              type: Opaque
+              metadata:
+                name: test
+                namespace: testing
+              data:
+                password: testpass
+                username: someuser
+            - apiVersion: v1
+              type: Opaque
+              metadata:
+                name: test
+                namespace: testing2
+              data:
+                password: testpass
+                username: someuser
+
 
 It is not recommended to store the kubernetes output file anywhere, since kubernetes secrets are just base64 encoded, they are not secure!
 
