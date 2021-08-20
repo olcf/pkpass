@@ -1,5 +1,6 @@
 """This module allows for the population of external password stores"""
 from os import path, remove
+from re import finditer
 from base64 import standard_b64encode
 from ruamel.yaml import YAML
 from yaml import dump
@@ -29,7 +30,9 @@ class Populate(Show):
             raise CliArgumentError("'%s' is an unsupported population type" % pop_type)
 
         myidentity = self.identities.iddb[self.args['identity']]
-        if self.args['all']:
+        if pop_type == 'kubernetes':
+            self._handle_kubernetes(myidentity)
+        elif self.args['all']:
             for password in self.args['populate'][pop_type]['passwords'].keys():
                 pwentry = PasswordEntry()
                 self._decrypt_wrapper(
@@ -53,23 +56,23 @@ class Populate(Show):
             )
 
         ####################################################################
-    def _handle_kubernetes(self, plaintext_pw, pwname):
+    def _handle_kubernetes(self, myidentity):
         """This function creates a file containing kube secrets"""
         ####################################################################
         k_conf = self.args['populate']['kubernetes']
-        password = k_conf['passwords'][pwname]
+        plaintext = {}
+        for password in k_conf['needed']:
+            pwentry = PasswordEntry()
+            pwentry.read_password_data(path.join(self.args['pwstore'], password))
+            plaintext_pw = self._decrypt_password_entry(pwentry, myidentity)
+            plaintext[password] = plaintext_pw
         if 'output' in k_conf:
             if self.args['pwstore'] in k_conf['output']:
                 raise CliArgumentError("Kubernetes output file should not exist in password store")
             if path.isfile(k_conf['output']):
                 remove(k_conf['output'])
-        for args in password:
-            data = {}
-            for key, value in args['data'].items():
-                if value == pwname:
-                    data[key] = standard_b64encode(plaintext_pw.encode('ASCII')).decode()
-                else:
-                    data[key] = standard_b64encode(value.encode('ASCII')).decode()
+        for args in k_conf['passwords']:
+            data = self._kubernetes_match_loop(args, plaintext)
             kube_map = {
                 'kind': 'Secret',
                 'apiVersion': args['apiVersion'],
@@ -83,6 +86,24 @@ class Populate(Show):
                 with open(k_conf['output'], 'a') as fname:
                     print("%s\n%s" % ("---", dump(kube_map)), file=fname)
 
+        ####################################################################
+    def _kubernetes_match_loop(self, args, plaintext):
+        """This matches ${example} inside the arg defs and generates a
+        dictionary of b64 encoded values with the actual password values
+        placed instead of ${}"""
+        ####################################################################
+        data = {}
+        for key, value in args['data'].items():
+            new_pw = str(value)
+            match_iter = finditer(r'\$\{([^${]*)\}', new_pw)
+            if not match_iter:
+                data[key] = standard_b64encode(new_pw.encode('ASCII')).decode()
+            else:
+                for match_values in match_iter:
+                    match_value = match_values.group(1)
+                    new_pw = new_pw.replace("${%s}" % match_value, plaintext[match_value])
+                data[key] = standard_b64encode("".join(new_pw).encode('ASCII')).decode()
+        return data
 
         ####################################################################
     def _handle_puppet(self, plaintext_pw, pwname):
@@ -127,8 +148,6 @@ class Populate(Show):
         plaintext_pw = self._decrypt_password_entry(password, myidentity)
         if pop_type == 'puppet_eyaml':
             self._handle_puppet(plaintext_pw, pwname)
-        elif pop_type == 'kubernetes':
-            self._handle_kubernetes(plaintext_pw, pwname)
 
         ####################################################################
     def _decrypt_password_entry(self, password, myidentity):
