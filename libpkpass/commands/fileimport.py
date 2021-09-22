@@ -41,7 +41,7 @@ class Import(Command):
         ####################################################################
         try:
             self._yaml_file(safe_load(string))
-        except (TypeError, scanner.ScannerError):
+        except (TypeError, scanner.ScannerError, KeyError):
             try:
                 self._flat_file(string.strip().split("\n"))
             except TypeError as err:
