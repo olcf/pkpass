@@ -8,7 +8,7 @@ import yaml
 from tqdm import tqdm
 from libpkpass.escrow import pk_split_secret
 from libpkpass.errors import NotARecipientError, DecryptionError, PasswordIOError, YamlFormatError,\
-    X509CertificateError
+    X509CertificateError , CliArgumentError
 import libpkpass.crypto as crypto
 
     #######################################################################
@@ -259,7 +259,14 @@ class PasswordEntry():
         identitydb = iddb.iddb
         recipient_entry = self.recipients[uid].copy()
         distributor = recipient_entry['distributor']
-        iddb.verify_identity(distributor, [])
+        try:
+            iddb.verify_identity(distributor, [])
+        except CliArgumentError:
+            return {
+                'distributor': distributor,
+                'sigOK': None,
+                'certOK': None
+            }
         signature = recipient_entry.pop('signature')
         message = self._create_signable_string(recipient_entry)
         sig_ok = crypto.pk_verify_signature(
