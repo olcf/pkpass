@@ -2,25 +2,12 @@
 """This is a super class to handle commonalities between the cli and interpreter"""
 from argparse import ArgumentParser
 from os import path
-import libpkpass.util as util
-import libpkpass.commands.card as card
-import libpkpass.commands.clip as clip
-import libpkpass.commands.create as create
-import libpkpass.commands.delete as delete
-import libpkpass.commands.distribute as distribute
-import libpkpass.commands.export as export
+from libpkpass.util import set_default_subparser
+from libpkpass.commands import card, clip, create, delete, \
+    distribute, export, generate, info, listrecipients, \
+    modify, recover, rename, show, populate, update, verifyinstall
 import libpkpass.commands.fileimport as pkimport
-import libpkpass.commands.generate as generate
-import libpkpass.commands.info as info
 import libpkpass.commands.list as pklist
-import libpkpass.commands.listrecipients as listrecipients
-import libpkpass.commands.modify as modify
-import libpkpass.commands.recover as recover
-import libpkpass.commands.rename as rename
-import libpkpass.commands.show as show
-import libpkpass.commands.populate as populate
-import libpkpass.commands.update as update
-import libpkpass.commands.verifyinstall as verifyinstall
 
     ##############################################################################
 class PkInterface():
@@ -42,7 +29,7 @@ class PkInterface():
             defaultrc = path.join(home, '.pkpassrc')
         self.parser = ArgumentParser(
             description='Public Key Password Manager')
-        self.parser.set_default_subparser = util.set_default_subparser
+        self.parser.set_default_subparser = set_default_subparser
         self.parser.add_argument(
             '--config', type=str,
             help="Path to a PKPass configuration file.  Defaults to '~/.pkpassrc{,.yml,.yaml}'",

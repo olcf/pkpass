@@ -38,23 +38,13 @@ class List(Command):
         if 'filter' in self.args and self.args['filter']:
             result = dictionary_filter(self.args['filter'], result)
 
-        print("Passwords for '%s':" % self.args['identity'])
+        print(f"Passwords for '{self.args['identity']}':")
         for key, value in sorted(result.items()):
-            print("%s\n  %s\n  %s" %
-                  (
-                      self.color_print(key + ":",
-                                       "first_level"),
-                      self.color_print("Distributor: ",
-                                       "second_level") + value['distributor'],
-                      self.color_print("Name: ",
-                                       "second_level") + value['name']
-                  ))
-        # print("\n%s" % yaml.dump(result, default_flow_style=False))
+            print(f"{self.color_print(key + ':', 'first_level')}\n  {self.color_print('Distributor: ', 'second_level') + value['distributor']}\n  {self.color_print('Name: ', 'second_level') + value['name']}")
 
         ####################################################################
     def _validate_args(self):
         ####################################################################
         for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

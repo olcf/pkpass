@@ -5,7 +5,7 @@ from pyperclip import copy, paste
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
-
+from libpkpass.models.recipient import Recipient
 
     ####################################################################
 class Clip(Command):
@@ -23,28 +23,29 @@ class Clip(Command):
         password = PasswordEntry()
         password.read_password_data(path.join(
             self.args['pwstore'], self.args['pwname']))
-        myidentity = self.identities.iddb[self.args['identity']]
+        distributor = password.recipients[self.identity['name']]['distributor']
 
         plaintext_pw = password.decrypt_entry(
-            identity=myidentity,
+            identity=self.identity,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"])
 
         if not self.args['noverify']:
             result = password.verify_entry(
-                myidentity['uid'], self.identities)
+                self.identity['name'],
+                self.identities,
+                distributor,
+                self.session.query(Recipient).filter(Recipient.name==distributor).first().certs,
+            )
             if not result['sigOK']:
-                print("Warning:  Could not verify that '%s' correctly signed your password entry." %
-                      result['distributor'])
+                print(f"Warning:  Could not verify that '{result['distributor']}' correctly signed your password entry.")
             if not result['certOK']:
-                print("Warning:  Could not verify the certificate authenticity of user '%s'." %
-                      result['distributor'])
+                print(f"Warning:  Could not verify the certificate authenticity of user '{result['distributor']}'.")
 
         oldclip = paste()
         try:
             copy(plaintext_pw)
-            print("Password copied into paste buffer for %s seconds" %
-                  self.args['time'])
+            print(f"Password copied into paste buffer for {self.args['time']} seconds")
             sleep(self.args['time'])
         finally:
             copy(oldclip)
@@ -54,5 +55,4 @@ class Clip(Command):
         ####################################################################
         for argument in ['keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

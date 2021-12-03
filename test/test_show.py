@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """This module tests the show module"""
 import unittest
-import libpkpass.commands.cli as cli
-import libpkpass.commands.show as show
+from libpkpass.commands.cli import Cli
 from libpkpass.errors import DecryptionError, CliArgumentError
 from .basetest.basetest import ERROR_MSGS, patch_args
 
@@ -14,7 +13,7 @@ class ShowErrors(unittest.TestCase):
         try:
             with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
                             all=None, pwname='test'):
-                show.Show(cli.Cli())
+                Cli()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -24,7 +23,7 @@ class ShowErrors(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='show', identity='bleh', nopassphrase='true',
                             all=None, pwname='test'):
-                show.Show(cli.Cli())
+                Cli()
         self.assertEqual(
             context.exception.msg,
             ERROR_MSGS['rep']
@@ -36,7 +35,7 @@ class ShowErrors(unittest.TestCase):
         try:
             with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
                             all=True, pwname='*test*'):
-                show.Show(cli.Cli())
+                Cli()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -47,7 +46,7 @@ class ShowErrors(unittest.TestCase):
         try:
             with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
                             all=None):
-                show.Show(cli.Cli())
+                Cli()
         except KeyError as error:
             if str(error) == "'pwname'":
                 ret = str(error)

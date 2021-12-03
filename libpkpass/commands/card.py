@@ -14,11 +14,13 @@ class Card(Command):
     def _run_command_execution(self):
         """ Run function for class.                                  """
         ####################################################################
-        print_card_info(self.args['card_slot'],
-                        self.args['identity'],
-                        2,
-                        self.args['color'],
-                        self.args['theme_map'])
+        print_card_info(
+            self.args['card_slot'],
+            self.identity,
+            2,
+            self.args['color'],
+            self.args['theme_map']
+        )
 
         ####################################################################
     def _validate_args(self):

@@ -25,11 +25,10 @@ class Rename(Command):
             resafe, reowner = self.safety_check()
             self.args['pwname'] = orig_pass
             if resafe or self.args['overwrite']:
-                myidentity = self.identities.iddb[self.args['identity']]
                 password = PasswordEntry()
                 password.read_password_data(os.path.join(self.args['pwstore'], self.args['pwname']))
                 plaintext_pw = password.decrypt_entry(
-                    identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
+                    identity=self.identity, passphrase=self.passphrase, card_slot=self.args['card_slot'])
                 self._confirmation(plaintext_pw)
             else:
                 raise NotThePasswordOwnerError(self.args['identity'], reowner, self.args['rename'])
@@ -42,8 +41,7 @@ class Rename(Command):
         ####################################################################
         yes = {'yes', 'y', 'ye', ''}
         deny = {'no', 'n'}
-        confirmation = input("%s: %s\nRename this password?(Defaults yes):"
-                             % (self.args['pwname'], plaintext_pw))
+        confirmation = input(f"{self.args['pwname']}: {plaintext_pw}\nRename this password?(Defaults yes): ")
         if confirmation.lower() in yes:
             self.rename_pass()
         elif confirmation.lower() in deny:
@@ -58,5 +56,4 @@ class Rename(Command):
         ####################################################################
         for argument in ['pwname', 'keypath', 'rename']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

@@ -2,8 +2,7 @@
 """This module tests the listrecipients module"""
 import unittest
 import yaml
-import libpkpass.commands.cli as cli
-import libpkpass.commands.listrecipients as listrecipients
+from libpkpass.commands.cli import Cli
 from .basetest.basetest import captured_output, patch_args
 
 class ListrecipientsTests(unittest.TestCase):
@@ -29,7 +28,7 @@ class ListrecipientsTests(unittest.TestCase):
         with patch_args(subparser_name='listrecipients', identity='r1',
                         nopassphrase="true", filter="r3"):
             with captured_output() as (out, _):
-                listrecipients.Listrecipients(cli.Cli())
+                Cli()
         output = yaml.safe_load(out.getvalue().replace('\t', '  '))
         # we remove these things because the actual values depend on creation
         # moreover, some of the outputs on different operating systems appear

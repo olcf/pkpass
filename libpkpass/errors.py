@@ -26,21 +26,19 @@ class EncryptionError(PKPassError):
 
 class EscrowError(PKPassError):
     def __init__(self, field, constant, value):
-        self.msg = "%s, must be greater than %s, current value: %s" % (
-            field, constant, value)
+        self.msg = f"{field}, must be greater than {constant}, current value: {value}"
 
 class FileOpenError(PKPassError):
     def __init__(self, value, reason):
-        self.msg = "File %s found in config, could not be opened due to %s" % (
-            value, reason)
+        self.msg = f"File {value} found in config, could not be opened due to {reason}"
 
 class GroupDefinitionError(PKPassError):
     def __init__(self, value):
-        self.msg = "Group %s is not defined in the config" % (value)
+        self.msg = f"Group {value} is not defined in the config"
 
 class JsonArgumentError(PKPassError):
     def __init__(self, value, reason):
-        self.msg = "Parse error for '%s' because '%s'" %  (value, reason)
+        self.msg = f"Parse error for '{value}' because '{reason}'"
 
 class LegacyImportFormatError(PKPassError):
     def __init__(self):
@@ -51,8 +49,8 @@ class NotARecipientError(PKPassError):
 
 class NotThePasswordOwnerError(PKPassError):
     def __init__(self, identity, owner, pwname):
-        self.msg = "User '%s' is not the owner of password '%s', not overwriting;\n\t\
-please use another password name or ask the owner (%s) to distribute to you" % (identity, pwname, owner)
+        self.msg = f"User '{identity}' is not the owner of password '{pwname}', not overwriting;\n\t\
+please use another password name or ask the owner ({owner}) to distribute to you"
 
 class NullRecipientError(PKPassError):
     def __init__(self):
@@ -67,8 +65,7 @@ class PasswordMismatchError(PKPassError):
 
 class PasswordValidationError(PKPassError):
     def __init__(self, field, value):
-        self.msg = "Error validating password field: %s with value %s" % (
-            field, value)
+        self.msg = f"Error validating password field: {field} with value {value}"
 
 class RulesMapError(PKPassError):
     def __init__(self, reason):
@@ -88,4 +85,4 @@ class X509CertificateError(PKPassError):
 
 class YamlFormatError(PKPassError):
     def __init__(self, value, reason):
-        self.msg = "Error%s due to: %s" % (value, reason)
+        self.msg = f"Error {value} due to: {reason}"

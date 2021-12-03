@@ -6,7 +6,6 @@ from os import unlink
 from hashlib import sha256
 from shutil import get_terminal_size
 from subprocess import Popen, PIPE, STDOUT, DEVNULL
-from pem import parse_file
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -25,21 +24,18 @@ def pk_encrypt_string(plaintext_string, certificate):
     """ Encrypt and return a base 64 encoded string for the provided identity"""
     ##############################################################################
     plaintext_derived_key = Fernet.generate_key()
-    if isinstance(certificate, bytes):
-        with NamedTemporaryFile(delete=False) as fname:
-            fname.write(certificate)
-            cert_file_path = fname.name
-    else:
-        cert_file_path = certificate['certificate_path']
+    with NamedTemporaryFile(delete=False) as fname:
+        fname.write(certificate)
+        cert_file_path = fname.name
     command = ['openssl', 'rsautl', '-inkey', cert_file_path, '-certin', '-encrypt', '-pkcs']
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=plaintext_derived_key)
-    if isinstance(certificate, bytes):
-        unlink(fname.name)
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate(input=plaintext_derived_key)
+        if isinstance(certificate, bytes):
+            unlink(fname.name)
 
-    if proc.returncode != 0:
-        raise EncryptionError("Error encrypting derived key: %s" % stdout)
-    ciphertext_derived_key = stdout
+        if proc.returncode != 0:
+            raise EncryptionError(f"Error encrypting derived key: {stdout}")
+        ciphertext_derived_key = stdout
 
     encrypted_string = Fernet(plaintext_derived_key).encrypt(
         handle_python_strings(plaintext_string)
@@ -50,15 +46,15 @@ def pk_encrypt_string(plaintext_string, certificate):
 def get_card_info():
     ##############################################################################
     command = ['pkcs11-tool', '-L']
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate()
-    return (handle_python_strings(stdout).split(b'Slot'), stdout)
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate()
+        return (handle_python_strings(stdout).split(b'Slot'), stdout)
 
     ##############################################################################
 def print_card_info(card_slot, identity, verbosity, color, theme_map):
     """Inform the user what card is selected"""
     ##############################################################################
-    if 'key_path' not in identity:
+    if 'key' not in identity or not identity['key']:
         out_list, stdout = get_card_info()
         if verbosity > 1:
             print_all_slots(stdout, color, theme_map)
@@ -67,7 +63,7 @@ def print_card_info(card_slot, identity, verbosity, color, theme_map):
             if int(stripped[0]) == int(card_slot):
                 verbosity = verbosity + 1 if verbosity < 2 else 2
                 stripped = "Using Slot" + ("\n").join(stripped.split('\n')[:verbosity])
-                print("%s" % (color_prepare(stripped, "info", color, theme_map)))
+                print(f"{color_prepare(stripped, 'info', color, theme_map)}")
 
     ##############################################################################
 def print_all_slots(slot_info, color, theme_map):
@@ -83,11 +79,13 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
     """ Decrypt a base64 encoded string for the provided identity"""
     ##############################################################################
     ciphertext_derived_key = handle_python_strings(ciphertext_derived_key)
-    if 'key_path' in identity:
-        command = ['openssl', 'rsautl', '-inkey', identity['key_path'], '-decrypt', '-pkcs']
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(
-            input=urlsafe_b64decode(ciphertext_derived_key))
+    if 'key' in identity and identity['key']:
+        command = ['openssl', 'rsautl', '-inkey', identity['key'], '-decrypt', '-pkcs']
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate(
+                input=urlsafe_b64decode(ciphertext_derived_key)
+            )
+            returncode = proc.returncode
         plaintext_derived_key = stdout
     else:
         # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
@@ -99,15 +97,16 @@ def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passp
         if card_slot is not None:
             command.extend(['--reader', str(card_slot)])
         command.extend(['--pin', '-'])
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL)
-        stdout, _ = proc.communicate(input=passphrase.encode('UTF-8'))
-        unlink(fname.name)
-        try:
-            plaintext_derived_key = stdout
-        except IndexError as err:
-            raise DecryptionError(stdout) from err
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL) as proc:
+            stdout, _ = proc.communicate(input=passphrase.encode('UTF-8'))
+            unlink(fname.name)
+            try:
+                plaintext_derived_key = stdout
+            except IndexError as err:
+                raise DecryptionError(stdout) from err
+            returncode = proc.returncode
 
-    if proc.returncode != 0:
+    if returncode != 0:
         raise DecryptionError(stdout)
 
     return Fernet(plaintext_derived_key).decrypt(
@@ -119,25 +118,26 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
     """ Compute the hash of string and create a digital signature """
     ##############################################################################
     stringhash = sha256(string.encode("UTF-8")).hexdigest()
-    if 'key_path' in identity:
-        command = ['openssl', 'rsautl', '-sign', '-inkey', identity['key_path']]
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(input=stringhash.encode('UTF-8'))
-        signature = urlsafe_b64encode(handle_python_strings(stdout))
+    if 'key' in identity and identity['key']:
+        command = ['openssl', 'rsautl', '-sign', '-inkey', identity['key']]
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate(input=stringhash.encode('UTF-8'))
+            signature = urlsafe_b64encode(handle_python_strings(stdout))
+            returncode = proc.returncode
     else:
         # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
         # command line (insecure) or via stdin.  So, we have to put signature text
         # into a file for pkcs15-crypt to read.  YUCK!
         with NamedTemporaryFile(delete=False) as fname:
             fname.write(stringhash.encode('UTF-8'))
-        out = NamedTemporaryFile(delete=False)
-        command = ['pkcs15-crypt', '--sign', '-i', fname.name, '-o', out.name, '--pkcs1', '--raw']
-        if card_slot is not None:
-            command.extend(['--reader', str(card_slot)])
-        command.extend(['--pin', '-'])
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(input=passphrase.encode('UTF-8'))
-        out.close()
+        with NamedTemporaryFile(delete=False) as out:
+            command = ['pkcs15-crypt', '--sign', '-i', fname.name, '-o', out.name, '--pkcs1', '--raw']
+            if card_slot is not None:
+                command.extend(['--reader', str(card_slot)])
+            command.extend(['--pin', '-'])
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+                stdout, _ = proc.communicate(input=passphrase.encode('UTF-8'))
+            returncode = proc.returncode
 
         with open(out.name, 'rb') as sigfile:
             signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
@@ -145,25 +145,25 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
         unlink(fname.name)
         unlink(out.name)
 
-    if proc.returncode != 0:
+    if returncode != 0:
         raise SignatureCreationError(stdout)
 
     return signature
 
     ##############################################################################
-def pk_verify_signature(string, signature, identity):
+def pk_verify_signature(string, signature, certs):
     """ Compute the hash of string and verify the digital signature """
     ##############################################################################
     stringhash = sha256(string.encode("UTF-8")).hexdigest()
-    for cert in parse_file(identity['certificate_path']):
+    for cert in certs:
         with NamedTemporaryFile(delete=False) as fname:
-            fname.write(cert.as_bytes())
+            fname.write(cert.cert_bytes)
         command = ['openssl', 'rsautl', '-inkey', fname.name, '-certin', '-verify']
-        proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        stdout, _ = proc.communicate(input=urlsafe_b64decode(handle_python_strings(signature)))
-        unlink(fname.name)
-        if stdout.decode("UTF-8") == stringhash:
-            return True
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate(input=urlsafe_b64decode(handle_python_strings(signature)))
+            unlink(fname.name)
+            if stdout.decode("UTF-8") == stringhash:
+                return True
 
     return stdout.decode("UTF-8") == stringhash
 
@@ -172,8 +172,8 @@ def pk_verify_chain(certificate, cabundle):
     """ Verify the publickey trust chain against a CA Bundle and return True if valid"""
     ##############################################################################
     command = ['openssl', 'verify', '-CAfile', cabundle]
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=certificate)
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate(input=certificate)
 
     return stdout.decode("UTF-8").rstrip() == "stdin: OK"
 
@@ -220,11 +220,11 @@ def get_cert_subjecthash(cert):
 def get_cert_element(cert, element):
     """ Return an arbitrary element of an x509 certificate """
     ##############################################################################
-    command = ['openssl', 'x509', '-noout', ("-%s" % element)]
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate(input=cert)
-    if proc.returncode != 0:
-        raise X509CertificateError(stdout)
+    command = ['openssl', 'x509', '-noout', f"-{element}"]
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate(input=cert)
+        if proc.returncode != 0:
+            raise X509CertificateError(stdout)
 
     try:
         return stdout.decode("UTF-8").rstrip()
@@ -236,8 +236,8 @@ def get_card_element(element):
     """Return an arbitrary element of a pcks15 capable device"""
     ##############################################################################
     command = ['pkcs15-tool', '--read-certificate', '1']
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate()
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate()
     if stdout.decode('utf-8').strip().lower() == 'no smart card readers found.':
         raise X509CertificateError('Smartcard not detected')
     return get_cert_element(stdout, element)
@@ -316,7 +316,7 @@ def sk_decrypt_string(ciphertext_string, key):
 def hash_password(password):
     """Hash people's password"""
     ##############################################################################
-    password = handle_python_strings("%s" % password)
+    password = handle_python_strings(f"{password}")
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"salt",
                      iterations=100000, backend=default_backend())
     return urlsafe_b64encode(handle_python_strings(kdf.derive(password)))
@@ -326,6 +326,6 @@ def puppet_password(eyaml, password):
     """Give eyaml password"""
     ##############################################################################
     command = [eyaml, 'encrypt', '-s', password, '-o', 'string']
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    stdout, _ = proc.communicate()
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate()
     return stdout.decode().strip()

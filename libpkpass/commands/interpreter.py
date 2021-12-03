@@ -15,27 +15,13 @@ from inspect import getmembers, isclass
 from yaml.parser import ParserError
 from libpkpass.commands.command import Command
 from libpkpass.errors import PKPassError, JsonArgumentError
-from libpkpass.identities import IdentityDB
 from libpkpass.passworddb import PasswordDB
 from libpkpass.util import handle_filepath_args, show_version, collect_args
-import libpkpass.commands.card as card
-import libpkpass.commands.clip as clip
-import libpkpass.commands.create as create
-import libpkpass.commands.delete as delete
-import libpkpass.commands.distribute as distribute
-import libpkpass.commands.export as export
+from libpkpass.commands import card, clip, create, delete, \
+    distribute, export, generate, info, listrecipients, \
+    modify, recover, rename, show, populate, update, pkinterface
 import libpkpass.commands.fileimport as pkimport
-import libpkpass.commands.generate as generate
-import libpkpass.commands.info as info
 import libpkpass.commands.list as pklist
-import libpkpass.commands.listrecipients as listrecipients
-import libpkpass.commands.modify as modify
-import libpkpass.commands.pkinterface as pkinterface
-import libpkpass.commands.recover as recover
-import libpkpass.commands.rename as rename
-import libpkpass.commands.show as show
-import libpkpass.commands.populate as populate
-import libpkpass.commands.update as update
 
 VERSION = show_version()
 
@@ -54,7 +40,7 @@ class Interpreter(Command):
         ####################################################################
         passworddb = PasswordDB()
         passworddb.load_from_directory(self.args['pwstore'])
-        Interactive(self.args, self.identities, passworddb).cmdloop_with_keyboard_interrupt()
+        Interactive(self.args, passworddb).cmdloop_with_keyboard_interrupt()
 
         ####################################################################
     def _validate_args(self):
@@ -70,13 +56,13 @@ def pkparse_error(message):
     ####################################################################
 class Interactive(Cmd, pkinterface.PkInterface):
     """This class implements the interactive interpreter functionality"""
-    intro = """Welcome to PKPass (Public Key Based Password Manager) v%s!
-Type ? to list commands""" % VERSION
+    intro = f"""Welcome to PKPass (Public Key Based Password Manager) v{VERSION}!
+Type ? to list commands"""
     prompt = 'pkpass> '
     ####################################################################
 
         ####################################################################
-    def __init__(self, args, recipients_database, pwdb):
+    def __init__(self, args, pwdb):
         ####################################################################
         Cmd.__init__(self)
         # manually remove interpreter from command line so that argparse doesn't try to use it
@@ -85,7 +71,6 @@ Type ? to list commands""" % VERSION
 
         pkinterface.PkInterface.__init__(self)
 
-        self.recipients_database = recipients_database if recipients_database else IdentityDB()
         self.pwdb = pwdb if pwdb else PasswordDB()
         self.parser.error = pkparse_error
 
@@ -113,22 +98,6 @@ Type ? to list commands""" % VERSION
             except KeyboardInterrupt:
                 first = False
                 sys.stdout.write('\n')
-
-        ####################################################################
-    def _load_iddb(self):
-        """load recipient database"""
-        ####################################################################
-        print("Reloading Identity database")
-        self.recipients_database = IdentityDB()
-        self.recipients_database.cabundle = self.args['cabundle']
-        self.recipients_database.load_certs_from_directory(
-            self.args['certpath'],
-            verify_on_load=True,
-            connectmap=self.args['connect'],
-            nocache=False
-        )
-        if 'keypath' in self.args:
-            self.recipients_database.load_keys_from_directory(self.args['keypath'])
 
         ####################################################################
     def _load_pwdb(self):
@@ -166,7 +135,6 @@ Type ? to list commands""" % VERSION
             self.args['config'] = config
             self.args = handle_filepath_args(self.args)
             self._change_pwstore()
-            self._load_iddb()
             self._load_pwdb()
 
         ####################################################################
@@ -219,8 +187,7 @@ Type ? to list commands""" % VERSION
     def default(self, line):
         """If we don't have a proper subcommand passed"""
         ####################################################################
-        print("Command '%s' not found, see help (?) for available commands"
-              % line)
+        print(f"Command '{line}' not found, see help (?) for available commands")
         return False
 
         ####################################################################
@@ -269,7 +236,7 @@ def add_dynamic_function(module_name, class_name):
         try:
             pk_class = [o for o in getmembers(globals()[module_name], isclass)
                         if str(o[0]) == class_name][0][1]
-            pk_class(self, iddb=self.recipients_database, pwdb=self.pwdb)
+            pk_class(self, pwdb=self.pwdb)
             self.actions[swap_name].run(self.parser.parse_args())
             return False
         except PKPassError as err:

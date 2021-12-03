@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """General Utility file for common functionality"""
 from os import path
+from tempfile import gettempdir
 from json import loads
 from getpass import getuser
 from sys import argv
 from re import search, error
 from fnmatch import filter as fnfilter
 from argparse import _SubParsersAction
+from sqlalchemy import create_engine
 from yaml import safe_load
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 from colored import fg, attr
 from libpkpass import __version__
+from libpkpass.models import Base
+from libpkpass.models.recipient import Recipient
+from libpkpass.models.cert import Cert
 from libpkpass.errors import FileOpenError, JsonArgumentError, ConfigParseError
 
     ####################################################################
@@ -30,9 +35,9 @@ def color_prepare(string, color_type, colorize, theme_map=None):
     }
     color = theme_map[color_type].lower() if (color_type in theme_map) else color_defaults[color_type]
     try:
-        return "%s%s%s" % (fg(color), string, attr('reset')) if colorize else string
+        return f"{fg(color)}{string}{attr('reset')}" if colorize else string
     except KeyError:
-        return "%s%s%s" % (fg(color_defaults[color_type]), string, attr('reset')) if colorize else string
+        return f"{fg(color_defaults[color_type])}{string}{attr('reset')}" if colorize else string
 
 
     ####################################################################
@@ -178,6 +183,22 @@ def collect_args(parsedargs):
     args['groups'] = convert_strings_to_list(args, 'groups')
     args['users'] = convert_strings_to_list(args, 'users')
     args['escrow_users'] = convert_strings_to_list(args, 'escrow_users')
+    return setup_db(args)
+
+    ##################################################################
+def setup_db(args):
+    """Setup global db engine"""
+    ##################################################################
+    if args['connect'] and 'base_directory' in args['connect']:
+        db_path = path.join(args['connect']['base_directory'], 'rd.db')
+    elif 'certpath' in args and args['certpath']:
+        db_path = path.join(args['certpath'], 'rd.db')
+    else:
+        db_path = path.join(gettempdir(), 'rd.db')
+    args['db'] = {}
+    args['db']['uri'] = f"sqlite+pysqlite:///{db_path}"
+    args['db']['engine'] = create_engine(args['db']['uri'])
+    Base.metadata.create_all(args['db']['engine'])
     return args
 
     ##################################################################
@@ -185,7 +206,7 @@ def get_config_args(config, cli_args):
     """Return the configuration from the config file"""
     ##################################################################
     try:
-        with open(config, 'r') as fname:
+        with open(config, 'r', encoding='ASCII') as fname:
             config_args = safe_load(fname)
         return config_args if config_args else {}
     except IOError:
@@ -194,3 +215,44 @@ def get_config_args(config, cli_args):
         return {}
     except (ParserError, ScannerError) as err:
         raise ConfigParseError("Parsing error with config file, please check syntax") from err
+
+    ###################################################################
+def create_or_update(session, model, unique_identifiers=None,
+                     dont_update=None, **kwargs):
+    """Create db object if it doesn't exist, doesn't commit to db
+    updates existing objects, returns the object
+
+    session: database session to utilize,
+    model: sqlalchemy model to query on
+    dont_update: list of keys in kwargs that should be ignored if the record alredy exists,
+        this would generally be an ID that is a permanent record id from an external data
+        source
+    unique_identifiers: list of the keys in 'kwargs' that identify a unique instance
+    kwargs: key, value pair of columns in the database model
+    """
+    ###################################################################
+    # Remove parameters that do not exist in the model
+    # this indicates the source has updated what it sends
+    if not unique_identifiers:
+        # If there are not unique_identifiers listed, utilize the whole
+        # object as a unique item
+        query_params = kwargs
+    else:
+        # If unique identifiers do exit filter the kwargs down by that list
+        # and then get the instance that matches that
+        query_params = {k:v for k,v in kwargs.items() if k in unique_identifiers}
+    instance = session.query(model).filter_by(**query_params).first()
+    # If we do not have an instance yet this means that we need
+    # to create a new object
+    if not instance:
+        session.add(model(**kwargs))
+        instance = session.query(model).filter_by(**query_params).first()
+    # If we do have an instance at this point, we need to ensure
+    # That the new data we recieved from the data source is
+    # appropriately populated in that row
+    else:
+        dont_update = dont_update if dont_update else []
+        for key, value in kwargs.items():
+            if key not in dont_update:
+                setattr(instance, key, value)
+    return instance

@@ -2,7 +2,7 @@
 """This Module handles the CLI and any error that comes from it"""
 from sys import version_info, argv
 if version_info[0] < 3:
-    raise Exception('Python version 3 is required 3.5 and higher is actively tested')
+    raise Exception('Python version 3 is required 3.6 and higher is actively tested')
 
 # pylint: disable=wrong-import-position
 # Reasoning for the disablement is because we want people to not try to run with python2
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     try:
         Cli()
     except PKPassError as error:
-        print("\n\n%s: %s" % (str(type(error).__name__), error.msg))
+        print(f"\n\n{str(type(error).__name__)}: {error.msg}")
     except KeyboardInterrupt:
         print("\nExiting")
     # This is so that users don't see tracebacks, an error will still print out
@@ -32,5 +32,4 @@ if __name__ == '__main__':
     except Exception as err: # pylint: disable=broad-except
         if HIGH_LEVEL_ARGS.debug:
             raise err
-        print("Generic exception caught: \n\t%s" %
-              format_exception_only(type(err), err)[0])
+        print(f"Generic exception caught: \n\t{format_exception_only(type(err), err)[0]}")

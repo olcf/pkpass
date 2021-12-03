@@ -1,6 +1,7 @@
 """This module is a generic for all pkpass commands"""
 import getpass
 from os import getcwd, path, sep, remove, rename
+from sqlalchemy.orm import sessionmaker
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.crypto import print_card_info
 from libpkpass.errors import NullRecipientError, CliArgumentError, GroupDefinitionError,\
@@ -9,6 +10,7 @@ from libpkpass.identities import IdentityDB
 from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
 from libpkpass.util import collect_args, color_prepare
+from libpkpass.models.recipient import Recipient
 
     ##########################################################################
 class Command():
@@ -30,10 +32,11 @@ class Command():
         self.args = {}
         self.recipient_list = []
         self.escrow_and_recipient_list = []
-        self.iddbcached = iddb is not None
         self.identities = iddb if iddb else IdentityDB()
         self.pwdbcached = pwdb is not None
         self.passworddb = pwdb if pwdb else PasswordDB()
+        self.session = None
+        self.identity = None
         cli.register(self, self.name, self.description)
 
         ##################################################################
@@ -57,25 +60,28 @@ class Command():
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
         self.args = collect_args(parsedargs)
+        self.session = sessionmaker(bind=self.args['db']['engine'])()
         self._validate_combinatorial_args()
         self._validate_args()
-        verify_on_load = self.args['subparser_name'] in ['listrecipients', 'import', 'interpreter']
 
         # Build the list of recipients that this command will act on
         self._build_recipient_list()
 
         # If there are defined repositories of keys and certificates, load them
-        if not self.iddbcached or self.args['no_cache']:
-            self.identities.cabundle = self.args['cabundle']
-            self.identities.load_certs_from_directory(
-                self.args['certpath'],
-                verify_on_load=verify_on_load,
-                connectmap=self.args['connect'],
-                nocache=self.args['no_cache']
-            )
-            if self.args['keypath']:
-                self.identities.load_keys_from_directory(self.args['keypath'])
-            self._validate_identities()
+        self.identities.args = self.args
+        self.identities.cabundle = self.args['cabundle']
+        self.identities.load_certs_from_directory(
+            self.args['certpath'],
+            connectmap=self.args['connect'],
+            nocache=self.args['no_cache']
+        )
+        if self.args['keypath']:
+            self.identities.load_keys_from_directory(self.args['keypath'])
+        self.identity = self.session.query(Recipient).filter(
+            Recipient.name==self.args['identity']
+        ).first()
+        self._validate_identities()
+        self.identity = dict(self.identity)
 
         if self.args['subparser_name'] in ['list', 'interpreter', 'distribute', 'export'] and not self.pwdbcached:
             self.passworddb.load_from_directory(self.args['pwstore'])
@@ -85,7 +91,7 @@ class Command():
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
             if self.args['verbosity'] != -1:
                 print_card_info(self.args['card_slot'],
-                                self.identities.iddb[self.args['identity']],
+                                self.identity,
                                 self.args['verbosity'],
                                 self.args['color'],
                                 self.args['theme_map'])
@@ -108,7 +114,7 @@ class Command():
         try:
             password = PasswordEntry()
             password.read_password_data(path.join(self.args['pwstore'], self.args['pwname']))
-            return (self.args['identity'] in password['recipients'].keys(), password['metadata']['creator'])
+            return (self.args['identity'] in password['recipients'], password['metadata']['creator'])
         except PasswordIOError:
             return (True, None)
 
@@ -122,9 +128,11 @@ class Command():
         swap_pass.add_recipients(secret=pass_value,
                                  distributor=self.args['identity'],
                                  recipients=[self.args['identity']],
-                                 identitydb=self.identities,
+                                 session=self.session,
                                  passphrase=self.passphrase,
                                  card_slot=self.args['card_slot'],
+                                 escrow_users=self.args['escrow_users'],
+                                 minimum=self.args['min_escrow'],
                                  pwstore=self.args['pwstore']
                                 )
         pass_entry['recipients'][self.args['identity']] = swap_pass['recipients'][self.args['identity']]
@@ -151,7 +159,7 @@ class Command():
         password.add_recipients(secret=password1,
                                 distributor=self.args['identity'],
                                 recipients=recipient_list,
-                                identitydb=self.identities,
+                                session=self.session,
                                 passphrase=self.passphrase,
                                 card_slot=self.args['card_slot'],
                                 escrow_users=self.args['escrow_users'],
@@ -183,7 +191,7 @@ class Command():
         try:
             remove(filepath)
         except OSError as err:
-            raise PasswordIOError("Password '%s' not found" % self.args['pwname']) from err
+            raise PasswordIOError(f"Password '{self.args['pwname']}' not found") from err
 
         ##################################################################
     def rename_pass(self):
@@ -199,7 +207,7 @@ class Command():
             password.write_password_data(newpath)
 
         except OSError as err:
-            raise PasswordIOError("Password '%s' not found" % self.args['pwname']) from err
+            raise PasswordIOError(f"Password '{self.args['pwname']}' not found") from err
 
         ##################################################################
     def _run_command_execution(self):
@@ -261,8 +269,7 @@ class Command():
                     valid = True
                     break
             if not valid:
-                raise CliArgumentError(
-                    "'%s' or '%s' is required" % tuple(arg_set))
+                raise CliArgumentError(f"'{arg_set[0]}' or '{arg_set[1]}' is required")
 
         ##################################################################
     def _validate_identities(self, swap_list=None):
@@ -271,24 +278,24 @@ class Command():
         if not swap_list:
             swap_list = self.escrow_and_recipient_list
         for recipient in swap_list:
-            self.identities.verify_identity(recipient, [])
-            if recipient not in self.identities.iddb.keys():
+            self.identities.verify_identity(recipient)
+            if recipient not in [x[0] for x in self.session.query(Recipient.name).all()]:
                 raise CliArgumentError(
-                    "Error: Recipient '%s' is not in the recipient database" %
-                    recipient)
+                    f"Error: Recipient '{recipient}' is not in the recipient database"
+                )
 
-        if self.args['identity'] in self.identities.iddb.keys():
-            self.identities.verify_identity(self.args['identity'], [])
+        if self.identity:
+            self.identities.verify_identity(self.args['identity'])
         else:
             raise CliArgumentError(
-                "Error: Your user '%s' is not in the recipient database" %
-                self.args['identity'])
+                f"Error: Your user '{self.args['identity']}' is not in the recipient database"
+            )
 
         ##################################################################
     def _print_debug(self):
         ##################################################################
         print(self.recipient_list)
-        print(self.identities.iddb.keys())
+        print(self.session.query(Recipient.name).all())
 
         ##################################################################
     def color_print(self, string, color_type):

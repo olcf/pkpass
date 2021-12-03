@@ -17,7 +17,6 @@ class Export(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        myidentity = self.identities.iddb[self.args['identity']]
         crypt_pass = False
         if not self.args['nocrypto']:
             crypt_pass = getpass.getpass("Please enter a password for the encryption: ")
@@ -25,17 +24,17 @@ class Export(Command):
             if crypt_pass != verify_pass:
                 raise PasswordMismatchError()
 
-        self._iterate_pdb(myidentity, self.passworddb, crypt_pass)
+        self._iterate_pdb(self.passworddb, crypt_pass)
 
         ####################################################################
-    def _iterate_pdb(self, myidentity, passworddb, crypt_pass=False):
+    def _iterate_pdb(self, passworddb, crypt_pass=False):
         """ Iterate through the passwords that we can decrypt """
         ####################################################################
-        uid = myidentity['uid']
+        uid = self.identity['name']
         all_passwords = {k:v for (k, v) in passworddb.pwdb.items() if uid in v.recipients.keys()}
         for _, password in tqdm(all_passwords.items()):
             plaintext_pw = password.decrypt_entry(
-                identity=myidentity,
+                identity=self.identity,
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"])
             password.recipients[uid]['encrypted_secret'] = plaintext_pw.encode("UTF-8")
@@ -51,8 +50,7 @@ class Export(Command):
         ####################################################################
         for argument in ['pwfile', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")
 
         ####################################################################
     def _validate_combinatorial_args(self):

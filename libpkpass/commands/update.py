@@ -1,7 +1,7 @@
 """This module allows for the updating of passwords"""
 import getpass
 from os import path
-import libpkpass.util as util
+from libpkpass.util import sort
 from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError, PasswordMismatchError, NotThePasswordOwnerError,\
@@ -28,7 +28,7 @@ class Update(Command):
         if safe or self.args['overwrite']:
             self.recipient_list = password['recipients'].keys()
             print("The following list of users are the current distribution list:")
-            print(", ".join(util.sort(self.recipient_list)))
+            print(", ".join(sort(self.recipient_list)))
             correct_distribution = input("Is this list correct? (y/N) ")
             if not correct_distribution or correct_distribution.lower()[0] == 'n':
                 self._new_distribution()
@@ -73,5 +73,4 @@ class Update(Command):
         ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

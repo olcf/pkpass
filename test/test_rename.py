@@ -3,8 +3,7 @@
 import builtins
 import unittest
 import mock
-import libpkpass.commands.cli as cli
-import libpkpass.commands.rename as rename
+from libpkpass.commands.cli import Cli
 from libpkpass.errors import DecryptionError, CliArgumentError
 from .basetest.basetest import patch_args, ERROR_MSGS
 
@@ -15,7 +14,7 @@ class RenameTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='rename', identity='bleh', nopassphrase='true',
                             all=None, pwname='test', rename='retest'):
-                rename.Rename(cli.Cli())
+                Cli()
         self.assertEqual(
             context.exception.msg,
             ERROR_MSGS['rep']
@@ -28,11 +27,11 @@ class RenameTests(unittest.TestCase):
             with patch_args(subparser_name='rename', identity='r1', nopassphrase='true',
                             all=True, pwname='test', rename='retest', overwrite='true'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    rename.Rename(cli.Cli())
+                    Cli()
             with patch_args(subparser_name='rename', identity='r1', nopassphrase='true',
                             all=True, pwname='retest', rename='test', overwrite="true"):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    rename.Rename(cli.Cli())
+                    Cli()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -42,7 +41,7 @@ class RenameTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='rename', identity='r1', nopassphrase='true',
                             all=True, rename='test', overwrite='true'):
-                rename.Rename(cli.Cli())
+                Cli()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
 if __name__ == '__main__':

@@ -4,8 +4,7 @@ import getpass
 import builtins
 import unittest
 import mock
-import libpkpass.commands.cli as cli
-import libpkpass.commands.create as create
+from libpkpass.commands.cli import Cli
 from libpkpass.errors import CliArgumentError, DecryptionError
 from .basetest.basetest import patch_args, ERROR_MSGS
 
@@ -19,7 +18,7 @@ class CreateTests(unittest.TestCase):
                             pwname='test'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
                     with mock.patch.object(getpass, 'getpass', lambda _: 'y'):
-                        create.Create(cli.Cli())
+                        Cli()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -31,7 +30,7 @@ class CreateTests(unittest.TestCase):
                             pwname=None):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
                     with mock.patch.object(getpass, 'getpass', lambda _: 'y'):
-                        create.Create(cli.Cli())
+                        Cli()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
 if __name__ == '__main__':

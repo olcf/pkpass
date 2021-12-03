@@ -3,8 +3,7 @@
 import builtins
 import unittest
 import mock
-import libpkpass.commands.cli as cli
-import libpkpass.commands.distribute as distribute
+from libpkpass.commands.cli import Cli
 from libpkpass.errors import CliArgumentError, DecryptionError
 from .basetest.basetest import patch_args, ERROR_MSGS
 
@@ -15,7 +14,7 @@ class DistributeTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='distribute', identity='bleh', nopassphrase='true',
                             pwname='test'):
-                distribute.Distribute(cli.Cli())
+                Cli()
         self.assertEqual(
             context.exception.msg,
             ERROR_MSGS['rep']
@@ -26,7 +25,7 @@ class DistributeTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='distribute', identity='r1', nopassphrase='true',
                             pwname=None):
-                distribute.Distribute(cli.Cli())
+                Cli()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
     def test_distribute_success(self):
@@ -36,7 +35,7 @@ class DistributeTests(unittest.TestCase):
             with patch_args(subparser_name='distribute', identity='r1', nopassphrase='true',
                             pwname='test'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    distribute.Distribute(cli.Cli())
+                    Cli()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
