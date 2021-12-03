@@ -187,7 +187,6 @@ class PasswordEntry():
             try:
                 distributor_hash = get_card_subjecthash()
             except X509CertificateError:
-                self.session.query(Recipient).filter(Recipient.name==distributor).first().certs,
                 distributor_hash = session.query(Cert).filter(
                     Cert.recipients.contains(distributor)
                 ).first().subjecthash
