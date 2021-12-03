@@ -28,7 +28,8 @@ class InfoTests(unittest.TestCase):
                         nopassphrase="true", pwname='test'):
             with captured_output() as (out, _):
                 Cli()
-        output = yaml.safe_load(out.getvalue())
+        out = "\n".join(out.getvalue().split('\n')[1:])
+        output = yaml.safe_load(out)
         del output['Earliest distribute timestamp']
         self.assertDictEqual(output, self.check_dict)
 

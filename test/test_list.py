@@ -35,7 +35,8 @@ class ListTests(unittest.TestCase):
         with patch_args(subparser_name='list', identity='r2', nopassphrase="true"):
             with captured_output() as (out, _):
                 Cli()
-        output = yaml.safe_load(out.getvalue().replace('\t', ' '))
+        out = "\n".join(out.getvalue().split('\n')[1:]).replace('\t', ' ')
+        output = yaml.safe_load(out)
         self.assertDictEqual(output, self.password_list_0)
 
     def test_list_one(self):
@@ -43,7 +44,8 @@ class ListTests(unittest.TestCase):
         with patch_args(subparser_name='list', identity='r1', nopassphrase="true"):
             with captured_output() as (out, _):
                 Cli()
-        output = yaml.safe_load(out.getvalue().replace('\t', ' '))
+        out = "\n".join(out.getvalue().split('\n')[1:]).replace('\t', ' ')
+        output = yaml.safe_load(out)
         self.assertDictEqual(output, self.password_list_1)
 
 if __name__ == '__main__':

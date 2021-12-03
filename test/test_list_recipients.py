@@ -29,7 +29,8 @@ class ListrecipientsTests(unittest.TestCase):
                         nopassphrase="true", filter="r3"):
             with captured_output() as (out, _):
                 Cli()
-        output = yaml.safe_load(out.getvalue().replace('\t', '  '))
+        out = "\n".join(out.getvalue().split('\n')[1:]).replace('\t', ' ')
+        output = yaml.safe_load(out)
         # we remove these things because the actual values depend on creation
         # moreover, some of the outputs on different operating systems appear
         # to utilize different delimiters.
