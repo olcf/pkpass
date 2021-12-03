@@ -27,8 +27,7 @@ class Delete(Command):
         ####################################################################
         yes = {'yes', 'y', 'ye', ''}
         deny = {'no', 'n'}
-        confirmation = input("%s: \nDelete this password?(Defaults yes):"
-                             % (self.args['pwname']))
+        confirmation = input(f"{self.args['pwname']}: \nDelete this password?(Defaults yes): ")
         if confirmation.lower() in yes:
             self.delete_pass()
         elif confirmation.lower() in deny:
@@ -42,5 +41,4 @@ class Delete(Command):
         ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

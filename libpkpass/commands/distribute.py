@@ -1,7 +1,7 @@
 """This Modules allows for distributing created passwords to other users"""
 from os import path
 from tqdm import tqdm
-import libpkpass.util as util
+from libpkpass.util import dictionary_filter
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
@@ -20,7 +20,7 @@ class Distribute(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        filtered_pdb = util.dictionary_filter(
+        filtered_pdb = dictionary_filter(
             path.join(self.args['pwstore'], self.args['pwname']),
             self.passworddb.pwdb,
             [self.args['identity'], 'recipients']
@@ -41,7 +41,7 @@ class Distribute(Command):
                     self.args['min_escrow'] = None
                     self.args['escrow_users'] = None
                     plaintext_pw = password.decrypt_entry(
-                        self.identities.iddb[self.args['identity']],
+                        self.identity,
                         passphrase=self.passphrase,
                         card_slot=self.args['card_slot'])
 
@@ -49,7 +49,7 @@ class Distribute(Command):
                     password.add_recipients(secret=plaintext_pw,
                                             distributor=self.args['identity'],
                                             recipients=self.recipient_list,
-                                            identitydb=self.identities,
+                                            session=self.session,
                                             passphrase=self.passphrase,
                                             card_slot=self.args['card_slot'],
                                             pwstore=self.args['pwstore']
@@ -64,5 +64,4 @@ class Distribute(Command):
         ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

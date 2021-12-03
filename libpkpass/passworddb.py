@@ -18,10 +18,10 @@ class PasswordDB():
         self.ignore = '*requirements.txt'
 
     def __repr__(self):
-        return "%s(%r)" % (self.__class__, self.__dict__)
+        return f"{self.__class__}({self.__dict__})"
 
     def __str__(self):
-        return "%r" % self.__dict__
+        return f"{self.__dict__}"
 
     def __sizeof__(self):
         return len(self.pwdb)
@@ -43,8 +43,7 @@ class PasswordDB():
         """ Load all passwords from directory """
     #############################################################################
         with Manager() as manager:
-            num_workers = cpu_count()
-            pool = Pool(num_workers)
+            pool = Pool(cpu_count())
             pwdb = manager.dict()
             for fpath, _, files in walk(pwstore):
                 pool.apply_async(self.parallel_loader, args=(files, fpath, pwdb))
@@ -74,7 +73,7 @@ class PasswordDB():
         """ Open a password file, load passwords and read metadata """
     ##############################################################################
         try:
-            with open(filename, 'r') as fname:
+            with open(filename, 'r', encoding='ASCII') as fname:
                 password_data = safe_load(fname)
                 password_entry = PasswordEntry()
                 password_entry.metadata = password_data['metadata']
@@ -85,7 +84,7 @@ class PasswordDB():
             return password_entry
         except (OSError, IOError, TypeError) as err:
             raise PasswordIOError(
-                "Error reading '%s' perhaps a path error for the db, or malformed file" % filename
+                f"Error reading '{filename}' perhaps a path error for the db, or malformed file"
             ) from err
 
     #############################################################################
@@ -95,9 +94,9 @@ class PasswordDB():
         try:
             if not path.isdir(path.dirname(filename)):
                 makedirs(path.dirname(filename))
-            with open(filename, 'w+') as fname:
+            with open(filename, 'w+', encoding='ASCII') as fname:
                 passdata = {key: value for key, value in password_data.todict().items() if value}
                 fname.write(dump(passdata,
                                  default_flow_style=False))
         except (OSError, IOError) as err:
-            raise PasswordIOError("Error creating '%s'" % filename) from err
+            raise PasswordIOError(f"Error creating '{filename}'") from err

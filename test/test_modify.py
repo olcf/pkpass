@@ -3,8 +3,7 @@
 import builtins
 import unittest
 import mock
-import libpkpass.commands.cli as cli
-import libpkpass.commands.modify as modify
+from libpkpass.commands.cli import Cli
 from libpkpass.errors import DecryptionError
 from .basetest.basetest import patch_args
 
@@ -17,7 +16,7 @@ class ModifyTests(unittest.TestCase):
             with patch_args(subparser_name='modify', identity='r3', nopassphrase='true',
                             pwname='gentest'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    modify.Modify(cli.Cli())
+                    Cli()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)

@@ -1,11 +1,16 @@
 """This Module handles the identitydb object"""
-from os import path, makedirs, listdir
-from tempfile import gettempdir
-from threading import Thread
+from os import path, listdir
+from datetime import datetime
 from pem import parse_file
+from sqlalchemy.orm import sessionmaker
+from tqdm import tqdm
 from libpkpass.crypto import pk_verify_chain, get_cert_fingerprint, get_cert_subject,\
     get_cert_issuer, get_cert_enddate, get_cert_issuerhash, get_cert_subjecthash
 from libpkpass.errors import FileOpenError, CliArgumentError
+from libpkpass.models.recipient import Recipient
+from libpkpass.models.cert import Cert
+from libpkpass.util import create_or_update
+
 
     ##########################################################################
 class IdentityDB():
@@ -19,105 +24,113 @@ class IdentityDB():
         self.extensions = {'certificate': ['.cert', '.crt'],
                            'key': '.key'}
         self.cabundle = ""
-        self.iddb = {}
+        self.args = {}
 
         #######################################################################
     def __repr__(self):
         #######################################################################
-        return "%s(%r)" % (self.__class__, self.__dict__)
+        return f"{self.__class__}({self.__dict__})"
 
         #######################################################################
     def __str__(self):
         #######################################################################
-        return "%r" % self.__dict__
+        return f"{self.__dict__}"
 
         #######################################################################
-    def _load_certs_from_external(self, connection_map, nocache):
+    def _load_certs_from_external(self, connection_map):
         """Load certificates from external via use of plugin"""
         #######################################################################
         if 'base_directory' in connection_map and connection_map['base_directory']:
-            temp_dir = connection_map['base_directory']
             del connection_map['base_directory']
-        else:
-            temp_dir = str(gettempdir())
-
         for key, value in connection_map.items():
             connector = getattr(__import__(key.lower(), fromlist=[key]), key)(value)
-            dirname = path.join(temp_dir, str(key))
-            if not path.exists(dirname):
-                makedirs(dirname)
-            if nocache or not listdir(dirname):
-                certs = connector.list_certificates()
-                for name, certlist in certs.items():
-                    with open(path.join(dirname, str(name)) +  str(self.extensions['certificate'][0]), 'w') as tmpcert:
-                        tmpcert.write("\n".join(certlist))
-
-            self._load_from_directory(dirname, 'certificate')
+            certs = connector.list_certificates()
+            print("Loading certs into database")
+            for name, certlist in tqdm(certs.items()):
+                self.load_db(name, certlist)
 
         #######################################################################
     def _load_from_directory(self, fpath, filetype):
         """ Helper function to read in (keys|certs) and store them correctly """
         #######################################################################
         try:
-            for fname in listdir(fpath):
+            print("Loading certs into database")
+            for fname in tqdm(listdir(fpath)):
                 if fname.endswith(tuple(self.extensions[filetype])):
                     uid = fname.split('.')[0]
                     filepath = path.join(fpath, fname)
-                    try:
-                        self.iddb[uid]["%s_path" % filetype] = filepath
-                    except KeyError as error:
-                        identity = {'uid': fname.split('.')[0],
-                                    "%s_path" % filetype: filepath}
-                        self.iddb[identity['uid']] = identity
+                    if filetype == 'certificate':
+                        self.load_db(uid, certlist=[x.as_text() for x in parse_file(filepath)])
+                    elif filetype == 'key':
+                        session = sessionmaker(bind=self.args['db']['engine'])()
+                        create_or_update(session,
+                                         Recipient,
+                                         unique_identifiers=['name'],
+                                         **{
+                                             'name': uid,
+                                             'key': filepath,
+                                         },
+                                         )
+                        session.commit()
         except OSError as error:
             raise FileOpenError(fpath, str(error.strerror)) from error
 
         #######################################################################
     def load_certs_from_directory(self,
                                   certpath,
-                                  verify_on_load=False,
                                   connectmap=None,
                                   nocache=False):
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
-        if certpath:
-            self._load_from_directory(certpath, 'certificate')
-        if connectmap:
-            self._load_certs_from_external(connectmap, nocache)
-        if verify_on_load:
-            threads = []
-            for identity, _ in self.iddb.items():
-                threads.append(Thread(target=self.verify_identity,
-                                      args=(identity, [])))
-                threads[-1].start()
-            for thread in threads:
-                thread.join()
+        session = sessionmaker(bind=self.args['db']['engine'])()
+        if not session.query(Recipient).first() or nocache:
+            if certpath:
+                self._load_from_directory(certpath, 'certificate')
+            if connectmap:
+                self._load_certs_from_external(connectmap)
 
         #######################################################################
-        # we need the results parameter because of the threading
-    def verify_identity(self, identity, results): #pylint: disable=unused-argument
+    def load_db(self, identity, certlist=None):
         """ Read in all rsa keys from directory and name them as found
-        results is a meaningless parameter, but is required to make threading work
         """
         #######################################################################
         try:
-            self.iddb[identity]['cabundle'] = self.cabundle
-            self.iddb[identity]['certs'] = []
-            for cert in parse_file(self.iddb[identity]['certificate_path']):
-                cert = cert.as_bytes()
+            session = sessionmaker(bind=self.args['db']['engine'])()
+            recipient = create_or_update(session, Recipient, dont_update=['key'], **{'name': identity})
+            for cert in certlist:
+                cert = cert.encode()
                 cert_dict = {}
                 cert_dict['cert_bytes'] = cert
-                cert_dict['verified'] = pk_verify_chain(cert, self.iddb[identity]['cabundle'])
+                cert_dict['verified'] = pk_verify_chain(cert, self.cabundle)
                 cert_dict['fingerprint'] = get_cert_fingerprint(cert)
                 cert_dict['subject'] = get_cert_subject(cert)
                 cert_dict['issuer'] = get_cert_issuer(cert)
-                cert_dict['enddate'] = get_cert_enddate(cert)
+                cert_dict['enddate'] = datetime.strptime(get_cert_enddate(cert), '%b %d %H:%M:%S %Y %Z')
                 cert_dict['issuerhash'] = get_cert_issuerhash(cert)
                 cert_dict['subjecthash'] = get_cert_subjecthash(cert)
-                self.iddb[identity]['certs'].append(cert_dict)
+                cert = create_or_update(
+                    session,
+                    Cert,
+                    unique_identifiers=['fingerprint'],
+                    **cert_dict
+                )
+                if cert not in recipient.certs:
+                    recipient.certs.append(cert)
+            session.commit()
         except KeyError as err:
             raise CliArgumentError(
-                "Error: Recipient '%s' is not in the recipient database" % identity) from err
+                f"Error: Recipient '{identity}' is not in the recipient database"
+            ) from err
+
+    def verify_identity(self, identity):
+        session = sessionmaker(bind=self.args['db']['engine'])()
+        recipient = session.query(Recipient).filter(Recipient.name == identity).first()
+        for cert in session.query(Cert).filter(
+                Cert.recipients.contains(recipient)
+        ).all():
+            if not cert.verified:
+                return False
+        return True
 
         #######################################################################
     def load_keys_from_directory(self, fpath):

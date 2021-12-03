@@ -41,5 +41,4 @@ class Create(Command):
         ####################################################################
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

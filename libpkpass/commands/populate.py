@@ -8,6 +8,7 @@ from libpkpass.commands.show import Show
 from libpkpass.crypto import puppet_password
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
+from libpkpass.models.recipient import Recipient
 
     ####################################################################
 class Populate(Show):
@@ -27,36 +28,33 @@ class Populate(Show):
         # currently only support puppet
         pop_type = self.args['type']
         if pop_type not in ['puppet_eyaml', 'kubernetes']:
-            raise CliArgumentError("'%s' is an unsupported population type" % pop_type)
+            raise CliArgumentError(f"'{pop_type}' is an unsupported population type")
 
-        myidentity = self.identities.iddb[self.args['identity']]
         if pop_type == 'kubernetes':
-            self._handle_kubernetes(myidentity)
+            self._handle_kubernetes()
         elif self.args['all']:
             for password in self.args['populate'][pop_type]['passwords'].keys():
                 pwentry = PasswordEntry()
                 self._decrypt_wrapper(
                     self.args['pwstore'],
                     pwentry,
-                    myidentity,
                     password,
                     pop_type
                 )
 
         elif self.args['pwname'] not in self.args['populate'][pop_type]['passwords'].keys():
-            raise CliArgumentError("'%s' doesn't have a mapping in %s" % (self.args['pwname'], pop_type))
+            raise CliArgumentError(f"'{self.args['pwname']}' doesn't have a mapping in {pop_type}")
         else:
             password = PasswordEntry()
             self._decrypt_wrapper(
                 self.args['pwstore'],
                 password,
-                myidentity,
                 self.args['pwname'],
                 pop_type
             )
 
         ####################################################################
-    def _handle_kubernetes(self, myidentity):
+    def _handle_kubernetes(self):
         """This function creates a file containing kube secrets"""
         ####################################################################
         k_conf = self.args['populate']['kubernetes']
@@ -64,7 +62,7 @@ class Populate(Show):
         for password in k_conf['needed']:
             pwentry = PasswordEntry()
             pwentry.read_password_data(path.join(self.args['pwstore'], password))
-            plaintext_pw = self._decrypt_password_entry(pwentry, myidentity)
+            plaintext_pw = self._decrypt_password_entry(pwentry)
             plaintext[password] = plaintext_pw
         if 'output' in k_conf:
             if self.args['pwstore'] in k_conf['output']:
@@ -81,10 +79,10 @@ class Populate(Show):
                 'type': args['type']
             }
             if self.args['value'] or 'output' not in k_conf:
-                print("%s\n%s" % ("---", dump(kube_map)))
+                print(f"---\n{dump(kube_map)}")
             else:
-                with open(k_conf['output'], 'a') as fname:
-                    print("%s\n%s" % ("---", dump(kube_map)), file=fname)
+                with open(k_conf['output'], 'a', encoding='ASCII') as fname:
+                    print(f"---\n{dump(kube_map)}", file=fname)
 
         ####################################################################
     def _kubernetes_match_loop(self, args, plaintext):
@@ -101,7 +99,7 @@ class Populate(Show):
             else:
                 for match_values in match_iter:
                     match_value = match_values.group(1)
-                    new_pw = new_pw.replace("${%s}" % match_value, plaintext[match_value])
+                    new_pw = new_pw.replace(f"%{{{match_value}}}", plaintext[match_value])
                 data[key] = standard_b64encode("".join(new_pw).encode('ASCII')).decode()
         return data
 
@@ -110,25 +108,25 @@ class Populate(Show):
         ####################################################################
         directory = path.expanduser(self.args['populate']['puppet_eyaml']['directory'])
         if not path.isdir(directory):
-            raise CliArgumentError("'%s' is not a directory" % directory)
+            raise CliArgumentError(f"'{directory}' is not a directory")
         puppet_bin = path.expanduser(self.args['populate']['puppet_eyaml']['bin'])
         if not path.isfile(puppet_bin):
-            raise CliArgumentError("'%s' is not a file" % puppet_bin)
+            raise CliArgumentError(f"'{puppet_bin}' is not a file")
         pkcs7_pass = puppet_password(puppet_bin, plaintext_pw)
         if self.args['value']:
             print(pkcs7_pass)
         else:
             for hiera_file, names in self.args['populate']['puppet_eyaml']['passwords'][pwname].items():
-                with open(path.join(directory, hiera_file), 'r') as data_file:
-                    print("Updating: %s" % hiera_file)
+                with open(path.join(directory, hiera_file), 'r', encoding='ASCII') as data_file:
+                    print(f"Updating: {hiera_file}")
                     yaml = YAML()
                     yaml.indent(mapping=2, sequence=4, offset=2)
                     yaml.preserve_quotes = True
                     hiera_yaml = yaml.load(data_file.read())
                     for name in names:
-                        print("Updating: %s" % name)
+                        print(f"Updating: {name}")
                         hiera_yaml[name] = pkcs7_pass
-                with open(path.join(directory, hiera_file), 'w') as data_file:
+                with open(path.join(directory, hiera_file), 'w', encoding='ASCII') as data_file:
                     yaml.dump(hiera_yaml, data_file)
 
         ####################################################################
@@ -136,34 +134,34 @@ class Populate(Show):
         ####################################################################
         for argument in ['keypath', 'type']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument
-                )
+                raise CliArgumentError(f"'{argument}' is a required argument")
 
         ####################################################################
-    def _decrypt_wrapper(self, directory, password, myidentity, pwname, pop_type):
+    def _decrypt_wrapper(self, directory, password, pwname, pop_type):
         """Decide whether to decrypt normally or for escrow"""
         ####################################################################
         password.read_password_data(path.join(directory, pwname))
-        plaintext_pw = self._decrypt_password_entry(password, myidentity)
+        plaintext_pw = self._decrypt_password_entry(password)
         if pop_type == 'puppet_eyaml':
             self._handle_puppet(plaintext_pw, pwname)
 
         ####################################################################
-    def _decrypt_password_entry(self, password, myidentity):
+    def _decrypt_password_entry(self, password):
         """This decrypts a given password entry"""
         ####################################################################
         plaintext_pw = password.decrypt_entry(
-            identity=myidentity, passphrase=self.passphrase, card_slot=self.args['card_slot']
+            identity=self.identity, passphrase=self.passphrase, card_slot=self.args['card_slot']
         )
+        distributor = password.recipients[self.identity['name']]['distributor']
         if not self.args['noverify']:
             result = password.verify_entry(
-                myidentity['uid'], self.identities
+                self.identity['uid'],
+                self.identities,
+                distributor,
+                self.session.query(Recipient).filter(Recipient.name==distributor).first().certs,
             )
             if not result['sigOK']:
-                print("warning: could not verify that '%s' correctly signed your password entry." %
-                      result['distributor'])
+                print(f"warning: could not verify that '{result['distributor']}' correctly signed your password entry.")
             if not result['certOK']:
-                print("Warning: could not verify the certificate authenticity of user '%s'." %
-                      result['distributor'])
+                print(f"Warning: could not verify the certificate authenticity of user '{result['distributor']}'.")
         return plaintext_pw

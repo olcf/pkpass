@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """This Module tests the password entry module"""
 import unittest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from libpkpass.password import PasswordEntry
 from libpkpass.identities import IdentityDB
 
@@ -19,6 +21,14 @@ class TestBasicFunction(unittest.TestCase):
         self.idobj = IdentityDB()
         self.idobj.identity = self.sender
         self.idobj.recipient_list = ['r2', 'r3']
+        db_path = 'test/pki/intermediate/certs/rd.db'
+        self.idobj.args = {
+            'db': {
+                'uri': f"sqlite+pysqlite:///{db_path}",
+                'engine': create_engine(f"sqlite+pysqlite:///{db_path}")
+            }
+        }
+        self.session = sessionmaker(bind=self.idobj.args['db']['engine'])()
         self.idobj.load_certs_from_directory(self.certdir, self.cabundle)
         self.idobj.load_keys_from_directory(self.keydir)
 
@@ -32,7 +42,7 @@ class TestBasicFunction(unittest.TestCase):
         passwordentry.add_recipients(secret=self.secret,
                                      distributor='r1',
                                      recipients=self.idobj.recipient_list,
-                                     identitydb=self.idobj)
+                                     session=self.session)
 
     def test_read_write(self):
         """Read and write password entry data"""
@@ -40,8 +50,8 @@ class TestBasicFunction(unittest.TestCase):
         passwordentry.read_password_data(self.file1)
         passwordentry.write_password_data(self.file2, overwrite=True)
 
-        with open(self.file1, 'r') as file1:
-            with open(self.file2, 'r') as file2:
+        with open(self.file1, 'r', encoding='ASCII') as file1:
+            with open(self.file2, 'r', encoding='ASCII') as file2:
                 self.assertTrue(file1.read() == file2.read())
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ import getpass
 import os.path
 from yaml import safe_load, scanner
 from tqdm import tqdm
-import libpkpass.crypto as crypto
+from libpkpass.crypto import sk_decrypt_string
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError, LegacyImportFormatError, FileOpenError
@@ -23,7 +23,7 @@ class Import(Command):
         ####################################################################
         try:
             contents = ""
-            with open(self.args['pwfile'], 'r') as fcontents:
+            with open(self.args['pwfile'], 'r', encoding='ASCII') as fcontents:
                 contents = fcontents.read().strip()
             if self.args['nocrypto']:
                 self._file_handler(contents)
@@ -31,7 +31,7 @@ class Import(Command):
                 passwd = getpass.getpass("Please enter the password for the file: ")
                 passwords = contents.split("\n")
                 for password in tqdm(passwords):
-                    self._file_handler(crypto.sk_decrypt_string(password, passwd))
+                    self._file_handler(sk_decrypt_string(password, passwd))
         except IOError as err:
             raise FileOpenError(self.args['pwfile'], "No such file or directory") from err
 
@@ -64,8 +64,7 @@ you can manually change the description in the file if you would like")
     def _yaml_file(self, password):
         """This function handles the yaml format of pkpass"""
         ####################################################################
-        myidentity = self.identities.iddb[self.args['identity']]
-        uid = myidentity['uid']
+        uid = self.identity['name']
         pwstore = self.args['pwstore']
 
         self.args['pwname'] = password['metadata']['name']
@@ -90,5 +89,4 @@ you can manually change the description in the file if you would like")
         ####################################################################
         for argument in ['pwfile', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")

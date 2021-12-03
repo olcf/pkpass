@@ -39,7 +39,7 @@ def check_exists(name):
     ####################################################################
 def print_messages(func, msg, **kwargs):
     ####################################################################
-    print("Starting %s" % msg)
+    print(f"Starting {msg}")
     print(func(**kwargs))
 
     ####################################################################
@@ -72,8 +72,8 @@ def check_passdb(cabundle, pwstore, certpath=None, keypath=None, connect=None):
     if connect and certpath:
         ret_msg.append("certpath or keypath is defined while using a connector")
     if certpath and not path.isdir(certpath):
-        ret_msg.append("certpath is not a directory %s" % certpath)
+        ret_msg.append(f"certpath is not a directory {certpath}")
     if keypath and not path.isdir(keypath):
-        ret_msg.append("Keypath is not a directory: %s" % keypath)
+        ret_msg.append(f"Keypath is not a directory: {keypath}")
     ret_msg.append("Completed passdb check")
     return "\n".join(ret_msg)

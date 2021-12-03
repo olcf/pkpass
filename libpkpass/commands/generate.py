@@ -56,7 +56,6 @@ class Generate(Command):
         self.args['rules_map'] = parse_json_arguments(self.args, 'rules_map')
         for argument in ['pwname', 'keypath', 'rules_map']:
             if argument not in self.args or self.args[argument] is None:
-                raise CliArgumentError(
-                    "'%s' is a required argument" % argument)
+                raise CliArgumentError(f"'{argument}' is a required argument")
         if self.args['rules'] not in self.args['rules_map'] or self.args['rules_map'][self.args['rules']] == "":
-            raise RulesMapError("No Rule set defined as %s" % self.args['rules'])
+            raise RulesMapError(f"No Rule set defined as {self.args['rules']}")
