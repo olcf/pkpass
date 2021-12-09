@@ -20,44 +20,33 @@ class Distribute(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        filtered_pdb = dictionary_filter(
-            path.join(self.args['pwstore'], self.args['pwname']),
-            self.passworddb.pwdb,
-            [self.args['identity'], 'recipients']
-        )
+        filtered_pdb = self._confirm_pdb()
         self.recipient_list.append(str(self.args['identity']))
         self.recipient_list = list(set(self.recipient_list))
-        print("The following users will receive the password:")
-        print(", ".join(self.recipient_list))
-        print("The following password files have matched:")
-        print(*filtered_pdb.keys(), sep="\n")
-        correct_distribution = input("Are these lists correct? (y/N) ")
-        if correct_distribution and correct_distribution.lower()[0] == 'y':
-            for dist_pass, _ in tqdm(filtered_pdb.items()):
-                password = PasswordEntry()
-                password.read_password_data(dist_pass)
-                if self.args['identity'] in password.recipients.keys():
-                    # we shouldn't modify escrow on distribute
-                    self.args['min_escrow'] = None
-                    self.args['escrow_users'] = None
-                    plaintext_pw = password.decrypt_entry(
-                        self.identity,
-                        passphrase=self.passphrase,
-                        card_slot=self.args['card_slot'])
+        self._confirm_recipients()
+        for dist_pass, _ in tqdm(filtered_pdb.items()):
+            password = PasswordEntry()
+            password.read_password_data(dist_pass)
+            if self.args['identity'] in password.recipients.keys():
+                # we shouldn't modify escrow on distribute
+                self.args['min_escrow'] = None
+                self.args['escrow_users'] = None
+                plaintext_pw = password.decrypt_entry(
+                    self.identity,
+                    passphrase=self.passphrase,
+                    card_slot=self.args['card_slot']
+                )
+                password.add_recipients(
+                    secret=plaintext_pw,
+                    distributor=self.args['identity'],
+                    recipients=self.recipient_list,
+                    session=self.session,
+                    passphrase=self.passphrase,
+                    card_slot=self.args['card_slot'],
+                    pwstore=self.args['pwstore']
+                )
 
-                    password.read_password_data(dist_pass)
-                    password.add_recipients(secret=plaintext_pw,
-                                            distributor=self.args['identity'],
-                                            recipients=self.recipient_list,
-                                            session=self.session,
-                                            passphrase=self.passphrase,
-                                            card_slot=self.args['card_slot'],
-                                            pwstore=self.args['pwstore']
-                                           )
-
-                    password.write_password_data(dist_pass)
-        else:
-            print("Exiting due to wrong password list")
+                password.write_password_data(dist_pass)
 
         ####################################################################
     def _validate_args(self):
@@ -65,3 +54,30 @@ class Distribute(Command):
         for argument in ['pwname', 'keypath']:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(f"'{argument}' is a required argument")
+
+        ####################################################################
+    def _confirm_pdb(self):
+        ####################################################################
+        filtered_pdb = dictionary_filter(
+            path.join(self.args['pwstore'], self.args['pwname']),
+            self.passworddb.pwdb,
+            [self.args['identity'], 'recipients']
+        )
+        print("The following password files have matched:")
+        print(*filtered_pdb.keys(), sep="\n")
+        correct = input("Are these correct? (y/N) ")
+        if not correct or correct.lower()[0] == 'n':
+            self.args['pwname'] = input("Please try a new filter: ")
+            self._confirm_pdb()
+        return filtered_pdb
+
+        ####################################################################
+    def _confirm_recipients(self):
+        ####################################################################
+        print("The following users will receive the password:")
+        print(", ".join(self.recipient_list))
+        correct = input("Are these correct? (y/N) ")
+        if not correct or correct.lower()[0] == 'n':
+            self.recipient_list = input("Please enter a comma delimited list: ")
+            self.recipient_list = list({x.strip() for x in self.recipient_list.split(",")})
+            self._confirm_recipients()
