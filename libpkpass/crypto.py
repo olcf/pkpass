@@ -232,10 +232,12 @@ def get_cert_element(cert, element):
         raise X509CertificateError(stdout) from err
 
     ##############################################################################
-def get_card_element(element):
+def get_card_element(element, card_slot=None):
     """Return an arbitrary element of a pcks15 capable device"""
     ##############################################################################
     command = ['pkcs15-tool', '--read-certificate', '1']
+    if card_slot is not None:
+        command.extend(['--reader', str(card_slot)])
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
         stdout, _ = proc.communicate()
     if stdout.decode('utf-8').strip().lower() == 'no smart card readers found.':
@@ -243,49 +245,49 @@ def get_card_element(element):
     return get_cert_element(stdout, element)
 
     ##############################################################################
-def get_card_fingerprint():
+def get_card_fingerprint(card_slot=None):
     """ Return the modulus of the x509 certificate of the identity """
     ##############################################################################
     # SHA1 Fingerprint=F9:9D:71:54:55:BE:99:24:6A:5E:E0:BB:48:F9:63:AE:A2:05:54:98
-    return get_card_element('fingerprint').split('=')[1]
+    return get_card_element('fingerprint', card_slot=card_slot).split('=')[1]
 
     ##############################################################################
-def get_card_subject():
+def get_card_subject(card_slot=None):
     """ Return the subject DN of the x509 certificate of the identity """
     ##############################################################################
     # subject= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return ' '.join(get_card_element('subject').split(' ')[1:])
+    return ' '.join(get_card_element('subject', card_slot=card_slot).split(' ')[1:])
 
     ##############################################################################
-def get_card_issuer():
+def get_card_issuer(card_slot=None):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
     # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return ' '.join(get_card_element('issuer').split(' ')[1:])
+    return ' '.join(get_card_element('issuer', card_slot=card_slot).split(' ')[1:])
 
     ##############################################################################
-def get_card_startdate():
+def get_card_startdate(card_slot=None):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_card_element('startdate').split('=')[1]
+    return get_card_element('startdate', card_slot=card_slot).split('=')[1]
 
     ##############################################################################
-def get_card_enddate():
+def get_card_enddate(card_slot=None):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_card_element('enddate').split('=')[1]
+    return get_card_element('enddate', card_slot=card_slot).split('=')[1]
 
     ##############################################################################
-def get_card_issuerhash():
+def get_card_issuerhash(card_slot=None):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_card_element('issuer_hash')
+    return get_card_element('issuer_hash', card_slot=card_slot)
 
     ##############################################################################
-def get_card_subjecthash():
+def get_card_subjecthash(card_slot=None):
     """ Return the issuer DN of the x509 certificate of the identity """
     ##############################################################################
-    return get_card_element('subject_hash')
+    return get_card_element('subject_hash', card_slot=card_slot)
 
     ##############################################################################
 def sk_encrypt_string(plaintext_string, key):

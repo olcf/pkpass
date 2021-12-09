@@ -243,7 +243,7 @@ class PasswordEntry():
                             passphrase
                         )
                 else:
-                    cert_key = get_card_fingerprint()
+                    cert_key = get_card_fingerprint(card_slot=card_slot)
                     return pk_decrypt_string(
                         recipient_entry['encrypted_secrets'][cert_key]['encrypted_secret'],
                         recipient_entry['encrypted_secrets'][cert_key]['derived_key'],
