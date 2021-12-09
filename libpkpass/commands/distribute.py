@@ -1,10 +1,11 @@
 """This Modules allows for distributing created passwords to other users"""
 from os import path
 from tqdm import tqdm
-from libpkpass.util import dictionary_filter
+from libpkpass.util import dictionary_filter, sort
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
+from libpkpass.models.recipient import Recipient
 
     ####################################################################
 class Distribute(Command):
@@ -74,8 +75,16 @@ class Distribute(Command):
         ####################################################################
     def _confirm_recipients(self):
         ####################################################################
-        print("The following users will receive the password:")
-        print(", ".join(self.recipient_list))
+        not_in_db = []
+        in_db = [x.name for x in self.session.query(Recipient).all()]
+        for recipient in self.recipient_list:
+            if recipient not in in_db:
+                not_in_db.append(recipient)
+        if not_in_db:
+            print(f"The following recipients are not in the db, removing {', '.join(not_in_db)}")
+            self.recipient_list = [x for x in self.recipient_list if x not in not_in_db]
+        print("The following users will receive the password: ")
+        print(", ".join(sort(self.recipient_list)))
         correct = input("Are these correct? (y/N) ")
         if not correct or correct.lower()[0] == 'n':
             self.recipient_list = input("Please enter a comma delimited list: ")
