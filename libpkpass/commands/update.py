@@ -1,7 +1,7 @@
 """This module allows for the updating of passwords"""
 import getpass
 from os import path
-# from sqlalchemy.orm import any
+from libpkpass import LOGGER
 from libpkpass.util import sort
 from libpkpass.password import PasswordEntry
 from libpkpass.commands.command import Command
@@ -29,7 +29,7 @@ class Update(Command):
         safe, owner = self.safety_check()
         if safe or self.args['overwrite']:
             self.recipient_list = password['recipients'].keys()
-            self._confirm_recipients()
+            yield from self._confirm_recipients()
             self._validate_identities(self.recipient_list)
 
             password1 = getpass.getpass("Enter updated password: ")
@@ -58,15 +58,17 @@ class Update(Command):
             if recipient not in in_db:
                 not_in_db.append(recipient)
         if not_in_db:
-            print(f"The following recipients are not in the db, removing {', '.join(not_in_db)}")
+            LOGGER.warning(
+                "The following recipients are not in the db, removing %s", ', '.join(not_in_db)
+            )
             self.recipient_list = [x for x in self.recipient_list if x not in not_in_db]
-        print("The following users will receive the password: ")
-        print(", ".join(sort(self.recipient_list)))
+        yield "The following users will receive the password: "
+        yield ", ".join(sort(self.recipient_list))
         correct = input("Are these correct? (y/N) ")
         if not correct or correct.lower()[0] == 'n':
             self.recipient_list = input("Please enter a comma delimited list: ")
             self.recipient_list = list({x.strip() for x in self.recipient_list.split(",")})
-            self._confirm_recipients()
+            yield from self._confirm_recipients()
 
         ####################################################################
     def _validate_args(self):

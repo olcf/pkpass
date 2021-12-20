@@ -57,22 +57,22 @@ def print_card_info(card_slot, identity, verbosity, color, theme_map):
     if 'key' not in identity or not identity['key']:
         out_list, stdout = get_card_info()
         if verbosity > 1:
-            print_all_slots(stdout, color, theme_map)
+            yield print_all_slots(stdout, color, theme_map)
         for out in out_list[1:]:
             stripped = out.decode("UTF-8").strip()
             if int(stripped[0]) == int(card_slot):
                 verbosity = verbosity + 1 if verbosity < 2 else 2
                 stripped = "Using Slot" + ("\n").join(stripped.split('\n')[:verbosity])
-                print(f"{color_prepare(stripped, 'info', color, theme_map)}")
+                yield f"{color_prepare(stripped, 'info', color, theme_map)}"
 
     ##############################################################################
 def print_all_slots(slot_info, color, theme_map):
     """Print all slots and cards available"""
     ##############################################################################
     columns = int(get_terminal_size().columns) // 4
-    print(color_prepare("#" * columns, "debug", color, theme_map),
-          handle_python_strings(slot_info).decode("UTF-8").strip(),
-          color_prepare("#" * columns, "debug", color, theme_map), sep="\n")
+    return (f'{color_prepare("#" * columns, "debug", color, theme_map)}\n'
+          f'{handle_python_strings(slot_info).decode("UTF-8").strip()}\n'
+          f'{color_prepare("#" * columns, "debug", color, theme_map)}\n')
 
     ##############################################################################
 def pk_decrypt_string(ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None):

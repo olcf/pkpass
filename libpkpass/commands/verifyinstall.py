@@ -17,8 +17,8 @@ class VerifyInstall(Command):
     def _run_command_execution(self):
         """ Run function for class.                                  """
         ####################################################################
-        print_messages(check_required_software, "installed software check")
-        print_messages(check_passdb, "passdb check",
+        yield from print_messages(check_required_software, "installed software check")
+        yield from print_messages(check_passdb, "passdb check",
                        cabundle=path.realpath(self.args['cabundle']),
                        pwstore=path.realpath(self.args['pwstore']),
                        keypath=path.realpath(self.args['keypath']) if self.args['keypath'] else None,
@@ -39,8 +39,8 @@ def check_exists(name):
     ####################################################################
 def print_messages(func, msg, **kwargs):
     ####################################################################
-    print(f"Starting {msg}")
-    print(func(**kwargs))
+    yield f"Starting {msg}"
+    yield func(**kwargs)
 
     ####################################################################
 def check_required_software():

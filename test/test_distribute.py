@@ -14,7 +14,7 @@ class DistributeTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='distribute', identity='bleh', nopassphrase='true',
                             pwname='test'):
-                Cli()
+                Cli().run()
         self.assertEqual(
             context.exception.msg,
             ERROR_MSGS['rep']
@@ -25,7 +25,7 @@ class DistributeTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='distribute', identity='r1', nopassphrase='true',
                             pwname=None):
-                Cli()
+                Cli().run()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
     def test_distribute_success(self):
@@ -35,7 +35,7 @@ class DistributeTests(unittest.TestCase):
             with patch_args(subparser_name='distribute', identity='r1', nopassphrase='true',
                             pwname='test'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    Cli()
+                    Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)

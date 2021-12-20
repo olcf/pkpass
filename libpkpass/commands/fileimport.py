@@ -3,6 +3,7 @@ import getpass
 import os.path
 from yaml import safe_load, scanner
 from tqdm import tqdm
+from libpkpass import LOGGER
 from libpkpass.crypto import sk_decrypt_string
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
@@ -51,7 +52,7 @@ class Import(Command):
     def _flat_file(self, passwords):
         """This function handles the simple key:value pair"""
         ####################################################################
-        print("INFO: Flat password file detected, using 'imported' as description \
+        LOGGER.info("Flat password file detected, using 'imported' as description \
 you can manually change the description in the file if you would like")
         for password in tqdm(passwords):
             psplit = password.split(":")

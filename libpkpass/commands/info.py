@@ -21,33 +21,33 @@ class Info(Command):
         password.read_password_data(path.join(self.args['pwstore'], self.args['pwname']))
 
         # Metadata
-        print(self.color_print("Metadata:", "first_level"))
+        yield self.color_print("Metadata:", "first_level")
         for key, value in password.metadata.items():
-            print(f"  {self.color_print(key.capitalize(), 'second_level')}: {value}")
+            yield f"  {self.color_print(key.capitalize(), 'second_level')}: {value}"
 
         # Escrow
         if password.escrow:
-            print(self.color_print("\nEscrow Groups:", "first_level"))
+            yield self.color_print("\nEscrow Groups:", "first_level")
             for group_key, group_value in password.escrow.items():
-                print(f"  {self.color_print(group_key, 'second_level')}:")
+                yield f"  {self.color_print(group_key, 'second_level')}:"
                 for key, value in group_value['metadata'].items():
-                    print(f"    {self.color_print(key + ':', 'third_level')} {str(value)}")
+                    yield f"    {self.color_print(key + ':', 'third_level')} {str(value)}"
 
-                print(f"    {self.color_print('Share Holders:', 'third_level')} {', '.join(list(group_value['recipients'].keys()))}")
-                print(f"    {self.color_print('Total Group Share Holders:', 'third_level')} {len(list(group_value['recipients'].keys()))}")
+                yield f"    {self.color_print('Share Holders:', 'third_level')} {', '.join(list(group_value['recipients'].keys()))}"
+                yield f"    {self.color_print('Total Group Share Holders:', 'third_level')} {len(list(group_value['recipients'].keys()))}"
 
                 timestamp_list = [x['timestamp'] for x in list(group_value['recipients'].values()) if 'timestamp' in x]
                 if timestamp_list:
                     timestamp = int(round(float(min(timestamp_list))))
                     timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-                    print(f"    {self.color_print('Group creation time:', 'third_level')} {timestamp}")
+                    yield f"    {self.color_print('Group creation time:', 'third_level')} {timestamp}"
 
         # Recipients
-        print(f"{self.color_print(linesep + 'Recipients:', 'first_level')} {', '.join(list(password.recipients.keys()))}")
-        print(f"{self.color_print('Total Recipients:', 'first_level')} {len(list(password.recipients.keys()))}")
+        yield f"{self.color_print(linesep + 'Recipients:', 'first_level')} {', '.join(list(password.recipients.keys()))}"
+        yield f"{self.color_print('Total Recipients:', 'first_level')} {len(list(password.recipients.keys()))}"
         rec_timestamp = int(round(float(min([x['timestamp'] for x in list(password.recipients.values()) if 'timestamp' in x]))))
         rec_timestamp = datetime.fromtimestamp(rec_timestamp).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"{self.color_print('Earliest distribute timestamp:', 'first_level')} {rec_timestamp}")
+        yield f"{self.color_print('Earliest distribute timestamp:', 'first_level')} {rec_timestamp}"
 
         ####################################################################
     def _validate_args(self):

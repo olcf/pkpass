@@ -13,7 +13,7 @@ class ShowErrors(unittest.TestCase):
         try:
             with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
                             all=None, pwname='test'):
-                Cli()
+                Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -23,7 +23,7 @@ class ShowErrors(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='show', identity='bleh', nopassphrase='true',
                             all=None, pwname='test'):
-                Cli()
+                Cli().run()
         self.assertEqual(
             context.exception.msg,
             ERROR_MSGS['rep']
@@ -35,7 +35,7 @@ class ShowErrors(unittest.TestCase):
         try:
             with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
                             all=True, pwname='*test*'):
-                Cli()
+                Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -46,7 +46,7 @@ class ShowErrors(unittest.TestCase):
         try:
             with patch_args(subparser_name='show', identity='r1', nopassphrase='true',
                             all=None):
-                Cli()
+                "".join(Cli().run())
         except KeyError as error:
             if str(error) == "'pwname'":
                 ret = str(error)

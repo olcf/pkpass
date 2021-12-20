@@ -14,11 +14,11 @@ class Recover(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        print("If the password returned is not correct, you may need more shares")
+        yield "If the password returned is not correct, you may need more shares"
         shares = input("Enter comma separated list of shares: ")
         shares = shares.split(",")
         shares = map(str.strip, shares)
-        print(pk_recover_secret(shares))
+        yield pk_recover_secret(shares)
 
         ####################################################################
     def _validate_args(self):

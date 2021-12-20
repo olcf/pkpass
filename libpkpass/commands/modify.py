@@ -22,8 +22,7 @@ class Modify(Command):
         editable = ['authorizer', 'description']
         for key, value in password['metadata'].items():
             if key in editable:
-                # print("%s %s" % (self.color_print(f"Current value for '{key}':", "first_level"), value))
-                print(f'''{self.color_print(f"Current value for '{key}':", "first_level")} {value}''')
+                yield f'''{self.color_print(f"Current value for '{key}':", "first_level")} {value}'''
                 password['metadata'][key] = input(f"New Value for {key}: ")
 
         password.write_password_data(full_path)

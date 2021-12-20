@@ -2,6 +2,7 @@
 import getpass
 from os import getcwd, path, sep, remove, rename
 from sqlalchemy.orm import sessionmaker
+from libpkpass import LOGGER
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.crypto import print_card_info
 from libpkpass.errors import NullRecipientError, CliArgumentError, GroupDefinitionError,\
@@ -53,7 +54,7 @@ class Command():
         """ Passes the argparse Namespace object of parsed arguments   """
         ##################################################################
         self._run_command_setup(parsedargs)
-        self._run_command_execution()
+        return self._run_command_execution()
 
         ##################################################################
     def _run_command_setup(self, parsedargs):
@@ -89,12 +90,12 @@ class Command():
             self._resolve_directory_path()
         self.args['card_slot'] = self.args['card_slot'] if self.args['card_slot'] else 0
         if 'nopassphrase' in self.selected_args and not self.args['nopassphrase']:
-            if self.args['verbosity'] != -1:
-                print_card_info(self.args['card_slot'],
-                                self.identity,
-                                self.args['verbosity'],
-                                self.args['color'],
-                                self.args['theme_map'])
+            for mesg in print_card_info(self.args['card_slot'],
+                                        self.identity,
+                                        self.args['verbosity'],
+                                        self.args['color'],
+                                        self.args['theme_map']):
+                LOGGER.info(mesg)
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
         ####################################################################
@@ -290,12 +291,6 @@ class Command():
             raise CliArgumentError(
                 f"Error: Your user '{self.args['identity']}' is not in the recipient database"
             )
-
-        ##################################################################
-    def _print_debug(self):
-        ##################################################################
-        print(self.recipient_list)
-        print(self.session.query(Recipient.name).all())
 
         ##################################################################
     def color_print(self, string, color_type):

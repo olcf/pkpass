@@ -1,6 +1,7 @@
 """This Modules allows for distributing created passwords to other users"""
 from os import path
 from tqdm import tqdm
+from libpkpass import LOGGER
 from libpkpass.util import dictionary_filter, sort
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
@@ -21,11 +22,11 @@ class Distribute(Command):
     def _run_command_execution(self):
         """ Run function for class.                                      """
         ####################################################################
-        filtered_pdb = self._confirm_pdb()
+        yield from self._confirm_pdb()
         self.recipient_list.append(str(self.args['identity']))
         self.recipient_list = list(set(self.recipient_list))
-        self._confirm_recipients()
-        for dist_pass, _ in tqdm(filtered_pdb.items()):
+        yield from self._confirm_recipients()
+        for dist_pass, _ in tqdm(self.filtered_pdb.items()):
             password = PasswordEntry()
             password.read_password_data(dist_pass)
             if self.args['identity'] in password.recipients.keys():
@@ -59,18 +60,17 @@ class Distribute(Command):
         ####################################################################
     def _confirm_pdb(self):
         ####################################################################
-        filtered_pdb = dictionary_filter(
+        self.filtered_pdb = dictionary_filter(
             path.join(self.args['pwstore'], self.args['pwname']),
             self.passworddb.pwdb,
             [self.args['identity'], 'recipients']
         )
-        print("The following password files have matched:")
-        print(*filtered_pdb.keys(), sep="\n")
+        yield "The following password files have matched:"
+        yield "\n".join(self.filtered_pdb.keys())
         correct = input("Are these correct? (y/N) ")
         if not correct or correct.lower()[0] == 'n':
             self.args['pwname'] = input("Please try a new filter: ")
-            self._confirm_pdb()
-        return filtered_pdb
+            yield from self._confirm_pdb()
 
         ####################################################################
     def _confirm_recipients(self):
@@ -81,12 +81,14 @@ class Distribute(Command):
             if recipient not in in_db:
                 not_in_db.append(recipient)
         if not_in_db:
-            print(f"The following recipients are not in the db, removing {', '.join(not_in_db)}")
+            LOGGER.warning(
+                "The following recipients are not in the db, removing %s", ', '.join(not_in_db)
+            )
             self.recipient_list = [x for x in self.recipient_list if x not in not_in_db]
-        print("The following users will receive the password: ")
-        print(", ".join(sort(self.recipient_list)))
+        yield "The following users will receive the password: "
+        yield ", ".join(sort(self.recipient_list))
         correct = input("Are these correct? (y/N) ")
         if not correct or correct.lower()[0] == 'n':
             self.recipient_list = input("Please enter a comma delimited list: ")
             self.recipient_list = list({x.strip() for x in self.recipient_list.split(",")})
-            self._confirm_recipients()
+            yield from self._confirm_recipients()

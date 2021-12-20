@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 """This module tests the listrecipients module"""
+import logging
 import unittest
 import yaml
 from libpkpass.commands.cli import Cli
-from .basetest.basetest import captured_output, patch_args
+from .basetest.basetest import patch_args
 
 class ListrecipientsTests(unittest.TestCase):
     """This class tests the listrecipients class"""
     def setUp(self):
+        logging.disable(logging.CRITICAL)
         self.out_dict = {
-            'Certificate store': 'test/pki/intermediate/certs',
-            'Key store': 'test/pki/intermediate/private',
-            'CA Bundle file': 'test/pki/intermediate/certs/ca-bundle',
-            'Looking for Key Extension': '.key',
-            'Looking for Certificate Extension': "['.cert', '.crt']",
-            'Loaded 4 identities': None,
             'r3': {
                 'certs': {
                     'verified': True,
@@ -27,9 +23,7 @@ class ListrecipientsTests(unittest.TestCase):
         self.maxDiff = None
         with patch_args(subparser_name='listrecipients', identity='r1',
                         nopassphrase="true", filter="r3"):
-            with captured_output() as (out, _):
-                Cli()
-        out = "\n".join(out.getvalue().split('\n')[1:]).replace('\t', ' ')
+            out = "\n".join(Cli().run()).replace('\t', ' ')
         output = yaml.safe_load(out)
         # we remove these things because the actual values depend on creation
         # moreover, some of the outputs on different operating systems appear

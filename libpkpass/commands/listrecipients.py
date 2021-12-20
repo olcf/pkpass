@@ -1,5 +1,5 @@
 """This Module allows for the listing of recipients"""
-from sqlalchemy.orm import sessionmaker
+from libpkpass import LOGGER
 from libpkpass.commands.command import Command
 from libpkpass.errors import CliArgumentError
 from libpkpass.models.cert import Cert
@@ -17,25 +17,23 @@ class Listrecipients(Command):
     def _run_command_execution(self):
         """ Run function for class.                                  """
         ####################################################################
-        session = sessionmaker(bind=self.args['db']['engine'])()
-        if self.args['verbosity'] != -1:
-            print(f'Certificate store: "{self.args["certpath"]}"')
-            print(f'Key store: "{self.args["keypath"]}"')
-            print(f'CA Bundle file: "{self.args["cabundle"]}"')
-            print(f'Looking for Key Extension: "{self.identities.extensions["key"]}"')
-            print(f'Looking for Certificate Extension: "{self.identities.extensions["certificate"]}"')
-            print(f"Loaded {len(session.query(Recipient).all())} identities:\n")
+        LOGGER.info('Certificate store: %s', self.args["certpath"])
+        LOGGER.info('Key store: %s', self.args["keypath"])
+        LOGGER.info('CA Bundle file: %s', self.args["cabundle"])
+        LOGGER.info('Looking for Key Extension: %s', self.identities.extensions["key"])
+        LOGGER.info('Looking for Certificate Extension: %s', self.identities.extensions["certificate"])
+        LOGGER.info("Loaded %s identities", len(self.session.query(Recipient).all()))
 
         if 'filter' in self.args and self.args['filter']:
-            identities = session.query(Recipient).filter(
+            identities = self.session.query(Recipient).filter(
                 Recipient.name.like(self.args['filter'].replace('*', '%'))
             )
         else:
-            identities = session.query(Recipient).all()
+            identities = self.session.query(Recipient).all()
         for identity in identities:
-            self._print_identity(
+            yield self._print_identity(
                 identity,
-                session.query(Cert).filter(
+                self.session.query(Cert).filter(
                     Cert.recipients.contains(identity)
                 ).all()
             )
@@ -44,12 +42,14 @@ class Listrecipients(Command):
     def _print_identity(self, identity, certs):
         """Print off identity"""
         ####################################################################
-        print(f"{self.color_print(identity.name, 'first_level')}:")
-        print(f"\t{self.color_print('certs', 'second_level')}:")
+        identity_list = []
+        identity_list.append(f"{self.color_print(identity.name, 'first_level')}:")
+        identity_list.append(f"\t{self.color_print('certs', 'second_level')}:")
         for cert in certs:
             for info in ['verified', 'subject', 'subjecthash', 'issuer', 'issuerhash', 'fingerprint', 'enddate']:
-                print(f"\t\t{self.color_print(info + ':', 'third_level')} {dict(cert)[info]}")
-            print()
+                identity_list.append(f"\t\t{self.color_print(info + ':', 'third_level')} {dict(cert)[info]}")
+            identity_list.append('\n')
+        return "\n".join(identity_list)
 
         ####################################################################
     def _validate_args(self):

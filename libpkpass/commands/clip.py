@@ -2,6 +2,7 @@
 from time import sleep
 from os import path
 from pyperclip import copy, paste
+from libpkpass import LOGGER
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import CliArgumentError
@@ -38,14 +39,20 @@ class Clip(Command):
                 self.session.query(Recipient).filter(Recipient.name==distributor).first().certs,
             )
             if not result['sigOK']:
-                print(f"Warning:  Could not verify that '{result['distributor']}' correctly signed your password entry.")
+                LOGGER.warning(
+                    "Could not verify that %s correctly signed your password entry.",
+                    result['distributor']
+                )
             if not result['certOK']:
-                print(f"Warning:  Could not verify the certificate authenticity of user '{result['distributor']}'.")
+                LOGGER.warning(
+                    "Could not verify the certificate authenticity of user '%s'.",
+                    result['distributor']
+                )
 
         oldclip = paste()
         try:
             copy(plaintext_pw)
-            print(f"Password copied into paste buffer for {self.args['time']} seconds")
+            yield f"Password copied into paste buffer for {self.args['time']} seconds"
             sleep(self.args['time'])
         finally:
             copy(oldclip)
