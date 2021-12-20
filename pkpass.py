@@ -21,7 +21,9 @@ if __name__ == '__main__':
     if '--debug' in argv:
         argv.remove('--debug')
     try:
-        Cli()
+        for mesg in Cli().run():
+            if mesg:
+                print(mesg)
     except PKPassError as error:
         print(f"\n\n{str(type(error).__name__)}: {error.msg}")
     except KeyboardInterrupt:

@@ -18,7 +18,7 @@ class GenerateTests(unittest.TestCase):
                             pwname='gentest'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
                     with mock.patch.object(getpass, 'getpass', lambda _: 'y'):
-                        Cli()
+                        Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -30,7 +30,7 @@ class GenerateTests(unittest.TestCase):
                             pwname=None):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
                     with mock.patch.object(getpass, 'getpass', lambda _: 'y'):
-                        Cli()
+                        Cli().run()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ class ModifyTests(unittest.TestCase):
             with patch_args(subparser_name='modify', identity='r3', nopassphrase='true',
                             pwname='gentest'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    Cli()
+                    Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)

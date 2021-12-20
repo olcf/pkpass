@@ -13,6 +13,7 @@ from subprocess import call
 from cmd import Cmd
 from inspect import getmembers, isclass
 from yaml.parser import ParserError
+from libpkpass import LOGGER
 from libpkpass.commands.command import Command
 from libpkpass.errors import PKPassError, JsonArgumentError
 from libpkpass.passworddb import PasswordDB
@@ -23,7 +24,9 @@ from libpkpass.commands import card, clip, create, delete, \
 import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.list as pklist
 
-VERSION = show_version()
+VERSION = None
+for mesg in show_version():
+    VERSION = mesg
 
     ####################################################################
 class Interpreter(Command):
@@ -41,6 +44,7 @@ class Interpreter(Command):
         passworddb = PasswordDB()
         passworddb.load_from_directory(self.args['pwstore'])
         Interactive(self.args, passworddb).cmdloop_with_keyboard_interrupt()
+        yield "Goodbye"
 
         ####################################################################
     def _validate_args(self):
@@ -103,7 +107,7 @@ Type ? to list commands"""
     def _load_pwdb(self):
         """reload passworddb"""
         ####################################################################
-        print("Reloading Password Database")
+        LOGGER.info("Reloading Password Database")
         self.pwdb = PasswordDB()
         self.pwdb.load_from_directory(self.args['pwstore'])
 
@@ -128,7 +132,7 @@ Type ? to list commands"""
             if not config_args:
                 config_args = self.args
         except ParserError:
-            print("Error parsing config file")
+            LOGGER.error("Error parsing config file")
             config_args = self.args
         finally:
             self.args = config_args
@@ -187,7 +191,10 @@ Type ? to list commands"""
     def default(self, line):
         """If we don't have a proper subcommand passed"""
         ####################################################################
-        print(f"Command '{line}' not found, see help (?) for available commands")
+        LOGGER.error(
+            "Command '%s' not found, see help (?) for available commands",
+            line
+        )
         return False
 
         ####################################################################
@@ -237,10 +244,12 @@ def add_dynamic_function(module_name, class_name):
             pk_class = [o for o in getmembers(globals()[module_name], isclass)
                         if str(o[0]) == class_name][0][1]
             pk_class(self, pwdb=self.pwdb)
-            self.actions[swap_name].run(self.parser.parse_args())
+            for mesg in self.actions[swap_name].run(self.parser.parse_args()):
+                if mesg:
+                    print(mesg)
             return False
         except PKPassError as err:
-            print(err)
+            LOGGER.error(err)
             return False
         except SystemExit:
             return False

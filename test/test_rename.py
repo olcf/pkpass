@@ -14,7 +14,7 @@ class RenameTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='rename', identity='bleh', nopassphrase='true',
                             all=None, pwname='test', rename='retest'):
-                Cli()
+                Cli().run()
         self.assertEqual(
             context.exception.msg,
             ERROR_MSGS['rep']
@@ -27,11 +27,11 @@ class RenameTests(unittest.TestCase):
             with patch_args(subparser_name='rename', identity='r1', nopassphrase='true',
                             all=True, pwname='test', rename='retest', overwrite='true'):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    Cli()
+                    Cli().run()
             with patch_args(subparser_name='rename', identity='r1', nopassphrase='true',
                             all=True, pwname='retest', rename='test', overwrite="true"):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
-                    Cli()
+                    Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -41,7 +41,7 @@ class RenameTests(unittest.TestCase):
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(subparser_name='rename', identity='r1', nopassphrase='true',
                             all=True, rename='test', overwrite='true'):
-                Cli()
+                Cli().run()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
 if __name__ == '__main__':

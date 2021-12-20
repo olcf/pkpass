@@ -125,6 +125,8 @@ class IdentityDB():
     def verify_identity(self, identity):
         session = sessionmaker(bind=self.args['db']['engine'])()
         recipient = session.query(Recipient).filter(Recipient.name == identity).first()
+        if not recipient:
+            return False
         for cert in session.query(Cert).filter(
                 Cert.recipients.contains(recipient)
         ).all():

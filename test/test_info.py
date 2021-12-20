@@ -4,7 +4,7 @@ import unittest
 import yaml
 from libpkpass.commands.cli import Cli
 from libpkpass.errors import CliArgumentError
-from .basetest.basetest import captured_output, patch_args, ERROR_MSGS
+from .basetest.basetest import patch_args, ERROR_MSGS
 
 class InfoTests(unittest.TestCase):
     """This class tests the info class"""
@@ -26,9 +26,7 @@ class InfoTests(unittest.TestCase):
         """Test what info shows on a password"""
         with patch_args(subparser_name='info', identity='r1',
                         nopassphrase="true", pwname='test'):
-            with captured_output() as (out, _):
-                Cli()
-        out = "\n".join(out.getvalue().split('\n')[1:])
+            out = "\n".join(Cli().run())
         output = yaml.safe_load(out)
         del output['Earliest distribute timestamp']
         self.assertDictEqual(output, self.check_dict)
@@ -38,7 +36,7 @@ class InfoTests(unittest.TestCase):
         with patch_args(subparser_name='info', identity='r1',
                         nopassphrase="true", pwname=None):
             with self.assertRaises(CliArgumentError) as context:
-                Cli()
+                Cli().run()
         self.assertEqual(context.exception.msg, ERROR_MSGS['pwname'])
 
 if __name__ == '__main__':

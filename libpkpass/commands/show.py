@@ -2,6 +2,7 @@
 from os import path, unlink, walk
 from fnmatch import fnmatch
 from tempfile import gettempdir
+from libpkpass import LOGGER
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError, CliArgumentError, NotARecipientError, DecryptionError
@@ -24,9 +25,8 @@ class Show(Command):
         ####################################################################
         password = PasswordEntry()
         if 'behalf' in self.args and self.args['behalf']:
-            self._behalf_prep(password)
-        else:
-            self._show_wrapper(password)
+            yield from self._behalf_prep(password)
+        yield from self._show_wrapper(password)
 
         ####################################################################
     def _show_wrapper(self, password):
@@ -34,14 +34,13 @@ class Show(Command):
         ####################################################################
         if self.args['all']:
             try:
-                self._walk_dir(self.args['pwstore'], password, self.args['ignore_decrypt'])
+                yield from self._walk_dir(self.args['pwstore'], password, self.args['ignore_decrypt'])
             except DecryptionError as err:
                 raise err
         elif self.args['pwname'] is None:
             raise PasswordIOError("No password supplied")
-        else:
-            self._decrypt_wrapper(
-                self.args['pwstore'], password, self.args['pwname'])
+        yield from self._decrypt_wrapper(
+            self.args['pwstore'], password, self.args['pwname'])
 
         ####################################################################
     def _behalf_prep(self, password):
@@ -67,7 +66,7 @@ class Show(Command):
             )
         self.args['identity'] = self.args['behalf']
         self.args['key_path'] = temp_key
-        self._show_wrapper(password)
+        yield from self._show_wrapper(password)
         unlink(temp_key)
 
         ####################################################################
@@ -80,14 +79,14 @@ class Show(Command):
                 if self.args['pwname'] is None or\
                         fnmatch(path.join(root, pwname), self.args['pwname']):
                     try:
-                        self._decrypt_wrapper(
+                        yield from self._decrypt_wrapper(
                             root, password, pwname)
                     except DecryptionError as err:
                         if ignore_decrypt:
-                            print(err)
+                            LOGGER.err(err)
                             continue
                         raise
-                    except NotARecipientError:
+                    except (NotARecipientError, TypeError):
                         continue
 
         ####################################################################
@@ -105,21 +104,20 @@ class Show(Command):
     def _decrypt_wrapper(self, directory, password, pwname):
         """Decide whether to decrypt normally or for escrow"""
         ####################################################################
-        password.read_password_data(path.join(directory, pwname))
-        try:
-            distributor = password.recipients[self.identity['name']]['distributor']
-            myescrow = []
-            if self.args['recovery']:
-                myescrow = self._handle_escrow_show(password)
-            if myescrow:
-                for share in myescrow:
-                    password['recipients'][self.identity['name']] = share[0]
-                    print(f"Share for escrow group: {share[1]}")
-                    self._decrypt_password_entry(password, distributor)
-            else:
-                self._decrypt_password_entry(password, distributor)
-        except KeyError:
-            pass
+        if directory and password and pwname:
+            password.read_password_data(path.join(directory, pwname))
+            try:
+                distributor = password.recipients[self.identity['name']]['distributor']
+                if self.args['recovery']:
+                    myescrow = self._handle_escrow_show(password)
+                    if myescrow:
+                        for share in myescrow:
+                            password['recipients'][self.identity['name']] = share[0]
+                            yield f"Share for escrow group: {share[1]}"
+                            yield self._decrypt_password_entry(password, distributor)
+                yield self._decrypt_password_entry(password, distributor)
+            except KeyError:
+                pass
 
         ####################################################################
     def _decrypt_password_entry(self, password, distributor):
@@ -135,11 +133,17 @@ class Show(Command):
                 self.session.query(Recipient).filter(Recipient.name==distributor).first().certs,
             )
             if not result['sigOK']:
-                print(f"warning: could not verify that '{result['distributor']}' correctly signed your password entry.")
+                LOGGER.warning(
+                    "Could not verify that %s correctly signed your password entry.",
+                    result['distributor']
+                )
             if not result['certOK']:
-                print(f"Warning: could not verify the certificate authenticity of user '{result['distributor']}'.")
+                LOGGER.warning(
+                    "Could not verify the certificate authenticity of user '%s'.",
+                    result['distributor']
+                )
 
-        print(f"{self.color_print(password.metadata['name'], 'first_level')}: {plaintext_pw}")
+        return f"{self.color_print(password.metadata['name'], 'first_level')}: {plaintext_pw}"
 
         ####################################################################
     def _validate_args(self):

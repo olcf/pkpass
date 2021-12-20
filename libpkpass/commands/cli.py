@@ -22,7 +22,8 @@ class Cli(PkInterface):
 
         self.parser.set_default_subparser(self.parser, name='interpreter')
         self.parsedargs = self.parser.parse_args()
+
+    def run(self):
         if 'version' in self.parsedargs and self.parsedargs.version:
-            print(show_version())
-        else:
-            self.actions[self.parsedargs.subparser_name].run(self.parsedargs)
+            return show_version()
+        return self.actions[self.parsedargs.subparser_name].run(self.parsedargs)

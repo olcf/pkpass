@@ -67,7 +67,7 @@ def set_default_subparser(self, name, args=None, positional_args=0):
 def show_version():
     """return the version number in the VERSION file"""
     ####################################################################
-    return __version__
+    yield __version__
 
     ####################################################################
 def sort(lst):

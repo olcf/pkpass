@@ -18,7 +18,7 @@ class UpdateTests(unittest.TestCase):
                             pwname='gentest', no_cache=True):
                 with mock.patch.object(builtins, 'input', lambda _: 'y'):
                     with mock.patch.object(getpass, 'getpass', lambda _: 'y'):
-                        Cli()
+                        Cli().run()
         except DecryptionError:
             ret = False
         self.assertTrue(ret)

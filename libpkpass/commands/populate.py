@@ -4,6 +4,7 @@ from re import finditer
 from base64 import standard_b64encode
 from ruamel.yaml import YAML
 from yaml import dump
+from libpkpass import LOGGER
 from libpkpass.commands.show import Show
 from libpkpass.crypto import puppet_password
 from libpkpass.password import PasswordEntry
@@ -31,7 +32,7 @@ class Populate(Show):
             raise CliArgumentError(f"'{pop_type}' is an unsupported population type")
 
         if pop_type == 'kubernetes':
-            self._handle_kubernetes()
+            yield from self._handle_kubernetes()
         elif self.args['all']:
             for password in self.args['populate'][pop_type]['passwords'].keys():
                 pwentry = PasswordEntry()
@@ -46,7 +47,7 @@ class Populate(Show):
             raise CliArgumentError(f"'{self.args['pwname']}' doesn't have a mapping in {pop_type}")
         else:
             password = PasswordEntry()
-            self._decrypt_wrapper(
+            yield from self._decrypt_wrapper(
                 self.args['pwstore'],
                 password,
                 self.args['pwname'],
@@ -79,7 +80,7 @@ class Populate(Show):
                 'type': args['type']
             }
             if self.args['value'] or 'output' not in k_conf:
-                print(f"---\n{dump(kube_map)}")
+                yield f"---\n{dump(kube_map)}"
             else:
                 with open(k_conf['output'], 'a', encoding='ASCII') as fname:
                     print(f"---\n{dump(kube_map)}", file=fname)
@@ -114,17 +115,17 @@ class Populate(Show):
             raise CliArgumentError(f"'{puppet_bin}' is not a file")
         pkcs7_pass = puppet_password(puppet_bin, plaintext_pw)
         if self.args['value']:
-            print(pkcs7_pass)
+            yield pkcs7_pass
         else:
             for hiera_file, names in self.args['populate']['puppet_eyaml']['passwords'][pwname].items():
                 with open(path.join(directory, hiera_file), 'r', encoding='ASCII') as data_file:
-                    print(f"Updating: {hiera_file}")
+                    yield f"Updating: {hiera_file}"
                     yaml = YAML()
                     yaml.indent(mapping=2, sequence=4, offset=2)
                     yaml.preserve_quotes = True
                     hiera_yaml = yaml.load(data_file.read())
                     for name in names:
-                        print(f"Updating: {name}")
+                        yield f"Updating: {name}"
                         hiera_yaml[name] = pkcs7_pass
                 with open(path.join(directory, hiera_file), 'w', encoding='ASCII') as data_file:
                     yaml.dump(hiera_yaml, data_file)
@@ -143,7 +144,7 @@ class Populate(Show):
         password.read_password_data(path.join(directory, pwname))
         plaintext_pw = self._decrypt_password_entry(password)
         if pop_type == 'puppet_eyaml':
-            self._handle_puppet(plaintext_pw, pwname)
+            yield from self._handle_puppet(plaintext_pw, pwname)
 
         ####################################################################
     def _decrypt_password_entry(self, password):
@@ -161,7 +162,13 @@ class Populate(Show):
                 self.session.query(Recipient).filter(Recipient.name==distributor).first().certs,
             )
             if not result['sigOK']:
-                print(f"warning: could not verify that '{result['distributor']}' correctly signed your password entry.")
+                LOGGER.warning(
+                    "Could not verify that %s correctly signed your password entry.",
+                    result['distributor']
+                )
             if not result['certOK']:
-                print(f"Warning: could not verify the certificate authenticity of user '{result['distributor']}'.")
+                LOGGER.warning(
+                    "Could not verify the certificate authenticity of user '%s'.",
+                    result['distributor']
+                )
         return plaintext_pw
