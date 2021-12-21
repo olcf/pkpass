@@ -196,6 +196,7 @@ def setup_db(args):
     else:
         db_path = path.join(gettempdir(), 'rd.db')
     args['db'] = {}
+    args['db']['path'] = db_path
     args['db']['uri'] = f"sqlite+pysqlite:///{db_path}"
     args['db']['engine'] = create_engine(args['db']['uri'])
     Base.metadata.create_all(args['db']['engine'])

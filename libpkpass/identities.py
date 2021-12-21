@@ -37,17 +37,22 @@ class IdentityDB():
         return f"{self.__dict__}"
 
         #######################################################################
-    def _load_certs_from_external(self, connection_map):
+    def _load_certs_from_external(self, connection_map, usedb=True):
         """Load certificates from external via use of plugin"""
         #######################################################################
         if 'base_directory' in connection_map and connection_map['base_directory']:
             del connection_map['base_directory']
         for key, value in connection_map.items():
             connector = getattr(__import__(key.lower(), fromlist=[key]), key)(value)
-            certs = connector.list_certificates()
-            print("Loading certs into database")
-            for name, certlist in tqdm(certs.items()):
-                self.load_db(name, certlist)
+            if usedb:
+                with open(self.args['db']['path'], 'wb') as db_path:
+                    db_path.write(connector.get_db())
+            else:
+                certs = connector.list_certificates()
+                print("Loading certs into database")
+                for name, certlist in tqdm(certs.items()):
+                    self.load_db(name, certlist)
+            break
 
         #######################################################################
     def _load_from_directory(self, fpath, filetype):
@@ -79,15 +84,16 @@ class IdentityDB():
     def load_certs_from_directory(self,
                                   certpath,
                                   connectmap=None,
-                                  nocache=False):
+                                  nocache=False,
+                                  usedb=True):
         """ Read in all x509 certificates from directory and name them as found """
         #######################################################################
         session = sessionmaker(bind=self.args['db']['engine'])()
         if not session.query(Recipient).first() or nocache:
+            if connectmap:
+                self._load_certs_from_external(connectmap, usedb=usedb)
             if certpath:
                 self._load_from_directory(certpath, 'certificate')
-            if connectmap:
-                self._load_certs_from_external(connectmap)
 
         #######################################################################
     def load_db(self, identity, certlist=None):
