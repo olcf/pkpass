@@ -26,7 +26,8 @@ class Show(Command):
         password = PasswordEntry()
         if 'behalf' in self.args and self.args['behalf']:
             yield from self._behalf_prep(password)
-        yield from self._show_wrapper(password)
+        else:
+            yield from self._show_wrapper(password)
 
         ####################################################################
     def _show_wrapper(self, password):
@@ -39,8 +40,10 @@ class Show(Command):
                 raise err
         elif self.args['pwname'] is None:
             raise PasswordIOError("No password supplied")
-        yield from self._decrypt_wrapper(
-            self.args['pwstore'], password, self.args['pwname'])
+        else:
+            yield from self._decrypt_wrapper(
+                self.args['pwstore'], password, self.args['pwname']
+            )
 
         ####################################################################
     def _behalf_prep(self, password):
@@ -75,9 +78,10 @@ class Show(Command):
         ####################################################################
         # walk returns root, dirs, and files we just need files
         for root, _, pwnames in walk(directory):
+            trim_root = root.replace(self.args['pwstore'], '').lstrip('/')
             for pwname in pwnames:
                 if self.args['pwname'] is None or\
-                        fnmatch(path.join(root, pwname), self.args['pwname']):
+                        fnmatch(path.join(trim_root, pwname), self.args['pwname']):
                     try:
                         yield from self._decrypt_wrapper(
                             root, password, pwname)
@@ -115,7 +119,8 @@ class Show(Command):
                             password['recipients'][self.identity['name']] = share[0]
                             yield f"Share for escrow group: {share[1]}"
                             yield self._decrypt_password_entry(password, distributor)
-                yield self._decrypt_password_entry(password, distributor)
+                else:
+                    yield self._decrypt_password_entry(password, distributor)
             except KeyError:
                 pass
 
