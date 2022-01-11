@@ -121,8 +121,10 @@ class Show(Command):
                             yield self._decrypt_password_entry(password, distributor)
                 else:
                     yield self._decrypt_password_entry(password, distributor)
-            except KeyError:
-                pass
+            except KeyError as err:
+                raise NotARecipientError(
+                    f"Identity '{self.identity['name']}' is not on the recipient list for password '{pwname}'"
+                ) from err
 
         ####################################################################
     def _decrypt_password_entry(self, password, distributor):
