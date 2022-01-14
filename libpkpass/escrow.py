@@ -3,7 +3,7 @@
 from pyseltongue import PlaintextToHexSecretSharer as ptohss
 from .errors import EscrowError
 
-    ##############################################################################
+##############################################################################
 def pk_split_secret(plaintext_string, escrow_list, minimum=None):
     """split a secret into multiple shares for encryption"""
     ##############################################################################
@@ -19,6 +19,8 @@ def pk_split_secret(plaintext_string, escrow_list, minimum=None):
     return ptohss.split_secret(str(plaintext_string), minimum, escrow_len)
 
     ##############################################################################
+
+
 def pk_recover_secret(shares):
     """Take Decrypted strings from crypto and recover a secret"""
     ##############################################################################

@@ -6,12 +6,13 @@ from contextlib import contextmanager
 from io import StringIO
 import mock
 
-CONFIG = './test/.test_config'
+CONFIG = "./test/.test_config"
 BADPIN = "Error decrypting password named 'test'.  Perhaps a bad pin/passphrase?"
 ERROR_MSGS = {
-    'pwname': "'pwname' is a required argument",
-    'rep': "Error: Your user 'bleh' is not in the recipient database",
+    "pwname": "'pwname' is a required argument",
+    "rep": "Error: Your user 'bleh' is not in the recipient database",
 }
+
 
 @contextmanager
 def captured_output():
@@ -24,13 +25,11 @@ def captured_output():
     finally:
         sys.stdout, sys.stderr = old_out, old_err
 
+
 def patch_args(**kwargs):
     """Patch argparse arguments intended for use with `with` statement
     uses default config path and no color output"""
     return mock.patch(
-        'argparse.ArgumentParser.parse_args',
-        return_value=argparse.Namespace(
-            config=CONFIG, color=False,
-            **kwargs
-        )
+        "argparse.ArgumentParser.parse_args",
+        return_value=argparse.Namespace(config=CONFIG, color=False, **kwargs),
     )

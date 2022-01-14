@@ -3,51 +3,61 @@ from os import path
 from shutil import which
 from libpkpass.commands.command import Command
 
-    ####################################################################
+
 class VerifyInstall(Command):
+    ####################################################################
     """This class is used as a command object and parses information passed through
     the CLI to show passwords that have been distributed to users"""
     ####################################################################
-    name = 'verifyinstall'
-    description = 'verify required software is present'
-    selected_args = Command.selected_args + ['pwstore', 'keypath', 'noverify', 'card_slot',
-                                             'connect']
+    name = "verifyinstall"
+    description = "verify required software is present"
+    selected_args = Command.selected_args + [
+        "pwstore",
+        "keypath",
+        "noverify",
+        "card_slot",
+        "connect",
+    ]
 
-        ####################################################################
     def _run_command_execution(self):
-        """ Run function for class.                                  """
+        ####################################################################
+        """Run function for class."""
         ####################################################################
         yield from print_messages(check_required_software, "installed software check")
-        yield from print_messages(check_passdb, "passdb check",
-                       cabundle=path.realpath(self.args['cabundle']),
-                       pwstore=path.realpath(self.args['pwstore']),
-                       keypath=path.realpath(self.args['keypath']) if self.args['keypath'] else None,
-                       certpath=path.realpath(self.args['certpath']) if self.args['certpath'] else None,
-                       connect=self.args['connect'])
+        yield from print_messages(
+            check_passdb,
+            "passdb check",
+            cabundle=path.realpath(self.args["cabundle"]),
+            pwstore=path.realpath(self.args["pwstore"]),
+            keypath=path.realpath(self.args["keypath"])
+            if self.args["keypath"]
+            else None,
+            certpath=path.realpath(self.args["certpath"])
+            if self.args["certpath"]
+            else None,
+            connect=self.args["connect"],
+        )
 
-        ####################################################################
     def _validate_args(self):
-        ####################################################################
         pass
 
-    ####################################################################
+
 def check_exists(name):
-    """ Check whether a program exists in path"""
+    ####################################################################
+    """Check whether a program exists in path"""
     ####################################################################
     return which(name) is not None
 
-    ####################################################################
+
 def print_messages(func, msg, **kwargs):
-    ####################################################################
     yield f"Starting {msg}"
     yield func(**kwargs)
 
-    ####################################################################
+
 def check_required_software():
-    ####################################################################
     required_tools = {
-        'pkcs15-tool (available via opensc)': ['pkcs15-tool'],
-        'ssl (openssl or libressl)': ['openssl', 'libressl']
+        "pkcs15-tool (available via opensc)": ["pkcs15-tool"],
+        "ssl (openssl or libressl)": ["openssl", "libressl"],
     }
     not_found = []
     for key, value in required_tools.items():
@@ -61,9 +71,8 @@ def check_required_software():
         return "The following packages were not found: \n\t%s" % "\n\t".join(not_found)
     return "Successful installed software check"
 
-    ####################################################################
+
 def check_passdb(cabundle, pwstore, certpath=None, keypath=None, connect=None):
-    ####################################################################
     ret_msg = []
     if not path.isfile(cabundle):
         ret_msg.append("Cabundle is not a file")
