@@ -5,8 +5,10 @@ from libpkpass.escrow import pk_split_secret, pk_recover_secret
 
 PASSWORD = "boomtown"
 
+
 class EscrowTests(unittest.TestCase):
     """This class tests the recover class"""
+
     shares = pk_split_secret(PASSWORD, ["r1", "r2", "r3"], 2)
 
     def test_spliting_with_no_min(self):
