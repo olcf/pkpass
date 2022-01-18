@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """This module tests the show module"""
-import sys
-import io
 import unittest
-from unittest.mock import patch
 from libpkpass.commands.cli import Cli
 from libpkpass.errors import DecryptionError, CliArgumentError
 
@@ -98,7 +95,7 @@ class ShowErrors(unittest.TestCase):
                 pwname="test",
                 subparser_name="recover",
                 identity="r3",
-                nopassphrase=True,
+                nopassphrase="true",
             ):
                 with unittest.mock.patch(
                     "builtins.input", return_value=",".join(shares)
