@@ -80,7 +80,7 @@ class ShowErrors(unittest.TestCase):
                 identity="r2",
                 nopassphrase="true",
                 all=None,
-                recovery=True,
+                recovery="true",
             ):
                 shares.append("".join(Cli().run()).split("test: ")[1])
             with patch_args(
@@ -89,7 +89,7 @@ class ShowErrors(unittest.TestCase):
                 identity="r3",
                 nopassphrase="true",
                 all=None,
-                recovery=True,
+                recovery="true",
             ):
                 shares.append("".join(Cli().run()).split("test: ")[1])
             with patch_args(
