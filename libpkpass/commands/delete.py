@@ -30,6 +30,8 @@ class Delete(Command):
             raise NotThePasswordOwnerError(
                 self.args["identity"], owner, self.args["pwname"]
             )
+        # necessary for print statement
+        yield ""
 
     def _confirmation(self):
         ####################################################################

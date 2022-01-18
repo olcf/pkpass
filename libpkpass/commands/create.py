@@ -51,6 +51,8 @@ class Create(Command):
         self.create_or_update_pass(
             password1, self.args["description"], self.args["authorizer"]
         )
+        # necessary for print statement
+        yield ""
 
     def _validate_args(self):
         for argument in ["pwname", "keypath"]:

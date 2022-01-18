@@ -86,21 +86,14 @@ class PasswordEntry:
         ####################################################################
         """Process the escrow user map into escrow users"""
         ####################################################################
-        escrow_guid = str(uuid1()).replace("-", "")
-        if escrow_map:
-            for key, value in escrow_map.items():
-                if set(value["recipients"]) == set(escrow_users):
-                    escrow_guid = key
-        self.escrow[escrow_guid] = {
+        self.escrow = {
             "metadata": {"minimum_escrow": minimum, "creator": distributor},
             "recipients": {},
         }
         i = 0
         for escrow_user in escrow_users:
             if escrow_user not in recipients:
-                self.escrow[escrow_guid]["recipients"][
-                    escrow_user
-                ] = self._add_recipient(
+                self.escrow["recipients"][escrow_user] = self._add_recipient(
                     escrow_user,
                     split_secret[i],
                     distributor,

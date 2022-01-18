@@ -31,6 +31,8 @@ class Export(Command):
                 raise PasswordMismatchError()
 
         self._iterate_pdb(self.passworddb, crypt_pass)
+        # necessary for print statement
+        yield ""
 
     def _iterate_pdb(self, passworddb, crypt_pass=False):
         ####################################################################

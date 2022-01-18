@@ -43,6 +43,8 @@ class Import(Command):
             raise FileOpenError(
                 self.args["pwfile"], "No such file or directory"
             ) from err
+        # necessary for print statement
+        yield ""
 
     def _file_handler(self, string):
         ####################################################################

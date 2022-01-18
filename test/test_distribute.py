@@ -44,6 +44,8 @@ class DistributeTests(unittest.TestCase):
                 identity="r1",
                 nopassphrase="true",
                 pwname="test",
+                escrow_users="r2,r3",
+                min_escrow=2,
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
                     Cli().run()

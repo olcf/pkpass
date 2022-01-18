@@ -10,5 +10,5 @@ git diff --cached --name-only | if grep --quiet "pkpass.py"; then
         exit 1
     fi
 fi
-git reset HEAD test/passwords
-git checkout -- test/passwords
+# git reset HEAD test/passwords
+# git checkout -- test/passwords

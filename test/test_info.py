@@ -20,6 +20,12 @@ class InfoTests(unittest.TestCase):
                 "Schemaversion": "v2",
                 "Signature": "None",
             },
+            "Escrow Group": {
+                "Creator": "r1",
+                "Share Holders": "r2, r3, r4",
+                "Total Group Share Holders": 3,
+                "Minimum_escrow": 2,
+            },
             "Recipients": "r1",
             "Total Recipients": 1,
         }
@@ -32,6 +38,7 @@ class InfoTests(unittest.TestCase):
             out = "\n".join(Cli().run())
         output = yaml.safe_load(out)
         del output["Earliest distribute timestamp"]
+        del output["Escrow Group"]["Group creation time"]
         self.assertDictEqual(output, self.check_dict)
 
     def test_info_no_pass(self):
