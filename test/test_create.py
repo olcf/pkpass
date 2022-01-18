@@ -21,10 +21,12 @@ class CreateTests(unittest.TestCase):
                 identity="r1",
                 nopassphrase="true",
                 pwname="test",
+                escrow_users="r2,r3,r4",
+                min_escrow=2,
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
                     with mock.patch.object(getpass, "getpass", lambda _: "y"):
-                        Cli().run()
+                        "".join(Cli().run())
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -33,11 +35,14 @@ class CreateTests(unittest.TestCase):
         """Test what happens with pwname is not supplied"""
         with self.assertRaises(CliArgumentError) as context:
             with patch_args(
-                subparser_name="create", identity="r1", nopassphrase="true", pwname=None
+                subparser_name="create",
+                identity="r1",
+                nopassphrase="true",
+                pwname=None,
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
                     with mock.patch.object(getpass, "getpass", lambda _: "y"):
-                        Cli().run()
+                        "".join(Cli().run())
         self.assertEqual(context.exception.msg, ERROR_MSGS["pwname"])
 
 

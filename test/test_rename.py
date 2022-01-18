@@ -22,7 +22,7 @@ class RenameTests(unittest.TestCase):
                 pwname="test",
                 rename="retest",
             ):
-                Cli().run()
+                "".join(Cli().run())
         self.assertEqual(context.exception.msg, ERROR_MSGS["rep"])
 
     def test_rename_success(self):
@@ -39,7 +39,7 @@ class RenameTests(unittest.TestCase):
                 overwrite="true",
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
-                    Cli().run()
+                    "".join(Cli().run())
             with patch_args(
                 subparser_name="rename",
                 identity="r1",
@@ -50,7 +50,7 @@ class RenameTests(unittest.TestCase):
                 overwrite="true",
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
-                    Cli().run()
+                    "".join(Cli().run())
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -66,7 +66,7 @@ class RenameTests(unittest.TestCase):
                 rename="test",
                 overwrite="true",
             ):
-                Cli().run()
+                "".join(Cli().run())
         self.assertEqual(context.exception.msg, ERROR_MSGS["pwname"])
 
 

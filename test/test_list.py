@@ -23,7 +23,7 @@ class ListTests(unittest.TestCase):
             with patch_args(
                 subparser_name="list", identity="bleh", nopassphrase="true"
             ):
-                Cli().run()
+                "".join(Cli().run())
         self.assertEqual(context.exception.msg, ERROR_MSGS["rep"])
 
     def test_list_none(self):

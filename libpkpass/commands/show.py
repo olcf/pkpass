@@ -120,12 +120,10 @@ class Show(Command):
         ####################################################################
         """This populates the user's escrow as passwords"""
         ####################################################################
-        myescrow = []
         if password.escrow:
-            for key, value in password["escrow"].items():
-                if self.identity in value["recipients"].keys():
-                    myescrow.append([value["recipients"][self.identity], key])
-        return myescrow
+            if self.identity["name"] in password.escrow["recipients"].keys():
+                return password.escrow["recipients"][self.identity["name"]]
+        return None
 
     def _decrypt_wrapper(self, directory, password, pwname):
         ####################################################################
@@ -134,15 +132,16 @@ class Show(Command):
         if directory and password and pwname:
             password.read_password_data(path.join(directory, pwname))
             try:
-                distributor = password.recipients[self.identity["name"]]["distributor"]
                 if self.args["recovery"]:
                     myescrow = self._handle_escrow_show(password)
                     if myescrow:
-                        for share in myescrow:
-                            password["recipients"][self.identity["name"]] = share[0]
-                            yield f"Share for escrow group: {share[1]}"
-                            yield self._decrypt_password_entry(password, distributor)
+                        distributor = myescrow["distributor"]
+                        password["recipients"][self.identity["name"]] = myescrow
+                        yield self._decrypt_password_entry(password, distributor)
                 else:
+                    distributor = password.recipients[self.identity["name"]][
+                        "distributor"
+                    ]
                     yield self._decrypt_password_entry(password, distributor)
             except KeyError as err:
                 raise NotARecipientError(

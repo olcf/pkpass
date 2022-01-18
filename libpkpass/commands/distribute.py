@@ -43,8 +43,6 @@ class Distribute(Command):
             password.read_password_data(dist_pass)
             if self.args["identity"] in password.recipients.keys():
                 # we shouldn't modify escrow on distribute
-                self.args["min_escrow"] = None
-                self.args["escrow_users"] = None
                 plaintext_pw = password.decrypt_entry(
                     self.identity,
                     passphrase=self.passphrase,
@@ -57,6 +55,8 @@ class Distribute(Command):
                     session=self.session,
                     passphrase=self.passphrase,
                     card_slot=self.args["card_slot"],
+                    escrow_users=self.args["escrow_users"],
+                    minimum=self.args["min_escrow"],
                     pwstore=self.args["pwstore"],
                 )
 
@@ -92,7 +92,7 @@ class Distribute(Command):
                 ", ".join(not_in_db),
             )
             self.recipient_list = [x for x in self.recipient_list if x not in not_in_db]
-        yield "The following users will receive the password: "
+        yield "The following user(s) will be added: "
         yield ", ".join(sort(self.recipient_list))
         correct = input("Are these correct? (y/N) ")
         if not correct or correct.lower()[0] == "n":

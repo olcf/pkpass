@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euxo pipefail
 rm -rf ca intermediate
 
 for ca in 'ca' 'intermediate'; do
@@ -128,7 +129,7 @@ openssl req -config intermediate/openssl.cnf -key intermediate/private/ca.key -n
 cat ca/certs/ca.cert intermediate/certs/ca.cert > intermediate/certs/ca-bundle
 chmod 444 intermediate/certs/ca-bundle
 
-for recipient in 'r1' 'r2' 'r3'; do
+for recipient in 'r1' 'r2' 'r3' 'r4' 'r5'; do
   export carecipient="$recipient"
   intermediate
   openssl genrsa -out intermediate/private/${recipient}.key 4096
