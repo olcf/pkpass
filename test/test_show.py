@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """This module tests the show module"""
+import sys
+import io
 import unittest
 from unittest.mock import patch
 from libpkpass.commands.cli import Cli
@@ -70,7 +72,6 @@ class ShowErrors(unittest.TestCase):
                 ret = str(error)
         self.assertEqual(ret, "'pwname'")
 
-    # @patch("builtins.input", side_effect=["the input you want to test"])
     def test_show_recovery(self):
         try:
             shares = []
@@ -78,16 +79,17 @@ class ShowErrors(unittest.TestCase):
                 pwname="test",
                 subparser_name="show",
                 identity="r2",
-                nopassphrase="true",
+                nopassphrase=True,
                 all=None,
                 recovery="true",
             ):
                 shares.append("".join(Cli().run()).split("test: ")[1])
+                print(shares)
             with patch_args(
                 pwname="test",
                 subparser_name="show",
                 identity="r3",
-                nopassphrase="true",
+                nopassphrase=True,
                 all=None,
                 recovery="true",
             ):
@@ -96,9 +98,11 @@ class ShowErrors(unittest.TestCase):
                 pwname="test",
                 subparser_name="recover",
                 identity="r3",
-                nopassphrase="true",
+                nopassphrase=True,
             ):
-                with patch("builtins.input", return_value=",".join(shares)):
+                with unittest.mock.patch(
+                    "builtins.input", return_value=",".join(shares)
+                ):
                     passwd = "|".join(Cli().run())
         except DecryptionError as err:
             raise err

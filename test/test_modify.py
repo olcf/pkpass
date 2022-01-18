@@ -22,7 +22,7 @@ class ModifyTests(unittest.TestCase):
                 pwname="gentest",
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
-                    Cli().run()
+                    "".join(Cli().run())
         except DecryptionError:
             ret = False
         self.assertTrue(ret)

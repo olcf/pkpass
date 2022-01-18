@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euxo pipefail
 rm -rf ca intermediate
 
 for ca in 'ca' 'intermediate'; do

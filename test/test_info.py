@@ -47,7 +47,7 @@ class InfoTests(unittest.TestCase):
             subparser_name="info", identity="r1", nopassphrase="true", pwname=None
         ):
             with self.assertRaises(CliArgumentError) as context:
-                Cli().run()
+                "".join(Cli().run())
         self.assertEqual(context.exception.msg, ERROR_MSGS["pwname"])
 
 

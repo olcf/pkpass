@@ -26,7 +26,7 @@ class CreateTests(unittest.TestCase):
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
                     with mock.patch.object(getpass, "getpass", lambda _: "y"):
-                        Cli().run()
+                        "".join(Cli().run())
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -42,7 +42,7 @@ class CreateTests(unittest.TestCase):
             ):
                 with mock.patch.object(builtins, "input", lambda _: "y"):
                     with mock.patch.object(getpass, "getpass", lambda _: "y"):
-                        Cli().run()
+                        "".join(Cli().run())
         self.assertEqual(context.exception.msg, ERROR_MSGS["pwname"])
 
 
