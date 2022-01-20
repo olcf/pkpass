@@ -162,7 +162,6 @@ class Command:
             card_slot=self.args["card_slot"],
             escrow_users=self.args["escrow_users"],
             minimum=self.args["min_escrow"],
-            pwstore=self.args["pwstore"],
         )
         pass_entry["recipients"][self.args["identity"]] = swap_pass["recipients"][
             self.args["identity"]
@@ -198,7 +197,6 @@ class Command:
             card_slot=self.args["card_slot"],
             escrow_users=self.args["escrow_users"],
             minimum=self.args["min_escrow"],
-            pwstore=self.args["pwstore"],
         )
 
         password.write_password_data(

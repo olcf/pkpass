@@ -11,20 +11,20 @@ from setuptools import setup, Command
 import versioneer
 
 REQUIRED = [
-    "colored==1.4.2",
-    "cryptography==3.4.7",
+    "colored==1.4.3",
+    "cryptography==36.0.1",
     "exrex==0.10.5",
     "mock==4.0.3",
     "pem==21.2.0",
     "pyperclip==1.8.2",
-    "pyseltongue==1.0.0",
-    "python-dateutil==2.8.1",
-    "PyYAML==5.4.1",
+    "pyseltongue==1.0.1",
+    "python-dateutil==2.8.2",
+    "PyYAML==6.0",
     "setuptools==56.0.0",
-    "SQLAlchemy==1.4.27",
-    "tqdm==4.60.0",
-    "ruamel.yaml==0.17.4",
-    "ruamel.yaml.clib==0.2.2",
+    "SQLAlchemy==1.4.30",
+    "tqdm==4.62.3",
+    "ruamel.yaml==0.17.20",
+    "ruamel.yaml.clib==0.2.6",
 ]
 
 HOME = os.path.expanduser("~")
@@ -307,15 +307,15 @@ class Verify(Command):
             with open(os.path.expanduser(self.rcfile), "r") as rcyaml:
                 try:
                     args_dict = yaml.safe_load(rcyaml)
-                except yaml.YAMLError as err:
+                except yaml.YAMLError as error:
                     valid = False
-                    print(err)
+                    print(error)
         for arg in store_args:
             if arg in args_dict.keys():
                 valid = False
                 print("'%s' found in rc file, this will be ignored" % arg)
 
-        for arg in args_dict.keys():
+        for arg in args_dict:
             if arg not in args and arg not in store_args:
                 valid = False
                 print(

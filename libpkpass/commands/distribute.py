@@ -30,6 +30,10 @@ class Distribute(Command):
         "noescrow",
     ]
 
+    def __init__(self, *args, **kwargs):
+        Command.__init__(self, *args, **kwargs)
+        self.filtered_pdb = {}
+
     def _run_command_execution(self):
         ####################################################################
         """Run function for class."""
@@ -42,7 +46,6 @@ class Distribute(Command):
             password = PasswordEntry()
             password.read_password_data(dist_pass)
             if self.args["identity"] in password.recipients.keys():
-                # we shouldn't modify escrow on distribute
                 plaintext_pw = password.decrypt_entry(
                     self.identity,
                     passphrase=self.passphrase,
@@ -57,7 +60,6 @@ class Distribute(Command):
                     card_slot=self.args["card_slot"],
                     escrow_users=self.args["escrow_users"],
                     minimum=self.args["min_escrow"],
-                    pwstore=self.args["pwstore"],
                 )
 
                 password.write_password_data(dist_pass)
