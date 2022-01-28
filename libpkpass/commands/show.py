@@ -158,15 +158,12 @@ class Show(Command):
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
         )
-        if not self.args["noverify"]:
+        dist_obj = (
+            self.session.query(Recipient).filter(Recipient.name == distributor).first()
+        )
+        if (dist_obj and dist_obj.certs) and not self.args["noverify"]:
             result = password.verify_entry(
-                self.identity["name"],
-                self.identities,
-                distributor,
-                self.session.query(Recipient)
-                .filter(Recipient.name == distributor)
-                .first()
-                .certs,
+                self.identity["name"], self.identities, distributor, dist_obj.certs
             )
             if not result["sigOK"]:
                 LOGGER.warning(

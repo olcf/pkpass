@@ -81,7 +81,6 @@ class PasswordDB:
                 password_entry.recipients = password_data["recipients"]
                 if "escrow" in password_data:
                     password_entry.escrow = password_data["escrow"]
-            password_entry.validate()
             return password_entry
         except (OSError, IOError, TypeError) as err:
             raise PasswordIOError(

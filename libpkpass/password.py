@@ -339,14 +339,6 @@ class PasswordEntry:
         ####################################################################
         return vars(self)
 
-    def validate(self):
-        ####################################################################
-        """This function validates a password object"""
-        ####################################################################
-        # for field in ['field1', 'field2']:
-        #  if weird: raise PasswordValidationError(field, value)
-        return True
-
     def __repr__(self):
         return f"{self.__class__}({self.__dict__})"
 
@@ -364,7 +356,6 @@ class PasswordEntry:
                 self.recipients = password_data["recipients"]
                 if "escrow" in password_data:
                     self.escrow = password_data["escrow"]
-            self.validate()
         except (OSError, IOError) as error:
             raise PasswordIOError(
                 f"Error Opening {filename} due to {error.strerror}"
@@ -383,7 +374,6 @@ class PasswordEntry:
         ####################################################################
         """Write password data to a password file"""
         ####################################################################
-        self.validate()
         # check if the file is in the base password directory
         incwd = path.basename(filename) == filename
         # if not ensure path exists
