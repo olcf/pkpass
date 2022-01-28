@@ -44,7 +44,9 @@ class Update(Command):
         )
         safe, owner = self.safety_check()
         if safe or self.args["overwrite"]:
-            self.recipient_list = password["recipients"].keys()
+            self.recipient_list = list(password["recipients"].keys())
+            self.recipient_list.append(str(self.args["identity"]))
+            self.recipient_list = list(set(self.recipient_list))
             yield from self._confirm_recipients()
             self._validate_identities(self.recipient_list)
 

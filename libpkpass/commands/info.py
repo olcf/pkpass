@@ -30,26 +30,24 @@ class Info(Command):
 
         # Escrow
         if password.escrow:
-            yield self.color_print("\nEscrow Groups:", "first_level")
-            for group_key, group_value in password.escrow.items():
-                yield f"  {self.color_print(group_key, 'second_level')}:"
-                for key, value in group_value["metadata"].items():
-                    yield f"    {self.color_print(key + ':', 'third_level')} {str(value)}"
+            yield self.color_print("\nEscrow Group:", "first_level")
+            for key, value in password.escrow["metadata"].items():
+                yield f"    {self.color_print(key.capitalize() + ':', 'second_level')} {str(value)}"
 
-                yield f"    {self.color_print('Share Holders:', 'third_level')} {', '.join(list(group_value['recipients'].keys()))}"
-                yield f"    {self.color_print('Total Group Share Holders:', 'third_level')} {len(list(group_value['recipients'].keys()))}"
+            yield f"    {self.color_print('Share Holders:', 'second_level')} {', '.join(list(password.escrow['recipients'].keys()))}"
+            yield f"    {self.color_print('Total Group Share Holders:', 'second_level')} {len(list(password.escrow['recipients'].keys()))}"
 
-                timestamp_list = [
-                    x["timestamp"]
-                    for x in list(group_value["recipients"].values())
-                    if "timestamp" in x
-                ]
-                if timestamp_list:
-                    timestamp = int(round(float(min(timestamp_list))))
-                    timestamp = datetime.fromtimestamp(timestamp).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
-                    yield f"    {self.color_print('Group creation time:', 'third_level')} {timestamp}"
+            timestamp_list = [
+                x["timestamp"]
+                for x in list(password.escrow["recipients"].values())
+                if "timestamp" in x
+            ]
+            if timestamp_list:
+                timestamp = int(round(float(min(timestamp_list))))
+                timestamp = datetime.fromtimestamp(timestamp).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+                yield f"    {self.color_print('Group creation time:', 'second_level')} {timestamp}"
 
         # Recipients
         yield f"{self.color_print(linesep + 'Recipients:', 'first_level')} {', '.join(list(password.recipients.keys()))}"

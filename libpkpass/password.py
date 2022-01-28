@@ -1,5 +1,4 @@
 """This Module defines what a password contains"""
-from uuid import uuid1
 from time import time
 from datetime import datetime
 from os import path, makedirs
@@ -72,7 +71,6 @@ class PasswordEntry:
 
     def process_escrow_map(
         self,
-        escrow_map,
         split_secret=None,
         distributor=None,
         recipients=None,
@@ -86,21 +84,14 @@ class PasswordEntry:
         ####################################################################
         """Process the escrow user map into escrow users"""
         ####################################################################
-        escrow_guid = str(uuid1()).replace("-", "")
-        if escrow_map:
-            for key, value in escrow_map.items():
-                if set(value["recipients"]) == set(escrow_users):
-                    escrow_guid = key
-        self.escrow[escrow_guid] = {
+        self.escrow = {
             "metadata": {"minimum_escrow": minimum, "creator": distributor},
             "recipients": {},
         }
         i = 0
         for escrow_user in escrow_users:
             if escrow_user not in recipients:
-                self.escrow[escrow_guid]["recipients"][
-                    escrow_user
-                ] = self._add_recipient(
+                self.escrow["recipients"][escrow_user] = self._add_recipient(
                     escrow_user,
                     split_secret[i],
                     distributor,
@@ -111,15 +102,11 @@ class PasswordEntry:
                 )
                 i += 1
 
-    def add_escrow(self, secret=None, escrow_users=None, minimum=None, pwstore=None):
+    def add_escrow(self, secret=None, escrow_users=None, minimum=None):
         ####################################################################
         """Add escrow users to the recipient list of this password object"""
         ####################################################################
-        split_secret = pk_split_secret(secret, escrow_users, minimum)
-        return (
-            self.read_escrow(path.join(pwstore, self.metadata["name"])),
-            split_secret,
-        )
+        return pk_split_secret(secret, escrow_users, minimum)
 
     def add_recipients(
         self,
@@ -132,7 +119,6 @@ class PasswordEntry:
         card_slot=None,
         escrow_users=None,
         minimum=None,
-        pwstore=None,
     ):
         ####################################################################
         """Add recipients to the recipient list of this password object"""
@@ -156,21 +142,18 @@ class PasswordEntry:
         if escrow_users:
             # escrow_users may now be none after the set operations
             try:
-                if (len(escrow_users) > 3) and (
-                    len(list((set(escrow_users) - set(recipients)))) < 3
-                ):
+                set_reduction = list((set(escrow_users) - set(recipients)))
+                if (len(escrow_users) > 3) and (len(set_reduction) < 3):
                     print(
                         "warning: min_escrow requirement not met after removing password recipients from escrow user list"
                     )
                     return
-                escrow_map, split_secret = self.add_escrow(
+                split_secret = self.add_escrow(
                     secret=secret,
                     escrow_users=escrow_users,
                     minimum=minimum,
-                    pwstore=pwstore,
                 )
                 self.process_escrow_map(
-                    escrow_map,
                     split_secret=split_secret,
                     distributor=distributor,
                     recipients=recipients,
@@ -184,6 +167,40 @@ class PasswordEntry:
             except ValueError as err:
                 print(f"Warning cannot create escrow shares, reason: {err}")
                 print("Your password has been created without escrow capabilities")
+
+    def _get_distributor(self, session, distributor):
+        distributor = (
+            session.query(Recipient).filter(Recipient.name == distributor).first()
+        )
+        try:
+            distributor_hash = get_card_subjecthash()
+        except X509CertificateError:
+            distributor_hash = (
+                session.query(Cert)
+                .filter(Cert.recipients.contains(distributor))
+                .first()
+                .subjecthash
+            )
+        return (distributor, distributor_hash)
+
+    def _build_encrypted_secrets(
+        self, session, recipient, encryption_algorithm, secret
+    ):
+        encrypted_secrets = {}
+        identity = session.query(Recipient).filter(Recipient.name == recipient).first()
+        for cert in (
+            session.query(Cert).filter(Cert.recipients.contains(identity)).all()
+        ):
+            if encryption_algorithm == "rsautl":
+                (encrypted_secret, encrypted_derived_key) = pk_encrypt_string(
+                    secret, cert.cert_bytes
+                )
+            encrypted_secrets[cert.fingerprint] = {
+                "encrypted_secret": encrypted_secret,
+                "derived_key": encrypted_derived_key,
+                "recipient_hash": cert.subjecthash,
+            }
+        return encrypted_secrets
 
     def _add_recipient(
         self,
@@ -199,34 +216,10 @@ class PasswordEntry:
         """Add recipient or sharer to list"""
         ####################################################################
         try:
-            encrypted_secrets = {}
-            identity = (
-                session.query(Recipient).filter(Recipient.name == recipient).first()
+            encrypted_secrets = self._build_encrypted_secrets(
+                session, recipient, encryption_algorithm, secret
             )
-            for cert in (
-                session.query(Cert).filter(Cert.recipients.contains(identity)).all()
-            ):
-                if encryption_algorithm == "rsautl":
-                    (encrypted_secret, encrypted_derived_key) = pk_encrypt_string(
-                        secret, cert.cert_bytes
-                    )
-                encrypted_secrets[cert.fingerprint] = {
-                    "encrypted_secret": encrypted_secret,
-                    "derived_key": encrypted_derived_key,
-                    "recipient_hash": cert.subjecthash,
-                }
-            distributor = (
-                session.query(Recipient).filter(Recipient.name == distributor).first()
-            )
-            try:
-                distributor_hash = get_card_subjecthash()
-            except X509CertificateError:
-                distributor_hash = (
-                    session.query(Cert)
-                    .filter(Cert.recipients.contains(distributor))
-                    .first()
-                    .subjecthash
-                )
+            distributor, distributor_hash = self._get_distributor(session, distributor)
             recipient_entry = {
                 "encrypted_secrets": encrypted_secrets,
                 "encryption_algorithm": encryption_algorithm,
@@ -234,9 +227,11 @@ class PasswordEntry:
                 "distributor": distributor.name,
                 "distributor_hash": distributor_hash,
             }
-            message = self._create_signable_string(recipient_entry)
             recipient_entry["signature"] = pk_sign_string(
-                message, dict(distributor), passphrase, card_slot
+                self._create_signable_string(recipient_entry),
+                dict(distributor),
+                passphrase,
+                card_slot,
             )
 
             return recipient_entry

@@ -223,7 +223,7 @@ def setup_db(args):
     args["db"] = {}
     args["db"]["path"] = db_path
     args["db"]["uri"] = f"sqlite+pysqlite:///{db_path}"
-    args["db"]["engine"] = create_engine(args["db"]["uri"])
+    args["db"]["engine"] = create_engine(f'{args["db"]["uri"]}?check_same_thread=False')
     Base.metadata.create_all(args["db"]["engine"])
     return args
 

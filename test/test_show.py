@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """This module tests the show module"""
+import sys
+import io
 import unittest
+from unittest.mock import patch
 from libpkpass.commands.cli import Cli
 from libpkpass.errors import DecryptionError, CliArgumentError
+
+# from libpkpass.escrow import pk_recover_secret
 from .basetest.basetest import ERROR_MSGS, patch_args
 
 
@@ -20,7 +25,7 @@ class ShowErrors(unittest.TestCase):
                 all=None,
                 pwname="test",
             ):
-                Cli().run()
+                "".join(Cli().run())
         except DecryptionError:
             ret = False
         self.assertTrue(ret)
@@ -66,6 +71,42 @@ class ShowErrors(unittest.TestCase):
             if str(error) == "'pwname'":
                 ret = str(error)
         self.assertEqual(ret, "'pwname'")
+
+    def test_show_recovery(self):
+        try:
+            shares = []
+            with patch_args(
+                pwname="test",
+                subparser_name="show",
+                identity="r2",
+                nopassphrase=True,
+                all=None,
+                recovery="true",
+            ):
+                shares.append("".join(Cli().run()).split("test: ")[1])
+                print(shares)
+            with patch_args(
+                pwname="test",
+                subparser_name="show",
+                identity="r3",
+                nopassphrase=True,
+                all=None,
+                recovery="true",
+            ):
+                shares.append("".join(Cli().run()).split("test: ")[1])
+            with patch_args(
+                pwname="test",
+                subparser_name="recover",
+                identity="r3",
+                nopassphrase=True,
+            ):
+                with unittest.mock.patch(
+                    "builtins.input", return_value=",".join(shares)
+                ):
+                    passwd = "|".join(Cli().run())
+        except DecryptionError as err:
+            raise err
+        self.assertEqual(passwd.split("|")[1], "y")
 
 
 if __name__ == "__main__":
