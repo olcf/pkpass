@@ -1,21 +1,19 @@
 """This module is a generic for all pkpass commands"""
 import getpass
-from os import getcwd, path, sep, remove, rename
+from os import getcwd, path, sep
 from sqlalchemy.orm import sessionmaker
 from libpkpass import LOGGER
 from libpkpass.commands.arguments import ARGUMENTS as arguments
 from libpkpass.crypto import print_card_info
 from libpkpass.errors import (
-    NullRecipientError,
     CliArgumentError,
-    GroupDefinitionError,
     PasswordIOError,
     NotThePasswordOwnerError,
 )
 from libpkpass.identities import IdentityDB
 from libpkpass.passworddb import PasswordDB
 from libpkpass.password import PasswordEntry
-from libpkpass.util import collect_args, color_prepare
+from libpkpass.util import collect_args, color_prepare, build_recipient_list
 from libpkpass.models.recipient import Recipient
 
 
@@ -42,16 +40,13 @@ class Command:
         ##################################################################
         """Intialization function for class. Register with argparse"""
         ##################################################################
-        self.cli = cli
         # default certpath to none because connect string is allowed
         self.args = {}
         self.recipient_list = []
         self.escrow_and_recipient_list = []
-        self.identities = iddb if iddb else IdentityDB()
+        self.iddb = iddb if iddb else IdentityDB()
         self.pwdbcached = pwdb is not None
         self.passworddb = pwdb if pwdb else PasswordDB()
-        self.session = None
-        self.identity = None
         cli.register(self, self.name, self.description)
 
     def register(self, parser):
@@ -66,37 +61,51 @@ class Command:
         """Passes the argparse Namespace object of parsed arguments"""
         ##################################################################
         self._run_command_setup(parsedargs)
+        self._pre_check()
+        self._passphrase_check()
         return self._run_command_execution()
+
+    def _passphrase_check(self):
+        if "nopassphrase" in self.selected_args and not self.args["nopassphrase"]:
+            for mesg in print_card_info(
+                self.args["card_slot"],
+                self.iddb.id,
+                self.args["verbosity"],
+                self.args["color"],
+                self.args["theme_map"],
+            ):
+                LOGGER.info(mesg)
+            self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
     def _run_command_setup(self, parsedargs):
         ##################################################################
         """Passes the argparse Namespace object of parsed arguments"""
         ##################################################################
         self.args = collect_args(parsedargs)
-        self.session = sessionmaker(bind=self.args["db"]["engine"])()
+        self.iddb.session = sessionmaker(bind=self.args["db"]["engine"])()
         self._validate_combinatorial_args()
         self._validate_args()
 
         # Build the list of recipients that this command will act on
-        self._build_recipient_list()
+        self.recipient_list, self.escrow_and_recipient_list = build_recipient_list(self.args)
 
         # If there are defined repositories of keys and certificates, load them
-        self.identities.args = self.args
-        self.identities.cabundle = self.args["cabundle"]
-        self.identities.load_certs_from_directory(
+        self.iddb.args = self.args
+        self.iddb.cabundle = self.args["cabundle"]
+        self.iddb.load_certs_from_directory(
             self.args["certpath"],
             connectmap=self.args["connect"],
             nocache=self.args["no_cache"],
         )
         if self.args["keypath"]:
-            self.identities.load_keys_from_directory(self.args["keypath"])
-        self.identity = (
-            self.session.query(Recipient)
+            self.iddb.load_keys_from_directory(self.args["keypath"])
+        self.iddb.id = (
+            self.iddb.session.query(Recipient)
             .filter(Recipient.name == self.args["identity"])
             .first()
         )
         self._validate_identities()
-        self.identity = dict(self.identity)
+        self.iddb.id = dict(self.iddb.id)
 
         if (
             self.args["subparser_name"]
@@ -107,16 +116,6 @@ class Command:
         if "pwname" in self.args and self.args["pwname"]:
             self._resolve_directory_path()
         self.args["card_slot"] = self.args["card_slot"] if self.args["card_slot"] else 0
-        if "nopassphrase" in self.selected_args and not self.args["nopassphrase"]:
-            for mesg in print_card_info(
-                self.args["card_slot"],
-                self.identity,
-                self.args["verbosity"],
-                self.args["color"],
-                self.args["theme_map"],
-            ):
-                LOGGER.info(mesg)
-            self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
 
     def _resolve_directory_path(self):
         ####################################################################
@@ -157,7 +156,7 @@ class Command:
             secret=pass_value,
             distributor=self.args["identity"],
             recipients=[self.args["identity"]],
-            session=self.session,
+            session=self.iddb.session,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
             escrow_users=self.args["escrow_users"],
@@ -192,7 +191,7 @@ class Command:
             secret=password1,
             distributor=self.args["identity"],
             recipients=recipient_list,
-            session=self.session,
+            session=self.iddb.session,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
             escrow_users=self.args["escrow_users"],
@@ -221,79 +220,18 @@ class Command:
                 self.args["identity"], owner, self.args["pwname"]
             )
 
-    def delete_pass(self):
-        ##################################################################
-        """This deletes a password that the user has created, useful for testing"""
-        ##################################################################
-        filepath = path.join(self.args["pwstore"], self.args["pwname"])
-        try:
-            remove(filepath)
-        except OSError as err:
-            raise PasswordIOError(
-                f"Password '{self.args['pwname']}' not found"
-            ) from err
-
-    def rename_pass(self):
-        ##################################################################
-        """This renames a password that the user has created"""
-        ##################################################################
-        oldpath = path.join(self.args["pwstore"], self.args["pwname"])
-        newpath = path.join(self.args["pwstore"], self.args["rename"])
-        try:
-            rename(oldpath, newpath)
-            password = PasswordEntry()
-            password.read_password_data(newpath)
-            password["metadata"]["name"] = self.args["rename"]
-            password.write_password_data(newpath)
-
-        except OSError as err:
-            raise PasswordIOError(
-                f"Password '{self.args['pwname']}' not found"
-            ) from err
-
     def _run_command_execution(self):
         ##################################################################
         """Passes the argparse Namespace object of parsed arguments"""
         ##################################################################
         raise NotImplementedError
 
-    def _build_recipient_list(self):
-        ##################################################################
-        """take groups and users and make a SOA for the recipients"""
-        ##################################################################
-        try:
-            if "groups" in self.args and self.args["groups"]:
-                self.recipient_list += self._parse_group_membership()
-            if "users" in self.args and self.args["users"]:
-                self.recipient_list += self.args["users"]
-            self.recipient_list = [x.strip() for x in list(set(self.recipient_list))]
-            self.escrow_and_recipient_list = (
-                self.recipient_list + self.args["escrow_users"]
-            )
-            for user in self.escrow_and_recipient_list:
-                if str(user) == "":
-                    raise NullRecipientError
-        except KeyError:  # If this is a command with no users, don't worry about it
-            pass
-
-    def _parse_group_membership(self):
-        ##################################################################
-        """Concat membership of supplied groups"""
-        ##################################################################
-        member_list = []
-        try:
-            for group in self.args["groups"]:
-                member_list += [
-                    user.strip()
-                    for user in self.args[group.strip()].split(",")
-                    if user.strip()
-                ]
-            return member_list
-        except KeyError as err:
-            raise GroupDefinitionError(str(err)) from err
-
     def _validate_args(self):
         raise NotImplementedError
+
+    def _pre_check(self):
+        """Pre check likely won't happen on all commands so we'll allow a
+        pass"""
 
     def _validate_combinatorial_args(self):
         ##################################################################
@@ -324,16 +262,16 @@ class Command:
         if not swap_list:
             swap_list = self.escrow_and_recipient_list
         for recipient in swap_list:
-            self.identities.verify_identity(recipient)
+            self.iddb.verify_identity(recipient)
             if recipient not in [
-                x[0] for x in self.session.query(Recipient.name).all()
+                x[0] for x in self.iddb.session.query(Recipient.name).all()
             ]:
                 raise CliArgumentError(
                     f"Error: Recipient '{recipient}' is not in the recipient database"
                 )
 
-        if self.identity:
-            self.identities.verify_identity(self.args["identity"])
+        if self.iddb.id:
+            self.iddb.verify_identity(self.args["identity"])
         else:
             raise CliArgumentError(
                 f"Error: Your user '{self.args['identity']}' is not in the recipient database"

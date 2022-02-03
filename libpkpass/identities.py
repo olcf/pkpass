@@ -29,6 +29,8 @@ class IdentityDB:
         self.extensions = {"certificate": [".cert", ".crt"], "key": ".key"}
         self.cabundle = ""
         self.args = {}
+        self.session = None
+        self.id = None
 
     def __repr__(self):
         return f"{self.__class__}({self.__dict__})"

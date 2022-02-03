@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """This module tests the info module"""
 import unittest
+import pylibyaml  # pylint: disable=unused-import
 import yaml
 from libpkpass.commands.cli import Cli
 from libpkpass.errors import CliArgumentError

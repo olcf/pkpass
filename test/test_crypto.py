@@ -25,25 +25,25 @@ class TestBasicFunction(unittest.TestCase):
         self.keydir = "test/pki/intermediate/private"
         self.cabundle = "test/pki/intermediate/certs/ca-bundle"
 
-        self.identities = IdentityDB()
+        self.iddb = IdentityDB()
         db_path = "test/pki/intermediate/certs/rd.db"
-        self.identities.args = {
+        self.iddb.args = {
             "db": {
                 "uri": f"sqlite+pysqlite:///{db_path}",
                 "engine": create_engine(f"sqlite+pysqlite:///{db_path}"),
-            }
+            },
         }
-        self.session = sessionmaker(bind=self.identities.args["db"]["engine"])()
-        self.identities.load_certs_from_directory(self.certdir, self.cabundle)
-        self.identities.load_keys_from_directory(self.keydir)
+        self.iddb.session = sessionmaker(bind=self.iddb.args["db"]["engine"])()
+        self.iddb.load_certs_from_directory(self.certdir, self.cabundle)
+        self.iddb.load_keys_from_directory(self.keydir)
 
     # Encrypt strings for all test identities and make sure they are different
     def test_encrypt_string(self):
         """Test encrypting a string"""
         results = []
-        for identity in self.session.query(Recipient).all():
+        for identity in self.iddb.session.query(Recipient).all():
             cert = (
-                self.session.query(Cert)
+                self.iddb.session.query(Cert)
                 .filter(Cert.recipients.contains(identity))
                 .first()
             )
@@ -51,9 +51,9 @@ class TestBasicFunction(unittest.TestCase):
         self.assertTrue(results[0] != results[1])
 
         # Encrypt/Decrypt strings for all test identities and make sure we get back what we put in
-        for identity in self.session.query(Recipient).all():
+        for identity in self.iddb.session.query(Recipient).all():
             cert = (
-                self.session.query(Cert)
+                self.iddb.session.query(Cert)
                 .filter(Cert.recipients.contains(identity))
                 .first()
             )
@@ -66,14 +66,14 @@ class TestBasicFunction(unittest.TestCase):
     def test_verify_string(self):
         """verify string is correct"""
         results = []
-        for identity in self.session.query(Recipient).all():
+        for identity in self.iddb.session.query(Recipient).all():
             results.append(pk_sign_string(self.plaintext, dict(identity), None))
         self.assertTrue(results[0] != results[1])
 
-        for identity in self.session.query(Recipient).all():
+        for identity in self.iddb.session.query(Recipient).all():
             signature = pk_sign_string(self.plaintext, dict(identity), None)
             cert = (
-                self.session.query(Cert)
+                self.iddb.session.query(Cert)
                 .filter(Cert.recipients.contains(identity))
                 .first()
             )
@@ -81,9 +81,9 @@ class TestBasicFunction(unittest.TestCase):
 
     def test_cert_fingerprint(self):
         """Verify fingerprint is correct"""
-        for identity in self.session.query(Recipient).all():
+        for identity in self.iddb.session.query(Recipient).all():
             cert = (
-                self.session.query(Cert)
+                self.iddb.session.query(Cert)
                 .filter(Cert.recipients.contains(identity))
                 .first()
             )

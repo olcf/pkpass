@@ -2,6 +2,7 @@
 from os import walk, path, makedirs
 from multiprocessing import Manager, cpu_count, Pool
 from fnmatch import fnmatch
+from pylibyaml import monkey_patch_pyyaml  # pylint: disable=unused-import
 from yaml import safe_load, dump
 from libpkpass.password import PasswordEntry
 from libpkpass.errors import PasswordIOError

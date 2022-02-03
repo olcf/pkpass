@@ -18,7 +18,7 @@ class Card(Command):
         ####################################################################
         return print_card_info(
             self.args["card_slot"],
-            self.identity,
+            self.iddb.id,
             2,
             self.args["color"],
             self.args["theme_map"],

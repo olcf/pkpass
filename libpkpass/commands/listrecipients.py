@@ -21,23 +21,25 @@ class Listrecipients(Command):
         LOGGER.info("Certificate store: %s", self.args["certpath"])
         LOGGER.info("Key store: %s", self.args["keypath"])
         LOGGER.info("CA Bundle file: %s", self.args["cabundle"])
-        LOGGER.info("Looking for Key Extension: %s", self.identities.extensions["key"])
+        LOGGER.info("Looking for Key Extension: %s", self.iddb.extensions["key"])
         LOGGER.info(
             "Looking for Certificate Extension: %s",
-            self.identities.extensions["certificate"],
+            self.iddb.extensions["certificate"],
         )
-        LOGGER.info("Loaded %s identities", len(self.session.query(Recipient).all()))
+        LOGGER.info(
+            "Loaded %s identities", len(self.iddb.session.query(Recipient).all())
+        )
 
         if "filter" in self.args and self.args["filter"]:
-            identities = self.session.query(Recipient).filter(
+            identities = self.iddb.session.query(Recipient).filter(
                 Recipient.name.like(self.args["filter"].replace("*", "%"))
             )
         else:
-            identities = self.session.query(Recipient).all()
+            identities = self.iddb.session.query(Recipient).all()
         for identity in identities:
             yield self._print_identity(
                 identity,
-                self.session.query(Cert)
+                self.iddb.session.query(Cert)
                 .filter(Cert.recipients.contains(identity))
                 .all(),
             )

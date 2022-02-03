@@ -3,7 +3,10 @@ from time import time
 from datetime import datetime
 from os import path, makedirs
 from dateutil import parser
-import yaml
+from pylibyaml import monkey_patch_pyyaml # pylint: disable=unused-import
+from yaml import safe_load, safe_dump
+from yaml.parser import ParserError
+from yaml.scanner import ScannerError
 from tqdm import tqdm
 from libpkpass.escrow import pk_split_secret
 from libpkpass.errors import (
@@ -61,11 +64,11 @@ class PasswordEntry:
         ####################################################################
         try:
             with open(filename, "r", encoding="ASCII") as fname:
-                password_data = yaml.safe_load(fname)
+                password_data = safe_load(fname)
                 if "escrow" in password_data.keys():
                     return password_data["escrow"]
                 return {}
-        except (OSError, IOError, yaml.scanner.ScannerError, yaml.parser.ParserError):
+        except (OSError, IOError, ScannerError, ParserError):
             # we actually don't care here.. file might not exist yet
             return {}
 
@@ -346,7 +349,7 @@ class PasswordEntry:
         ####################################################################
         try:
             with open(filename, "r", encoding="ASCII") as fname:
-                password_data = yaml.safe_load(fname)
+                password_data = safe_load(fname)
                 self.metadata = password_data["metadata"]
                 self.recipients = password_data["recipients"]
                 if "escrow" in password_data:
@@ -355,7 +358,7 @@ class PasswordEntry:
             raise PasswordIOError(
                 f"Error Opening {filename} due to {error.strerror}"
             ) from error
-        except (yaml.scanner.ScannerError, yaml.parser.ParserError) as error:
+        except (ScannerError, ParserError) as error:
             raise YamlFormatError(str(error.problem_mark), error.problem) from error
 
     def write_password_data(
@@ -380,11 +383,11 @@ class PasswordEntry:
             with open(filename, open_method, encoding="ASCII") as fname:
                 if encrypted_export:
                     encrypted = sk_encrypt_string(
-                        yaml.safe_dump(passdata, default_flow_style=False), password
+                        safe_dump(passdata, default_flow_style=False), password
                     )
                     fname.write(encrypted.decode() + "\n")
                 else:
-                    fname.write(yaml.safe_dump(passdata, default_flow_style=False))
+                    fname.write(safe_dump(passdata, default_flow_style=False))
         except (OSError, IOError) as error:
             raise PasswordIOError(f"Error creating '{filename}'") from error
 

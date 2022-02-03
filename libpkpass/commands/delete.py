@@ -1,7 +1,8 @@
 """This module allows for the deletion of passwords"""
+from os import path, remove
 from sys import exit as sysexit
 from libpkpass.commands.command import Command
-from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError
+from libpkpass.errors import CliArgumentError, NotThePasswordOwnerError, PasswordIOError
 
 
 class Delete(Command):
@@ -32,6 +33,18 @@ class Delete(Command):
             )
         # necessary for print statement
         yield ""
+
+    def delete_pass(self):
+        ##################################################################
+        """This deletes a password that the user has created, useful for testing"""
+        ##################################################################
+        filepath = path.join(self.args["pwstore"], self.args["pwname"])
+        try:
+            remove(filepath)
+        except OSError as err:
+            raise PasswordIOError(
+                f"Password '{self.args['pwname']}' not found"
+            ) from err
 
     def _confirmation(self):
         ####################################################################

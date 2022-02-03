@@ -2,6 +2,7 @@
 """This module tests the listrecipients module"""
 import logging
 import unittest
+import pylibyaml  # pylint: disable=unused-import
 import yaml
 from libpkpass.commands.cli import Cli
 from .basetest.basetest import patch_args
