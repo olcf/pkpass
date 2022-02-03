@@ -51,9 +51,7 @@ class Show(Command):
         ####################################################################
         if self.args["all"]:
             try:
-                yield from self._walk_dir(
-                    self.args["pwstore"], password, self.args["ignore_decrypt"]
-                )
+                yield from self._walk_dir(password)
             except DecryptionError as err:
                 raise err
         elif self.args["pwname"] is None:
@@ -74,7 +72,7 @@ class Show(Command):
         self.args["behalf"] = self.args["behalf"].split("/")[-1]
         temp_key = path.join(gettempdir(), f'{self.args["behalf"]}.key')
         plaintext_pw = password.decrypt_entry(
-            identity=self.identity,
+            identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
         )
@@ -95,12 +93,12 @@ class Show(Command):
         yield from self._show_wrapper(password)
         unlink(temp_key)
 
-    def _walk_dir(self, directory, password, ignore_decrypt=False):
+    def _walk_dir(self, password):
         ####################################################################
         """Walk our directory searching for passwords"""
         ####################################################################
         # walk returns root, dirs, and files we just need files
-        for root, _, pwnames in walk(directory):
+        for root, _, pwnames in walk(self.args['pwstore']):
             trim_root = root.replace(self.args["pwstore"], "").lstrip("/")
             for pwname in pwnames:
                 if self.args["pwname"] is None or fnmatch(
@@ -109,7 +107,7 @@ class Show(Command):
                     try:
                         yield from self._decrypt_wrapper(root, password, pwname)
                     except DecryptionError as err:
-                        if ignore_decrypt:
+                        if self.args['ignore_decrypt']:
                             LOGGER.err(err)
                             continue
                         raise
@@ -121,8 +119,8 @@ class Show(Command):
         """This populates the user's escrow as passwords"""
         ####################################################################
         if password.escrow:
-            if self.identity["name"] in password.escrow["recipients"].keys():
-                return password.escrow["recipients"][self.identity["name"]]
+            if self.iddb.id["name"] in password.escrow["recipients"].keys():
+                return password.escrow["recipients"][self.iddb.id["name"]]
         return None
 
     def _decrypt_wrapper(self, directory, password, pwname):
@@ -136,16 +134,16 @@ class Show(Command):
                     myescrow = self._handle_escrow_show(password)
                     if myescrow:
                         distributor = myescrow["distributor"]
-                        password["recipients"][self.identity["name"]] = myescrow
+                        password["recipients"][self.iddb.id["name"]] = myescrow
                         yield self._decrypt_password_entry(password, distributor)
                 else:
-                    distributor = password.recipients[self.identity["name"]][
+                    distributor = password.recipients[self.iddb.id["name"]][
                         "distributor"
                     ]
                     yield self._decrypt_password_entry(password, distributor)
             except KeyError as err:
                 raise NotARecipientError(
-                    f"Identity '{self.identity['name']}' is not on the recipient list for password '{pwname}'"
+                    f"Identity '{self.iddb.id['name']}' is not on the recipient list for password '{pwname}'"
                 ) from err
 
     def _decrypt_password_entry(self, password, distributor):
@@ -153,16 +151,18 @@ class Show(Command):
         """This decrypts a given password entry"""
         ####################################################################
         plaintext_pw = password.decrypt_entry(
-            identity=self.identity,
+            identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
         )
         dist_obj = (
-            self.session.query(Recipient).filter(Recipient.name == distributor).first()
+            self.iddb.session.query(Recipient)
+            .filter(Recipient.name == distributor)
+            .first()
         )
         if (dist_obj and dist_obj.certs) and not self.args["noverify"]:
             result = password.verify_entry(
-                self.identity["name"], self.identities, distributor, dist_obj.certs
+                self.iddb.id["name"], self.iddb, distributor, dist_obj.certs
             )
             if not result["sigOK"]:
                 LOGGER.warning(
@@ -181,3 +181,16 @@ class Show(Command):
         for argument in ["keypath"]:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(f"'{argument}' is a required argument")
+
+    def _pre_check(self):
+        """Ensure our password exists before asking for authentication"""
+        for root, _, pwnames in walk(self.args['pwstore']):
+            trim_root = root.replace(self.args["pwstore"], "").lstrip("/")
+            for pwname in pwnames:
+                if self.args["pwname"] is None or fnmatch(
+                    path.join(trim_root, pwname), self.args["pwname"]
+                ):
+                    return True
+        raise PasswordIOError(
+            f"{path.join(self.args['pwstore'], self.args['pwname'])} does not exist"
+        )

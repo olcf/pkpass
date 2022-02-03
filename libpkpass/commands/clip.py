@@ -5,7 +5,7 @@ from pyperclip import copy, paste
 from libpkpass import LOGGER
 from libpkpass.commands.command import Command
 from libpkpass.password import PasswordEntry
-from libpkpass.errors import CliArgumentError
+from libpkpass.errors import CliArgumentError, PasswordIOError
 from libpkpass.models.recipient import Recipient
 
 
@@ -35,18 +35,18 @@ class Clip(Command):
         password.read_password_data(
             path.join(self.args["pwstore"], self.args["pwname"])
         )
-        distributor = password.recipients[self.identity["name"]]["distributor"]
+        distributor = password.recipients[self.iddb.id["name"]]["distributor"]
         plaintext_pw = password.decrypt_entry(
-            identity=self.identity,
+            identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
         )
         if not self.args["noverify"]:
             result = password.verify_entry(
-                self.identity["name"],
-                self.identities,
+                self.iddb.id["name"],
+                self.iddb,
                 distributor,
-                self.session.query(Recipient)
+                self.iddb.session.query(Recipient)
                 .filter(Recipient.name == distributor)
                 .first()
                 .certs,
@@ -73,3 +73,10 @@ class Clip(Command):
         for argument in ["keypath"]:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(f"'{argument}' is a required argument")
+
+    def _pre_check(self):
+        if path.exists(path.join(self.args["pwstore"], self.args["pwname"])):
+            return True
+        raise PasswordIOError(
+            f"{path.join(self.args['pwstore'], self.args['pwname'])} does not exist"
+        )

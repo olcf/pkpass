@@ -20,19 +20,19 @@ class TestBasicFunction(unittest.TestCase):
         self.textblob = "Testing TextField"
         self.sender = "r1"
 
-        self.idobj = IdentityDB()
-        self.idobj.identity = self.sender
-        self.idobj.recipient_list = ["r2", "r3"]
+        self.iddb = IdentityDB()
+        self.iddb.id = self.sender
+        self.iddb.recipient_list = ["r2", "r3"]
         db_path = "test/pki/intermediate/certs/rd.db"
-        self.idobj.args = {
+        self.iddb.args = {
             "db": {
                 "uri": f"sqlite+pysqlite:///{db_path}",
                 "engine": create_engine(f"sqlite+pysqlite:///{db_path}"),
-            }
+            },
         }
-        self.session = sessionmaker(bind=self.idobj.args["db"]["engine"])()
-        self.idobj.load_certs_from_directory(self.certdir, self.cabundle)
-        self.idobj.load_keys_from_directory(self.keydir)
+        self.iddb.session = sessionmaker(bind=self.iddb.args["db"]["engine"])()
+        self.iddb.load_certs_from_directory(self.certdir, self.cabundle)
+        self.iddb.load_keys_from_directory(self.keydir)
 
     def test_create_encrypt_decrypt(self):
         """create a password entry"""
@@ -43,8 +43,8 @@ class TestBasicFunction(unittest.TestCase):
         passwordentry.add_recipients(
             secret=self.secret,
             distributor="r1",
-            recipients=self.idobj.recipient_list,
-            session=self.session,
+            recipients=self.iddb.recipient_list,
+            session=self.iddb.session,
         )
 
     def test_read_write(self):

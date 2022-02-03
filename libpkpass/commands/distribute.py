@@ -47,7 +47,7 @@ class Distribute(Command):
             password.read_password_data(dist_pass)
             if self.args["identity"] in password.recipients.keys():
                 plaintext_pw = password.decrypt_entry(
-                    self.identity,
+                    self.iddb.id,
                     passphrase=self.passphrase,
                     card_slot=self.args["card_slot"],
                 )
@@ -55,7 +55,7 @@ class Distribute(Command):
                     secret=plaintext_pw,
                     distributor=self.args["identity"],
                     recipients=self.recipient_list,
-                    session=self.session,
+                    session=self.iddb.session,
                     passphrase=self.passphrase,
                     card_slot=self.args["card_slot"],
                     escrow_users=self.args["escrow_users"],
@@ -84,7 +84,7 @@ class Distribute(Command):
 
     def _confirm_recipients(self):
         not_in_db = []
-        in_db = [x.name for x in self.session.query(Recipient).all()]
+        in_db = [x.name for x in self.iddb.session.query(Recipient).all()]
         for recipient in self.recipient_list:
             if recipient not in in_db:
                 not_in_db.append(recipient)

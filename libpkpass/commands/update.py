@@ -9,6 +9,7 @@ from libpkpass.errors import (
     CliArgumentError,
     PasswordMismatchError,
     NotThePasswordOwnerError,
+    PasswordIOError,
     BlankPasswordError,
 )
 from libpkpass.models.recipient import Recipient
@@ -73,7 +74,7 @@ class Update(Command):
 
     def _confirm_recipients(self):
         not_in_db = []
-        in_db = [x.name for x in self.session.query(Recipient).all()]
+        in_db = [x.name for x in self.iddb.session.query(Recipient).all()]
         for recipient in self.recipient_list:
             if recipient not in in_db:
                 not_in_db.append(recipient)
@@ -97,3 +98,10 @@ class Update(Command):
         for argument in ["pwname", "keypath"]:
             if argument not in self.args or self.args[argument] is None:
                 raise CliArgumentError(f"'{argument}' is a required argument")
+
+    def _pre_check(self):
+        if path.exists(path.join(self.args["pwstore"], self.args["pwname"])):
+            return True
+        raise PasswordIOError(
+            f"{path.join(self.args['pwstore'], self.args['pwname'])} does not exist"
+        )

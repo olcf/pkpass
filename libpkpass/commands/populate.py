@@ -173,17 +173,17 @@ class Populate(Show):
         """This decrypts a given password entry"""
         ####################################################################
         plaintext_pw = password.decrypt_entry(
-            identity=self.identity,
+            identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
         )
-        distributor = password.recipients[self.identity["name"]]["distributor"]
+        distributor = password.recipients[self.iddb.id["name"]]["distributor"]
         if not self.args["noverify"]:
             result = password.verify_entry(
-                self.identity["uid"],
-                self.identities,
+                self.iddb.id["uid"],
+                self.iddb,
                 distributor,
-                self.session.query(Recipient)
+                self.iddb.session.query(Recipient)
                 .filter(Recipient.name == distributor)
                 .first()
                 .certs,

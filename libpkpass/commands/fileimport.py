@@ -77,7 +77,7 @@ you can manually change the description in the file if you would like"
         ####################################################################
         """This function handles the yaml format of pkpass"""
         ####################################################################
-        uid = self.identity["name"]
+        uid = self.iddb.id["name"]
         pwstore = self.args["pwstore"]
 
         self.args["pwname"] = password["metadata"]["name"]

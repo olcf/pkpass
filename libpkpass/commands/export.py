@@ -38,13 +38,13 @@ class Export(Command):
         ####################################################################
         """Iterate through the passwords that we can decrypt"""
         ####################################################################
-        uid = self.identity["name"]
+        uid = self.iddb.id["name"]
         all_passwords = {
             k: v for (k, v) in passworddb.pwdb.items() if uid in v.recipients.keys()
         }
         for _, password in tqdm(all_passwords.items()):
             plaintext_pw = password.decrypt_entry(
-                identity=self.identity,
+                identity=self.iddb.id,
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"],
             )

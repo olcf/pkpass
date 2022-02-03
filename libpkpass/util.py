@@ -9,15 +9,16 @@ from re import search, error
 from fnmatch import filter as fnfilter
 from argparse import _SubParsersAction
 from sqlalchemy import create_engine
+from pylibyaml import monkey_patch_pyyaml # pylint: disable=unused-import
 from yaml import safe_load
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 from colored import fg, attr
 from libpkpass import __version__
 from libpkpass.models import Base
-from libpkpass.models.recipient import Recipient
-from libpkpass.models.cert import Cert
-from libpkpass.errors import FileOpenError, JsonArgumentError, ConfigParseError
+from libpkpass.models.recipient import Recipient # pylint: disable=unused-import
+from libpkpass.models.cert import Cert # pylint: disable=unused-import
+from libpkpass.errors import FileOpenError, JsonArgumentError, ConfigParseError, NullRecipientError, GroupDefinitionError
 
 
 def color_prepare(string, color_type, colorize, theme_map=None):
@@ -209,6 +210,44 @@ def collect_args(parsedargs):
     args["escrow_users"] = convert_strings_to_list(args, "escrow_users")
     return setup_db(args)
 
+def build_recipient_list(args):
+    ##################################################################
+    """take groups and users and make a SOA for the recipients"""
+    ##################################################################
+    recipient_list = []
+    escrow_and_recipient_list = []
+    try:
+        if "groups" in args and args["groups"]:
+            recipient_list += parse_group_membership(args)
+        if "users" in args and args["users"]:
+            recipient_list += args["users"]
+        recipient_list = [x.strip() for x in list(set(recipient_list))]
+        escrow_and_recipient_list = (
+            recipient_list + args["escrow_users"]
+        )
+        for user in escrow_and_recipient_list:
+            if str(user) == "":
+                raise NullRecipientError
+        return recipient_list, escrow_and_recipient_list
+    except KeyError:  # If this is a command with no users, don't worry about it
+        return None
+
+def parse_group_membership(args):
+    ##################################################################
+    """Concat membership of supplied groups"""
+    ##################################################################
+    member_list = []
+    try:
+        for group in args["groups"]:
+            member_list += [
+                user.strip()
+                for user in args[group.strip()].split(",")
+                if user.strip()
+            ]
+        return member_list
+    except KeyError as err:
+        raise GroupDefinitionError(str(err)) from err
+
 
 def setup_db(args):
     ##################################################################
@@ -220,6 +259,8 @@ def setup_db(args):
         db_path = path.join(args["certpath"], "rd.db")
     else:
         db_path = path.join(gettempdir(), "rd.db")
+    if not path.isdir(path.dirname(db_path)):
+        raise FileOpenError(path.dirname(db_path), "No such file or directory")
     args["db"] = {}
     args["db"]["path"] = db_path
     args["db"]["uri"] = f"sqlite+pysqlite:///{db_path}"
