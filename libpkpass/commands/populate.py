@@ -179,7 +179,6 @@ class Populate(Show):
         )
         distributor = password.recipients[self.iddb.id["name"]]["distributor"]
         if not self.args["noverify"]:
-            print(self.iddb.id)
             result = password.verify_entry(
                 self.iddb.id["name"],
                 self.iddb,
