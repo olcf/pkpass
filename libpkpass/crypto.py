@@ -275,6 +275,8 @@ def get_cert_element(cert, element):
     """Return an arbitrary element of an x509 certificate"""
     ####################################################################
     command = ["openssl", "x509", "-noout", f"-{element}"]
+    if element == "fingerprint":
+        command.append("-sha1")
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
         stdout, _ = proc.communicate(input=cert)
         if proc.returncode != 0:
