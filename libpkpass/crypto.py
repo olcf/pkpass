@@ -41,7 +41,7 @@ def pk_encrypt_string(plaintext_string, certificate):
         "-certin",
         "-inkey",
         cert_file_path,
-        "-pkeyopts",
+        "-pkeyopt",
         "rsa_padding_mode:pkcs1"
     ]
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
@@ -105,7 +105,7 @@ def pk_decrypt_string(
     ####################################################################
     ciphertext_derived_key = handle_python_strings(ciphertext_derived_key)
     if "key" in identity and identity["key"]:
-        command = ["openssl", "pkeyutl", "-decrypt", "-inkey", identity["key"],  "-pkeyopts", "rsa_padding_mode:pkcs1"]
+        command = ["openssl", "pkeyutl", "-decrypt", "-inkey", identity["key"],  "-pkeyopt", "rsa_padding_mode:pkcs1"]
         with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
             stdout, _ = proc.communicate(
                 input=urlsafe_b64decode(ciphertext_derived_key)
