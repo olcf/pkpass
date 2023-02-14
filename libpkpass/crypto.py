@@ -36,12 +36,13 @@ def pk_encrypt_string(plaintext_string, certificate):
         cert_file_path = fname.name
     command = [
         "openssl",
-        "rsautl",
+        "pkeyutl",
+        "-encrypt",
+        "-certin",
         "-inkey",
         cert_file_path,
-        "-certin",
-        "-encrypt",
-        "-pkcs",
+        "-pkeyopts",
+        "rsa_padding_mode:pkcs1"
     ]
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
         stdout, _ = proc.communicate(input=plaintext_derived_key)
