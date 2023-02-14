@@ -154,7 +154,6 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
     ####################################################################
     stringhash = sha256(string.encode("UTF-8")).hexdigest()
     if "key" in identity and identity["key"]:
-        command = ["openssl", "rsautl", "-sign", "-inkey", identity["key"]]
         with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
             stdout, _ = proc.communicate(input=stringhash.encode("UTF-8"))
             signature = urlsafe_b64encode(handle_python_strings(stdout))
