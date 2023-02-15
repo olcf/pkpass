@@ -36,12 +36,13 @@ def pk_encrypt_string(plaintext_string, certificate):
         cert_file_path = fname.name
     command = [
         "openssl",
-        "rsautl",
+        "pkeyutl",
+        "-encrypt",
+        "-certin",
         "-inkey",
         cert_file_path,
-        "-certin",
-        "-encrypt",
-        "-pkcs",
+        "-pkeyopt",
+        "rsa_padding_mode:pkcs1"
     ]
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
         stdout, _ = proc.communicate(input=plaintext_derived_key)
@@ -104,7 +105,7 @@ def pk_decrypt_string(
     ####################################################################
     ciphertext_derived_key = handle_python_strings(ciphertext_derived_key)
     if "key" in identity and identity["key"]:
-        command = ["openssl", "rsautl", "-inkey", identity["key"], "-decrypt", "-pkcs"]
+        command = ["openssl", "pkeyutl", "-decrypt", "-inkey", identity["key"],  "-pkeyopt", "rsa_padding_mode:pkcs1"]
         with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
             stdout, _ = proc.communicate(
                 input=urlsafe_b64decode(ciphertext_derived_key)
@@ -153,7 +154,7 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
     ####################################################################
     stringhash = sha256(string.encode("UTF-8")).hexdigest()
     if "key" in identity and identity["key"]:
-        command = ["openssl", "rsautl", "-sign", "-inkey", identity["key"]]
+        command = ["openssl", "pkeyutl", "-sign", "-inkey", identity["key"]]
         with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
             stdout, _ = proc.communicate(input=stringhash.encode("UTF-8"))
             signature = urlsafe_b64encode(handle_python_strings(stdout))
@@ -202,7 +203,7 @@ def pk_verify_signature(string, signature, certs):
     for cert in certs:
         with NamedTemporaryFile(delete=False) as fname:
             fname.write(cert.cert_bytes)
-        command = ["openssl", "rsautl", "-inkey", fname.name, "-certin", "-verify"]
+        command = ["openssl", "pkeyutl", "-verifyrecover", "-certin", "-inkey", fname.name]
         with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
             stdout, _ = proc.communicate(
                 input=urlsafe_b64decode(handle_python_strings(signature))
