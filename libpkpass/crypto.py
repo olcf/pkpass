@@ -77,20 +77,33 @@ def get_card_info(SCBackend="opensc"):
     raise BadBackendError(SCBackend)
 
 
-def print_card_info(card_slot, identity, verbosity, color, theme_map):
+def print_card_info(card_slot, identity, verbosity, color, theme_map, SCBackend):
     ####################################################################
     """Inform the user what card is selected"""
     ####################################################################
     if "key" not in identity or not identity["key"]:
-        out_list, stdout = get_card_info()
+        out_list, stdout = get_card_info(SCBackend)
         if verbosity > 1:
             yield print_all_slots(stdout, color, theme_map)
-        for out in out_list[1:]:
-            stripped = out.decode("UTF-8").strip()
-            if int(stripped[0]) == int(card_slot):
-                verbosity = verbosity + 1 if verbosity < 2 else 2
-                stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
-                yield f"{color_prepare(stripped, 'info', color, theme_map)}"
+        if SCBackend == "opensc":
+            for out in out_list[1:]:
+                stripped = out.decode("UTF-8").strip()
+                if int(stripped[0]) == int(card_slot):
+                    verbosity = verbosity + 1 if verbosity < 2 else 2
+                    stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
+                    yield f"{color_prepare(stripped, 'info', color, theme_map)}"
+        elif SCBackend == "yubi":
+            for out in out_list:
+                stripped = out.decode("UTF-8").strip()
+                if "Yubico" not in stripped:
+                    print("unsupported SC Type")
+                    exit(1)
+                if int(stripped.split('CCID') or 0) == int(card_slot):
+                    verbosity = verbosity + 1 if verbosity < 2 else 2
+                    stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
+                    yield f"{color_prepare(stripped, 'info', color, theme_map)}"
+        else
+            raise BadBackendError(SCBackend)
 
 
 def print_all_slots(slot_info, color, theme_map):
