@@ -386,6 +386,25 @@ def sk_encrypt_string(plaintext_string, key):
     return urlsafe_b64encode(handle_python_strings(encrypted_string))
 
 
+def get_card_serial(card_slot=None):
+    ####################################################################
+    """Return the serial element of a card"""
+    ####################################################################
+    command = ["yubico-piv-tool", "-a", "status"]
+    if card_slot is not None and card_slot != 0:
+        command.extend(["-r", str(card_slot)])
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate()
+    if stdout.decode("utf-8").strip().lower() == "no smart card readers found.":
+        raise X509CertificateError("Smartcard not detected")
+    for line in stdout.decode("utf-8").strip().lower().splitlines():
+        if "serial number:" in line:
+            return line.split(":")[1].replace(" ", "").replace("\t", "")
+    # todo: fix this
+    raise X509CertificateError("Smartcard not detected")
+    return None
+
+
 def sk_decrypt_string(ciphertext_string, key):
     ####################################################################
     """Symmetrically Decrypt a base64 encoded string using the provided key"""
