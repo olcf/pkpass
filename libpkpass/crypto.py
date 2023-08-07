@@ -198,7 +198,7 @@ def pk_decrypt_string(
     )
 
 
-def pk_sign_string(string, identity, passphrase, card_slot=None):
+def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=None):
     ####################################################################
     """Compute the hash of string and create a digital signature"""
     ####################################################################
@@ -210,31 +210,58 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
             signature = urlsafe_b64encode(handle_python_strings(stdout))
             returncode = proc.returncode
     else:
-        # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
-        # command line (insecure) or via stdin.  So, we have to put signature text
-        # into a file for pkcs15-crypt to read.  YUCK!
-        with NamedTemporaryFile(delete=False) as fname:
-            fname.write(stringhash.encode("UTF-8"))
-        with NamedTemporaryFile(delete=False) as out:
-            command = [
-                "pkcs15-crypt",
-                "--sign",
-                "-i",
-                fname.name,
-                "-o",
-                out.name,
-                "--pkcs1",
-                "--raw",
-            ]
-            if card_slot is not None:
-                command.extend(["--reader", str(card_slot)])
-            command.extend(["--pin", "-"])
-            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
-                stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
-            returncode = proc.returncode
+        if SCBackend == "opensc":
+            # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
+            # command line (insecure) or via stdin.  So, we have to put signature text
+            # into a file for pkcs15-crypt to read.  YUCK!
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(stringhash.encode("UTF-8"))
+            with NamedTemporaryFile(delete=False) as out:
+                command = [
+                    "pkcs15-crypt",
+                    "--sign",
+                    "-i",
+                    fname.name,
+                    "-o",
+                    out.name,
+                    "--pkcs1",
+                    "--raw",
+                ]
+                if card_slot is not None:
+                    command.extend(["--reader", str(card_slot)])
+                command.extend(["--pin", "-"])
+                with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+                    stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
+                returncode = proc.returncode
 
-        with open(out.name, "rb") as sigfile:
-            signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
+            with open(out.name, "rb") as sigfile:
+                signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
+        elif SCBackend == "yubi":
+            # todo: fix this
+            # https://developers.yubico.com/yubico-piv-tool/YKCS11/Supported_applications/openssl_engine.html
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(stringhash.encode("UTF-8"))
+            with NamedTemporaryFile(delete=False) as out:
+                command = [
+                    "openssl",
+                    "pkeyutl",
+                    "-sign",
+                    "-engine", "pkcs11",
+                    "-inkey", "pkcs11:type=private;pin-value=" + passphrase + ";serial=" + get_card_serial(card_slot),
+                    "-pkeyopt", "rsa_padding_mode:pkcs1",
+                    "-in", fname.name,
+                    "-out", out.name
+                ]
+                # todo: make this an option
+                with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dynlib")) as proc:
+                    stdout, _ = proc.communicate(
+                        input=stringhash.encode("UTF-8")
+                        )
+                    returncode = proc.returncode
+            with open(out.name, "rb") as sigfile:
+                signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
+        else:
+                raise BadBackendError(SCBackend)
 
         unlink(fname.name)
         unlink(out.name)
