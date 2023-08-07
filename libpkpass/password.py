@@ -170,7 +170,7 @@ class PasswordEntry:
                     card_slot=card_slot,
                     escrow_users=escrow_users,
                     minimum=minimum,
-                    SCBackend=SCBackend
+                    SCBackend=SCBackend,
                 )
             except ValueError as err:
                 print(f"Warning cannot create escrow shares, reason: {err}")
@@ -219,7 +219,7 @@ class PasswordEntry:
         encryption_algorithm="rsautl",
         passphrase=None,
         card_slot=None,
-        SCBackend=None
+        SCBackend=None,
     ):
         ####################################################################
         """Add recipient or sharer to list"""
@@ -240,7 +240,7 @@ class PasswordEntry:
                 self._create_signable_string(recipient_entry),
                 dict(distributor),
                 passphrase,
-                SCBackend
+                SCBackend,
                 card_slot,
             )
 
