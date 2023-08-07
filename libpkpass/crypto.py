@@ -120,7 +120,7 @@ def print_all_slots(slot_info, color, theme_map):
 
 
 def pk_decrypt_string(
-    ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None
+    ciphertext_string, ciphertext_derived_key, identity, passphrase, SCBackend, card_slot=None
 ):
     ####################################################################
     """Decrypt a base64 encoded string for the provided identity"""
@@ -135,30 +135,58 @@ def pk_decrypt_string(
             returncode = proc.returncode
         plaintext_derived_key = stdout
     else:
-        # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
-        # command line (insecure) or via stdin.  So, we have to put ciphertext into
-        # a file for pkcs15-crypt to read.  YUCK!
-        with NamedTemporaryFile(delete=False) as fname:
-            fname.write(urlsafe_b64decode(ciphertext_derived_key))
-        command = [
-            "pkcs15-crypt",
-            "--decipher",
-            "--raw",
-            "--pkcs",
-            "--input",
-            fname.name,
-        ]
-        if card_slot is not None:
-            command.extend(["--reader", str(card_slot)])
-        command.extend(["--pin", "-"])
-        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL) as proc:
-            stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
-            unlink(fname.name)
-            try:
-                plaintext_derived_key = stdout
-            except IndexError as err:
-                raise DecryptionError(stdout) from err
-            returncode = proc.returncode
+        if SCBackend == "opensc":
+            # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
+            # command line (insecure) or via stdin.  So, we have to put ciphertext into
+            # a file for pkcs15-crypt to read.  YUCK!
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(urlsafe_b64decode(ciphertext_derived_key))
+            command = [
+                "pkcs15-crypt",
+                "--decipher",
+                "--raw",
+                "--pkcs",
+                "--input",
+                fname.name,
+            ]
+            if card_slot is not None:
+                command.extend(["--reader", str(card_slot)])
+            command.extend(["--pin", "-"])
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL) as proc:
+                stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
+                unlink(fname.name)
+                try:
+                    plaintext_derived_key = stdout
+                except IndexError as err:
+                    raise DecryptionError(stdout) from err
+                returncode = proc.returncode
+        elif SCBackend == "yubi":
+            # todo: fix this
+            # https://developers.yubico.com/yubico-piv-tool/YKCS11/Supported_applications/openssl_engine.html
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(urlsafe_b64decode(ciphertext_derived_key))
+            command = [
+                "openssl",
+                "pkeyutl",
+                "-decrypt",
+                "-engine", "pkcs11",
+                "-keyform", "engine",
+                "-inkey", "pkcs11:type=private;pin-value=" + passphrase + ";serial=" + get_card_serial(card_slot),
+                "-pkeyopt", "rsa_padding_mode:pkcs1",
+                "-in", fname.name
+            ]
+            # todo: make path an option
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dylib")) as proc:
+                stdout, _ = proc.communicate(
+                    input=urlsafe_b64decode(ciphertext_derived_key)
+                )
+                try:
+                    plaintext_derived_key = str(stdout).split("\\n")[1]
+                except IndexError as err:
+                    raise DecryptionError(stdout) from err
+                returncode = proc.returncode
+        else:
+            raise BadBackendError(SCBackend)
 
     if returncode != 0:
         raise DecryptionError(stdout)
