@@ -43,6 +43,7 @@ class Rename(Command):
                     identity=self.iddb.id,
                     passphrase=self.passphrase,
                     card_slot=self.args["card_slot"],
+                    SCBackend=self.args["SCBackend"],
                 )
                 self._confirmation(plaintext_pw)
             else:

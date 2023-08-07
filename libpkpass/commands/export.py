@@ -47,6 +47,7 @@ class Export(Command):
                 identity=self.iddb.id,
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"],
+                SCBackend=self.args["SCBackend"],
             )
             password.recipients[uid]["encrypted_secret"] = plaintext_pw.encode("UTF-8")
             password.write_password_data(

@@ -40,6 +40,7 @@ class Clip(Command):
             identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
+            SCBackend=self.args["SCBackend"],
         )
         if not self.args["noverify"]:
             result = password.verify_entry(
