@@ -176,7 +176,7 @@ def pk_decrypt_string(
                 "-in", fname.name
             ]
             # todo: make path an option
-            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dylib")) as proc:
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dylib")) as proc:
                 stdout, _ = proc.communicate(
                     input=urlsafe_b64decode(ciphertext_derived_key)
                 )
