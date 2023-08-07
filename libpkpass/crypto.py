@@ -367,13 +367,20 @@ def get_cert_element(cert, element):
         raise X509CertificateError(stdout) from err
 
 
-def get_card_element(element, card_slot=None):
+def get_card_element(element, SCBackend, card_slot=None):
     ####################################################################
     """Return an arbitrary element of a pcks15 capable device"""
     ####################################################################
-    command = ["pkcs15-tool", "--read-certificate", "1"]
-    if card_slot is not None:
-        command.extend(["--reader", str(card_slot)])
+    if SCBackend == "opensc":
+        command = ["pkcs15-tool", "--read-certificate", "1"]
+        if card_slot is not None:
+            command.extend(["--reader", str(card_slot)])
+    elif SCBackend == "yubi":
+        command = ["yubico-piv-tool", "-a", "read-certificate", "-s", "9a"]
+        if card_slot is not None and card_slot != 0:
+            command.extend(["-r", str(card_slot)])
+    else:
+        raise BadBackendError(SCBackend)
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
         stdout, _ = proc.communicate()
     if stdout.decode("utf-8").strip().lower() == "no smart card readers found.":
