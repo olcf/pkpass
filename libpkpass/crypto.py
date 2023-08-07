@@ -247,6 +247,7 @@ def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=N
                     "pkeyutl",
                     "-sign",
                     "-engine", "pkcs11",
+                    "-keyform", "engine",
                     "-inkey", "pkcs11:type=private;pin-value=" + passphrase + ";serial=" + get_card_serial(card_slot),
                     "-pkeyopt", "rsa_padding_mode:pkcs1",
                     "-in", fname.name,
