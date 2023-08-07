@@ -270,6 +270,6 @@ ARGUMENTS = {
             "type": str,
             "default": "opensc",
             "help": "SC backend to use: opensc or yubi",
-        }
-    }
+        },
+    },
 }
