@@ -120,7 +120,7 @@ def print_all_slots(slot_info, color, theme_map):
 
 
 def pk_decrypt_string(
-    ciphertext_string, ciphertext_derived_key, identity, passphrase, SCBackend, card_slot=None
+    ciphertext_string, ciphertext_derived_key, identity, passphrase, SCBackend="opensc", card_slot=None
 ):
     ####################################################################
     """Decrypt a base64 encoded string for the provided identity"""
