@@ -103,7 +103,7 @@ def print_card_info(card_slot, identity, verbosity, color, theme_map, SCBackend)
                     verbosity = verbosity + 1 if verbosity < 2 else 2
                     stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
                     yield f"{color_prepare(stripped, 'info', color, theme_map)}"
-        else
+        else:
             raise BadBackendError(SCBackend)
 
 
