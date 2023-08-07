@@ -377,15 +377,6 @@ def get_card_subjecthash(card_slot=None):
     return get_card_element("subject_hash", card_slot=card_slot)
 
 
-def sk_encrypt_string(plaintext_string, key):
-    ####################################################################
-    """Symmetrically Encrypt and return a base 64 encoded string using the provided secret"""
-    ####################################################################
-    fern = Fernet(hash_password(key))
-    encrypted_string = fern.encrypt(plaintext_string.encode("UTF-8"))
-    return urlsafe_b64encode(handle_python_strings(encrypted_string))
-
-
 def get_card_serial(card_slot=None):
     ####################################################################
     """Return the serial element of a card"""
@@ -403,6 +394,15 @@ def get_card_serial(card_slot=None):
     # todo: fix this
     raise X509CertificateError("Smartcard not detected")
     return None
+
+
+def sk_encrypt_string(plaintext_string, key):
+    ####################################################################
+    """Symmetrically Encrypt and return a base 64 encoded string using the provided secret"""
+    ####################################################################
+    fern = Fernet(hash_password(key))
+    encrypted_string = fern.encrypt(plaintext_string.encode("UTF-8"))
+    return urlsafe_b64encode(handle_python_strings(encrypted_string))
 
 
 def sk_decrypt_string(ciphertext_string, key):
