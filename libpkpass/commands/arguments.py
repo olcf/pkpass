@@ -264,4 +264,12 @@ ARGUMENTS = {
             "help": "verbose output (repeat for increased verbosity)",
         },
     },
+    "SCBackend": {
+        "args": ["--scbackend"],
+        "kwargs": {
+            "type": str,
+            "default": "opensc",
+            "help": "SC backend to use: opensc or yubi",
+        }
+    }
 }
