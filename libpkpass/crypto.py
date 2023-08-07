@@ -2,7 +2,7 @@
 """This Module handles the crypto functions i.e. encryption and decryption"""
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from tempfile import NamedTemporaryFile
-from os import unlink
+from os import unlink, environ
 from hashlib import sha256
 from shutil import get_terminal_size
 from subprocess import Popen, PIPE, STDOUT, DEVNULL
@@ -16,6 +16,7 @@ from libpkpass.errors import (
     DecryptionError,
     SignatureCreationError,
     X509CertificateError,
+    BadBackendError,
 )
 
 
