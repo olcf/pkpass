@@ -83,6 +83,7 @@ class PasswordEntry:
         card_slot=None,
         escrow_users=None,
         minimum=None,
+        SCBackend=None,
     ):
         ####################################################################
         """Process the escrow user map into escrow users"""
@@ -102,6 +103,7 @@ class PasswordEntry:
                     encryption_algorithm,
                     passphrase,
                     card_slot,
+                    SCBackend,
                 )
                 i += 1
 
@@ -122,6 +124,7 @@ class PasswordEntry:
         card_slot=None,
         escrow_users=None,
         minimum=None,
+        SCBackend=None,
     ):
         ####################################################################
         """Add recipients to the recipient list of this password object"""
@@ -138,6 +141,7 @@ class PasswordEntry:
                 encryption_algorithm=encryption_algorithm,
                 passphrase=passphrase,
                 card_slot=card_slot,
+                SCBackend=SCBackend,
             )
             for r in tqdm(recipients, leave=False)
         }
@@ -166,17 +170,18 @@ class PasswordEntry:
                     card_slot=card_slot,
                     escrow_users=escrow_users,
                     minimum=minimum,
+                    SCBackend=SCBackend
                 )
             except ValueError as err:
                 print(f"Warning cannot create escrow shares, reason: {err}")
                 print("Your password has been created without escrow capabilities")
 
-    def _get_distributor(self, session, distributor):
+    def _get_distributor(self, session, distributor, SCBackend=None):
         distributor = (
             session.query(Recipient).filter(Recipient.name == distributor).first()
         )
         try:
-            distributor_hash = get_card_subjecthash()
+            distributor_hash = get_card_subjecthash(SCBackend)
         except X509CertificateError:
             distributor_hash = (
                 session.query(Cert)
@@ -214,6 +219,7 @@ class PasswordEntry:
         encryption_algorithm="rsautl",
         passphrase=None,
         card_slot=None,
+        SCBackend=None
     ):
         ####################################################################
         """Add recipient or sharer to list"""
@@ -222,7 +228,7 @@ class PasswordEntry:
             encrypted_secrets = self._build_encrypted_secrets(
                 session, recipient, encryption_algorithm, secret
             )
-            distributor, distributor_hash = self._get_distributor(session, distributor)
+            distributor, distributor_hash = self._get_distributor(session, distributor, SCBackend)
             recipient_entry = {
                 "encrypted_secrets": encrypted_secrets,
                 "encryption_algorithm": encryption_algorithm,
@@ -234,6 +240,7 @@ class PasswordEntry:
                 self._create_signable_string(recipient_entry),
                 dict(distributor),
                 passphrase,
+                SCBackend
                 card_slot,
             )
 
@@ -243,7 +250,7 @@ class PasswordEntry:
                 f"Identity '{recipient}' is not on the recipient list for password '{self.metadata['name']}'"
             ) from err
 
-    def decrypt_entry(self, identity=None, passphrase=None, card_slot=None):
+    def decrypt_entry(self, identity=None, passphrase=None, card_slot=None, SCBackend=None):
         ####################################################################
         """Decrypt this password entry for a particular identity
         (usually the user)"""
@@ -262,6 +269,7 @@ class PasswordEntry:
                 recipient_entry["derived_key"],
                 identity,
                 passphrase,
+                SCBackend,
                 card_slot,
             )
         except KeyError:
@@ -274,9 +282,10 @@ class PasswordEntry:
                             value["derived_key"],
                             identity,
                             passphrase,
+                            SCBackend,
                         )
                 else:
-                    cert_key = get_card_fingerprint(card_slot=card_slot)
+                    cert_key = get_card_fingerprint(SCBackend, card_slot=card_slot)
                     return pk_decrypt_string(
                         recipient_entry["encrypted_secrets"][cert_key][
                             "encrypted_secret"
@@ -284,10 +293,11 @@ class PasswordEntry:
                         recipient_entry["encrypted_secrets"][cert_key]["derived_key"],
                         identity,
                         passphrase,
+                        SCBackend,
                         card_slot,
                     )
             except DecryptionError as err:
-                msg = create_error_message(recipient_entry["timestamp"], card_slot)
+                msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend)
                 raise DecryptionError(
                     f"Error decrypting password named '{self.metadata['name']}'. {msg}"
                 ) from err
@@ -296,7 +306,7 @@ class PasswordEntry:
                     f"Error decrypting password named '{self.metadata['name']}'. Appropriate private key not found"
                 ) from err
         except DecryptionError as err:
-            msg = create_error_message(recipient_entry["timestamp"], card_slot)
+            msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend)
             raise DecryptionError(
                 f"Error decrypting password named '{self.metadata['name']}'. {msg}"
             ) from err
@@ -392,13 +402,13 @@ class PasswordEntry:
             raise PasswordIOError(f"Error creating '{filename}'") from error
 
 
-def create_error_message(recipient_timestamp, card_slot):
-    card_start = get_card_startdate()
+def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc"):
+    card_start = get_card_startdate(SCBackend)
     card_start = datetime.timestamp(parser.parse(card_start))
     distribute_time = float(recipient_timestamp)
     # Slots are indexed at 0 so when enumerating you add 1
     # There is also an additional information line so add 1 again
-    if int(card_slot) + 2 > len(get_card_info()[0]):
+    if int(card_slot) + 2 > len(get_card_info(SCBackend)[0]):
         msg = "Attempting to use card slot that is not connected"
     elif distribute_time < card_start:
         msg = "Password distributed before this certificate was created"
