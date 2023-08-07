@@ -189,6 +189,7 @@ def collect_args(parsedargs):
         "theme_map": None,
         "color": True,
         "verbosity": 0,
+        "SCBackend": "opensc",
     }
     cli_args = parsedargs if isinstance(parsedargs, dict) else vars(parsedargs)
     config_args = get_config_args(cli_args["config"], cli_args)
