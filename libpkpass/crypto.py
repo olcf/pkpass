@@ -388,12 +388,12 @@ def get_card_element(element, SCBackend, card_slot=None):
     return get_cert_element(stdout, element)
 
 
-def get_card_fingerprint(card_slot=None):
+def get_card_fingerprint(SCBackend, card_slot=None):
     ####################################################################
     """Return the modulus of the x509 certificate of the identity"""
     ####################################################################
     # SHA1 Fingerprint=F9:9D:71:54:55:BE:99:24:6A:5E:E0:BB:48:F9:63:AE:A2:05:54:98
-    return get_card_element("fingerprint", card_slot=card_slot).split("=")[1]
+    return get_card_element("fingerprint", SCBackend, card_slot=card_slot).split("=")[1]
 
 
 def get_card_subject(card_slot=None):
