@@ -63,11 +63,18 @@ def pk_encrypt_string(plaintext_string, certificate):
     )
 
 
-def get_card_info():
-    command = ["pkcs11-tool", "-L"]
-    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
-        stdout, _ = proc.communicate()
-        return (handle_python_strings(stdout).split(b"Slot"), stdout)
+def get_card_info(SCBackend="opensc"):
+    if SCBackend == "opensc":
+        command = ["pkcs11-tool", "-L"]
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate()
+            return (handle_python_strings(stdout).split(b"Slot"), stdout)
+    elif SCBackend == "yubi":
+        command = ["yubico-piv-tool", "-a", "list-readers"]
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate()
+            return (handle_python_strings(stdout).splitlines(), stdout)
+    raise BadBackendError(SCBackend)
 
 
 def print_card_info(card_slot, identity, verbosity, color, theme_map):
