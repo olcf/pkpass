@@ -176,6 +176,8 @@ Type ? to list commands"""
         ####################################################################
         if str(line) == "edit" or "--no-cache" in line:
             self._reload_config()
+        elif str(line) == "":
+            pass
         elif str(line.split()[0]) in [
             "create",
             "delete",
