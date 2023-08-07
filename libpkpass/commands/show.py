@@ -75,6 +75,7 @@ class Show(Command):
             identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
+            SCBackend=self.args["SCBackend"],
         )
         with open(temp_key, "w", encoding="ASCII") as fname:
             fname.write(
@@ -154,6 +155,7 @@ class Show(Command):
             identity=self.iddb.id,
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
+            SCBackend=self.args["SCBackend"],
         )
         dist_obj = (
             self.iddb.session.query(Recipient)
