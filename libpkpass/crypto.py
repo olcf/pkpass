@@ -97,8 +97,9 @@ def print_card_info(card_slot, identity, verbosity, color, theme_map, SCBackend)
                 stripped = out.decode("UTF-8").strip()
                 if "Yubico" not in stripped:
                     print("unsupported SC Type")
+                    # todo: better handling
                     exit(1)
-                if int(stripped.split('CCID') or 0) == int(card_slot):
+                if int(stripped.split('CCID')[1] or 0) == int(card_slot):
                     verbosity = verbosity + 1 if verbosity < 2 else 2
                     stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
                     yield f"{color_prepare(stripped, 'info', color, theme_map)}"
