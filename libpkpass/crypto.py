@@ -396,48 +396,48 @@ def get_card_fingerprint(SCBackend, card_slot=None):
     return get_card_element("fingerprint", SCBackend, card_slot=card_slot).split("=")[1]
 
 
-def get_card_subject(card_slot=None):
+def get_card_subject(SCBackend, card_slot=None):
     ####################################################################
     """Return the subject DN of the x509 certificate of the identity"""
     ####################################################################
     # subject= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return " ".join(get_card_element("subject", card_slot=card_slot).split(" ")[1:])
+    return " ".join(get_card_element("subject", SCBackend, card_slot=card_slot).split(" ")[1:])
 
 
-def get_card_issuer(card_slot=None):
+def get_card_issuer(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
     # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return " ".join(get_card_element("issuer", card_slot=card_slot).split(" ")[1:])
+    return " ".join(get_card_element("issuer", SCBackend, card_slot=card_slot).split(" ")[1:])
 
 
-def get_card_startdate(card_slot=None):
+def get_card_startdate(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("startdate", card_slot=card_slot).split("=")[1]
+    return get_card_element("startdate", SCBackend, card_slot=card_slot).split("=")[1]
 
 
-def get_card_enddate(card_slot=None):
+def get_card_enddate(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("enddate", card_slot=card_slot).split("=")[1]
+    return get_card_element("enddate", SCBackend, card_slot=card_slot).split("=")[1]
 
 
-def get_card_issuerhash(card_slot=None):
+def get_card_issuerhash(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("issuer_hash", card_slot=card_slot)
+    return get_card_element("issuer_hash", SCBackend, card_slot=card_slot)
 
 
-def get_card_subjecthash(card_slot=None):
+def get_card_subjecthash(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("subject_hash", card_slot=card_slot)
+    return get_card_element("subject_hash", SCBackend, card_slot=card_slot)
 
 
 def get_card_serial(card_slot=None):
