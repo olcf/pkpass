@@ -83,7 +83,7 @@ class PasswordEntry:
         card_slot=None,
         escrow_users=None,
         minimum=None,
-        SCBackend=None,
+        SCBackend="opensc",
     ):
         ####################################################################
         """Process the escrow user map into escrow users"""
@@ -124,7 +124,7 @@ class PasswordEntry:
         card_slot=None,
         escrow_users=None,
         minimum=None,
-        SCBackend=None,
+        SCBackend="opensc",
     ):
         ####################################################################
         """Add recipients to the recipient list of this password object"""
@@ -219,7 +219,7 @@ class PasswordEntry:
         encryption_algorithm="rsautl",
         passphrase=None,
         card_slot=None,
-        SCBackend=None,
+        SCBackend="opensc",
     ):
         ####################################################################
         """Add recipient or sharer to list"""
