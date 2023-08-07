@@ -257,12 +257,12 @@ def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=N
                 with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dylib")) as proc:
                     stdout, _ = proc.communicate(
                         input=stringhash.encode("UTF-8")
-                        )
-                    returncode = proc.returncode
+                    )
+                returncode = proc.returncode
             with open(out.name, "rb") as sigfile:
                 signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
         else:
-                raise BadBackendError(SCBackend)
+            raise BadBackendError(SCBackend)
 
         unlink(fname.name)
         unlink(out.name)
