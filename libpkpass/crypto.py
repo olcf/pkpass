@@ -120,7 +120,7 @@ def print_all_slots(slot_info, color, theme_map):
 
 
 def pk_decrypt_string(
-    ciphertext_string, ciphertext_derived_key, identity, passphrase, SCBackend="opensc", card_slot=None
+    ciphertext_string, ciphertext_derived_key, identity, passphrase, SCBackend="opensc", card_slot=None, PKCS11_module_path="/usr/local/lib/libykcs11.dylib"
 ):
     ####################################################################
     """Decrypt a base64 encoded string for the provided identity"""
@@ -175,8 +175,7 @@ def pk_decrypt_string(
                 "-pkeyopt", "rsa_padding_mode:pkcs1",
                 "-in", fname.name
             ]
-            # todo: make path an option
-            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dylib")) as proc:
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH=PKCS11_module_path)) as proc:
                 stdout, _ = proc.communicate(
                     input=urlsafe_b64decode(ciphertext_derived_key)
                 )
@@ -198,7 +197,7 @@ def pk_decrypt_string(
     )
 
 
-def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=None):
+def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=None, PKCS11_module_path="/usr/local/lib/libykcs11.dylib"):
     ####################################################################
     """Compute the hash of string and create a digital signature"""
     ####################################################################
@@ -254,7 +253,7 @@ def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=N
                     "-out", out.name
                 ]
                 # todo: make this an option
-                with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH="/usr/local/lib/libykcs11.dylib")) as proc:
+                with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH=PKCS11_module_path)) as proc:
                     stdout, _ = proc.communicate(
                         input=stringhash.encode("UTF-8")
                     )
