@@ -44,6 +44,7 @@ class Rename(Command):
                     passphrase=self.passphrase,
                     card_slot=self.args["card_slot"],
                     SCBackend=self.args["SCBackend"],
+                    PKCS11_module_path=self.args["PKCS11_module_path"],
                 )
                 self._confirmation(plaintext_pw)
             else:

@@ -76,6 +76,7 @@ class Show(Command):
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
             SCBackend=self.args["SCBackend"],
+            PKCS11_module_path=self.args["PKCS11_module_path"]
         )
         with open(temp_key, "w", encoding="ASCII") as fname:
             fname.write(

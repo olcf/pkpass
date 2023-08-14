@@ -51,6 +51,7 @@ class Distribute(Command):
                     passphrase=self.passphrase,
                     card_slot=self.args["card_slot"],
                     SCBackend=self.args["SCBackend"],
+                    PKCS11_module_path=self.args["PKCS11_module_path"],
                 )
                 password.add_recipients(
                     secret=plaintext_pw,
@@ -62,6 +63,7 @@ class Distribute(Command):
                     escrow_users=self.args["escrow_users"],
                     minimum=self.args["min_escrow"],
                     SCBackend=self.args["SCBackend"],
+                    PKCS11_module_path=self.args["PKCS11_module_path"],
                 )
 
                 password.write_password_data(dist_pass)
