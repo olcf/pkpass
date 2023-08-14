@@ -17,6 +17,7 @@ from libpkpass.errors import (
     SignatureCreationError,
     X509CertificateError,
     BadBackendError,
+    PKPassError,
 )
 
 
@@ -96,9 +97,8 @@ def print_card_info(card_slot, identity, verbosity, color, theme_map, SCBackend)
             for out in out_list:
                 stripped = out.decode("UTF-8").strip()
                 if "Yubico" not in stripped:
-                    print("unsupported SC type")
-                    # todo: better handling
-                    exit(1)
+                    # exit(1)
+                    raise PKPassError("Unsupported SC type for backend yubi.\nYubico not in:\n" + stripped)
                 if int(stripped.split('CCID')[1] or 0) == int(card_slot):
                     verbosity = verbosity + 1 if verbosity < 2 else 2
                     stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
@@ -161,7 +161,7 @@ def pk_decrypt_string(
                     raise DecryptionError(stdout) from err
                 returncode = proc.returncode
         elif SCBackend == "yubi":
-            # todo: fix this
+            # todo: this can be improved to not use temp files
             # https://developers.yubico.com/yubico-piv-tool/YKCS11/Supported_applications/openssl_engine.html
             with NamedTemporaryFile(delete=False) as fname:
                 fname.write(urlsafe_b64decode(ciphertext_derived_key))
@@ -237,7 +237,7 @@ def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=N
             with open(out.name, "rb") as sigfile:
                 signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
         elif SCBackend == "yubi":
-            # todo: fix this
+            # todo: this can be improved to not use temp files
             # https://developers.yubico.com/yubico-piv-tool/YKCS11/Supported_applications/openssl_engine.html
             with NamedTemporaryFile(delete=False) as fname:
                 fname.write(stringhash.encode("UTF-8"))
@@ -442,7 +442,7 @@ def get_card_subjecthash(SCBackend, card_slot=None):
 
 def get_card_serial(card_slot=None):
     ####################################################################
-    """Return the serial element of a card"""
+    """Return the serial element of a yubico card"""
     ####################################################################
     command = ["yubico-piv-tool", "-a", "status"]
     if card_slot is not None and card_slot != 0:
@@ -454,7 +454,6 @@ def get_card_serial(card_slot=None):
     for line in stdout.decode("utf-8").strip().lower().splitlines():
         if "serial number:" in line:
             return line.split(":")[1].replace(" ", "").replace("\t", "")
-    # todo: fix this
     raise X509CertificateError("Smartcard not detected")
     return None
 
