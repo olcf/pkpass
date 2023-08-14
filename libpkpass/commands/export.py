@@ -48,6 +48,7 @@ class Export(Command):
                 passphrase=self.passphrase,
                 card_slot=self.args["card_slot"],
                 SCBackend=self.args["SCBackend"],
+                PKCS11_module_path=self.args["PKCS11_module_path"],
             )
             password.recipients[uid]["encrypted_secret"] = plaintext_pw.encode("UTF-8")
             password.write_password_data(

@@ -41,6 +41,7 @@ class Clip(Command):
             passphrase=self.passphrase,
             card_slot=self.args["card_slot"],
             SCBackend=self.args["SCBackend"],
+            PKCS11_module_path=self.args["PKCS11_module_path"],
         )
         if not self.args["noverify"]:
             result = password.verify_entry(

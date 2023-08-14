@@ -84,6 +84,7 @@ class PasswordEntry:
         escrow_users=None,
         minimum=None,
         SCBackend="opensc",
+        PKCS11_module_path="/usr/local/lib/libykcs11.dylib",
     ):
         ####################################################################
         """Process the escrow user map into escrow users"""
@@ -104,6 +105,7 @@ class PasswordEntry:
                     passphrase,
                     card_slot,
                     SCBackend,
+                    PKCS11_module_path,
                 )
                 i += 1
 
@@ -125,6 +127,7 @@ class PasswordEntry:
         escrow_users=None,
         minimum=None,
         SCBackend="opensc",
+        PKCS11_module_path="/usr/local/lib/libykcs11.dylib",
     ):
         ####################################################################
         """Add recipients to the recipient list of this password object"""
@@ -142,6 +145,7 @@ class PasswordEntry:
                 passphrase=passphrase,
                 card_slot=card_slot,
                 SCBackend=SCBackend,
+                PKCS11_module_path=PKCS11_module_path,
             )
             for r in tqdm(recipients, leave=False)
         }
@@ -171,6 +175,7 @@ class PasswordEntry:
                     escrow_users=escrow_users,
                     minimum=minimum,
                     SCBackend=SCBackend,
+                    PKCS11_module_path=PKCS11_module_path,
                 )
             except ValueError as err:
                 print(f"Warning cannot create escrow shares, reason: {err}")
@@ -220,6 +225,7 @@ class PasswordEntry:
         passphrase=None,
         card_slot=None,
         SCBackend="opensc",
+        PKCS11_module_path="/usr/local/lib/libykcs11.dylib",
     ):
         ####################################################################
         """Add recipient or sharer to list"""
@@ -242,6 +248,7 @@ class PasswordEntry:
                 passphrase,
                 SCBackend,
                 card_slot,
+                PKCS11_module_path,
             )
 
             return recipient_entry
@@ -250,7 +257,7 @@ class PasswordEntry:
                 f"Identity '{recipient}' is not on the recipient list for password '{self.metadata['name']}'"
             ) from err
 
-    def decrypt_entry(self, identity=None, passphrase=None, card_slot=None, SCBackend=None):
+    def decrypt_entry(self, identity=None, passphrase=None, card_slot=None, SCBackend=None, PKCS11_module_path="/usr/local/lib/libykcs11.dylib"):
         ####################################################################
         """Decrypt this password entry for a particular identity
         (usually the user)"""
@@ -271,6 +278,7 @@ class PasswordEntry:
                 passphrase,
                 SCBackend,
                 card_slot,
+                PKCS11_module_path,
             )
         except KeyError:
             try:
@@ -283,6 +291,8 @@ class PasswordEntry:
                             identity,
                             passphrase,
                             SCBackend,
+                            card_slot,
+                            PKCS11_module_path,
                         )
                 else:
                     cert_key = get_card_fingerprint(SCBackend, card_slot=card_slot)
@@ -295,9 +305,10 @@ class PasswordEntry:
                         passphrase,
                         SCBackend,
                         card_slot,
+                        PKCS11_module_path,
                     )
             except DecryptionError as err:
-                msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend)
+                msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend, err)
                 raise DecryptionError(
                     f"Error decrypting password named '{self.metadata['name']}'. {msg}"
                 ) from err
@@ -306,7 +317,7 @@ class PasswordEntry:
                     f"Error decrypting password named '{self.metadata['name']}'. Appropriate private key not found"
                 ) from err
         except DecryptionError as err:
-            msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend)
+            msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend, err)
             raise DecryptionError(
                 f"Error decrypting password named '{self.metadata['name']}'. {msg}"
             ) from err
@@ -402,16 +413,18 @@ class PasswordEntry:
             raise PasswordIOError(f"Error creating '{filename}'") from error
 
 
-def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc"):
+def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc", err=None):
     card_start = get_card_startdate(SCBackend)
     card_start = datetime.timestamp(parser.parse(card_start))
     distribute_time = float(recipient_timestamp)
     # Slots are indexed at 0 so when enumerating you add 1
-    # There is also an additional information line so add 1 again
-    if int(card_slot) + 2 > len(get_card_info(SCBackend)[0]):
+    # For opensc there is also an additional information line so add 1 again
+    if (int(card_slot) + 2 > len(get_card_info(SCBackend)[0]) and SCBackend == "opensc") or (int(card_slot) + 1 > len(get_card_info(SCBackend)[0]) and SCBackend == "yubi"):
         msg = "Attempting to use card slot that is not connected"
     elif distribute_time < card_start:
         msg = "Password distributed before this certificate was created"
+    elif err is not None and "dlopen" in str(err.msg):
+        msg = "Perhaps a bad path in PKCS11_module_path"
     else:
         msg = "Perhaps a bad pin/passphrase?"
     return msg
