@@ -419,7 +419,7 @@ def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc"):
     distribute_time = float(recipient_timestamp)
     # Slots are indexed at 0 so when enumerating you add 1
     # For opensc there is also an additional information line so add 1 again
-    if int(card_slot) + 2 > len(get_card_info(SCBackend)[0]):
+    if (int(card_slot) + 2 > len(get_card_info(SCBackend)[0]) and SCBackend == "opensc") or (int(card_slot) + 1 > len(get_card_info(SCBackend)[0]) and SCBackend == "yubi"):
         msg = "Attempting to use card slot that is not connected"
     elif distribute_time < card_start:
         msg = "Password distributed before this certificate was created"
