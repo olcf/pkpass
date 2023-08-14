@@ -252,7 +252,6 @@ def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=N
                     "-in", fname.name,
                     "-out", out.name
                 ]
-                # todo: make this an option
                 with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH=PKCS11_module_path)) as proc:
                     stdout, _ = proc.communicate(
                         input=stringhash.encode("UTF-8")

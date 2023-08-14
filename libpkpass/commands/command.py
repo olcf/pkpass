@@ -163,6 +163,7 @@ class Command:
             escrow_users=self.args["escrow_users"],
             minimum=self.args["min_escrow"],
             SCBackend=self.args["SCBackend"],
+            PKCS11_module_path=self.args["PKCS11_module_path"],
         )
         pass_entry["recipients"][self.args["identity"]] = swap_pass["recipients"][
             self.args["identity"]
@@ -199,6 +200,7 @@ class Command:
             escrow_users=self.args["escrow_users"],
             minimum=self.args["min_escrow"],
             SCBackend=self.args["SCBackend"],
+            PKCS11_module_path=self.args["PKCS11_module_path"],
         )
 
         password.write_password_data(
