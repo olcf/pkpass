@@ -308,7 +308,7 @@ class PasswordEntry:
                         PKCS11_module_path,
                     )
             except DecryptionError as err:
-                msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend)
+                msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend, err)
                 raise DecryptionError(
                     f"Error decrypting password named '{self.metadata['name']}'. {msg}"
                 ) from err
@@ -317,7 +317,7 @@ class PasswordEntry:
                     f"Error decrypting password named '{self.metadata['name']}'. Appropriate private key not found"
                 ) from err
         except DecryptionError as err:
-            msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend)
+            msg = create_error_message(recipient_entry["timestamp"], card_slot, SCBackend, err)
             raise DecryptionError(
                 f"Error decrypting password named '{self.metadata['name']}'. {msg}"
             ) from err
@@ -413,7 +413,7 @@ class PasswordEntry:
             raise PasswordIOError(f"Error creating '{filename}'") from error
 
 
-def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc"):
+def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc", err=None):
     card_start = get_card_startdate(SCBackend)
     card_start = datetime.timestamp(parser.parse(card_start))
     distribute_time = float(recipient_timestamp)
@@ -423,6 +423,8 @@ def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc"):
         msg = "Attempting to use card slot that is not connected"
     elif distribute_time < card_start:
         msg = "Password distributed before this certificate was created"
+    elif err is not None and "dlopen" in str(err.msg):
+        msg = "Perhaps a bad path in PKCS11_module_path"
     else:
         msg = "Perhaps a bad pin/passphrase?"
     return msg
