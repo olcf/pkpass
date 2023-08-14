@@ -73,6 +73,7 @@ class Command:
                 self.args["verbosity"],
                 self.args["color"],
                 self.args["theme_map"],
+                self.args["SCBackend"],
             ):
                 LOGGER.info(mesg)
             self.passphrase = getpass.getpass("Enter Pin/Passphrase: ")
@@ -161,6 +162,8 @@ class Command:
             card_slot=self.args["card_slot"],
             escrow_users=self.args["escrow_users"],
             minimum=self.args["min_escrow"],
+            SCBackend=self.args["SCBackend"],
+            PKCS11_module_path=self.args["PKCS11_module_path"],
         )
         pass_entry["recipients"][self.args["identity"]] = swap_pass["recipients"][
             self.args["identity"]
@@ -196,6 +199,8 @@ class Command:
             card_slot=self.args["card_slot"],
             escrow_users=self.args["escrow_users"],
             minimum=self.args["min_escrow"],
+            SCBackend=self.args["SCBackend"],
+            PKCS11_module_path=self.args["PKCS11_module_path"],
         )
 
         password.write_password_data(

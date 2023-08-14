@@ -31,6 +31,11 @@ class EncryptionError(PKPassError):
     pass
 
 
+class BadBackendError(PKPassError):
+    def __init__(self, value):
+        self.msg = f"Invalid value for SCBackend: {value}"
+
+
 class EscrowError(PKPassError):
     def __init__(self, field, constant, value):
         self.msg = f"{field}, must be greater than {constant}, current value: {value}"

@@ -22,6 +22,7 @@ class Card(Command):
             2,
             self.args["color"],
             self.args["theme_map"],
+            self.args["SCBackend"],
         )
 
     def _validate_args(self):

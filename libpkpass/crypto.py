@@ -2,7 +2,7 @@
 """This Module handles the crypto functions i.e. encryption and decryption"""
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from tempfile import NamedTemporaryFile
-from os import unlink
+from os import unlink, environ
 from hashlib import sha256
 from shutil import get_terminal_size
 from subprocess import Popen, PIPE, STDOUT, DEVNULL
@@ -16,6 +16,8 @@ from libpkpass.errors import (
     DecryptionError,
     SignatureCreationError,
     X509CertificateError,
+    BadBackendError,
+    PKPassError,
 )
 
 
@@ -62,27 +64,47 @@ def pk_encrypt_string(plaintext_string, certificate):
     )
 
 
-def get_card_info():
-    command = ["pkcs11-tool", "-L"]
-    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
-        stdout, _ = proc.communicate()
-        return (handle_python_strings(stdout).split(b"Slot"), stdout)
+def get_card_info(SCBackend="opensc"):
+    if SCBackend == "opensc":
+        command = ["pkcs11-tool", "-L"]
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate()
+            return (handle_python_strings(stdout).split(b"Slot"), stdout)
+    elif SCBackend == "yubi":
+        command = ["yubico-piv-tool", "-a", "list-readers"]
+        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+            stdout, _ = proc.communicate()
+            return (handle_python_strings(stdout).splitlines(), stdout)
+    raise BadBackendError(SCBackend)
 
 
-def print_card_info(card_slot, identity, verbosity, color, theme_map):
+def print_card_info(card_slot, identity, verbosity, color, theme_map, SCBackend):
     ####################################################################
     """Inform the user what card is selected"""
     ####################################################################
     if "key" not in identity or not identity["key"]:
-        out_list, stdout = get_card_info()
+        out_list, stdout = get_card_info(SCBackend)
         if verbosity > 1:
             yield print_all_slots(stdout, color, theme_map)
-        for out in out_list[1:]:
-            stripped = out.decode("UTF-8").strip()
-            if int(stripped[0]) == int(card_slot):
-                verbosity = verbosity + 1 if verbosity < 2 else 2
-                stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
-                yield f"{color_prepare(stripped, 'info', color, theme_map)}"
+        if SCBackend == "opensc":
+            for out in out_list[1:]:
+                stripped = out.decode("UTF-8").strip()
+                if int(stripped[0]) == int(card_slot):
+                    verbosity = verbosity + 1 if verbosity < 2 else 2
+                    stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
+                    yield f"{color_prepare(stripped, 'info', color, theme_map)}"
+        elif SCBackend == "yubi":
+            for out in out_list:
+                stripped = out.decode("UTF-8").strip()
+                if "Yubico" not in stripped:
+                    # exit(1)
+                    raise PKPassError("Unsupported SC type for backend yubi.\nYubico not in:\n" + stripped)
+                if int(stripped.split('CCID')[1] or 0) == int(card_slot):
+                    verbosity = verbosity + 1 if verbosity < 2 else 2
+                    stripped = "Using Slot" + ("\n").join(stripped.split("\n")[:verbosity])
+                    yield f"{color_prepare(stripped, 'info', color, theme_map)}"
+        else:
+            raise BadBackendError(SCBackend)
 
 
 def print_all_slots(slot_info, color, theme_map):
@@ -98,14 +120,14 @@ def print_all_slots(slot_info, color, theme_map):
 
 
 def pk_decrypt_string(
-    ciphertext_string, ciphertext_derived_key, identity, passphrase, card_slot=None
+    ciphertext_string, ciphertext_derived_key, identity, passphrase, SCBackend="opensc", card_slot=None, PKCS11_module_path="/usr/local/lib/libykcs11.dylib"
 ):
     ####################################################################
     """Decrypt a base64 encoded string for the provided identity"""
     ####################################################################
     ciphertext_derived_key = handle_python_strings(ciphertext_derived_key)
     if "key" in identity and identity["key"]:
-        command = ["openssl", "pkeyutl", "-decrypt", "-inkey", identity["key"],  "-pkeyopt", "rsa_padding_mode:pkcs1"]
+        command = ["openssl", "pkeyutl", "-decrypt", "-inkey", identity["key"], "-pkeyopt", "rsa_padding_mode:pkcs1"]
         with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
             stdout, _ = proc.communicate(
                 input=urlsafe_b64decode(ciphertext_derived_key)
@@ -113,30 +135,57 @@ def pk_decrypt_string(
             returncode = proc.returncode
         plaintext_derived_key = stdout
     else:
-        # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
-        # command line (insecure) or via stdin.  So, we have to put ciphertext into
-        # a file for pkcs15-crypt to read.  YUCK!
-        with NamedTemporaryFile(delete=False) as fname:
-            fname.write(urlsafe_b64decode(ciphertext_derived_key))
-        command = [
-            "pkcs15-crypt",
-            "--decipher",
-            "--raw",
-            "--pkcs",
-            "--input",
-            fname.name,
-        ]
-        if card_slot is not None:
-            command.extend(["--reader", str(card_slot)])
-        command.extend(["--pin", "-"])
-        with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL) as proc:
-            stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
-            unlink(fname.name)
-            try:
-                plaintext_derived_key = stdout
-            except IndexError as err:
-                raise DecryptionError(stdout) from err
-            returncode = proc.returncode
+        if SCBackend == "opensc":
+            # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
+            # command line (insecure) or via stdin.  So, we have to put ciphertext into
+            # a file for pkcs15-crypt to read.  YUCK!
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(urlsafe_b64decode(ciphertext_derived_key))
+            command = [
+                "pkcs15-crypt",
+                "--decipher",
+                "--raw",
+                "--pkcs",
+                "--input",
+                fname.name,
+            ]
+            if card_slot is not None:
+                command.extend(["--reader", str(card_slot)])
+            command.extend(["--pin", "-"])
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=DEVNULL) as proc:
+                stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
+                unlink(fname.name)
+                try:
+                    plaintext_derived_key = stdout
+                except IndexError as err:
+                    raise DecryptionError(stdout) from err
+                returncode = proc.returncode
+        elif SCBackend == "yubi":
+            # todo: this can be improved to not use temp files
+            # https://developers.yubico.com/yubico-piv-tool/YKCS11/Supported_applications/openssl_engine.html
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(urlsafe_b64decode(ciphertext_derived_key))
+            command = [
+                "openssl",
+                "pkeyutl",
+                "-decrypt",
+                "-engine", "pkcs11",
+                "-keyform", "engine",
+                "-inkey", "pkcs11:type=private;pin-value=" + passphrase + ";serial=" + get_card_serial(card_slot),
+                "-pkeyopt", "rsa_padding_mode:pkcs1",
+                "-in", fname.name
+            ]
+            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH=PKCS11_module_path)) as proc:
+                stdout, _ = proc.communicate(
+                    input=urlsafe_b64decode(ciphertext_derived_key)
+                )
+                try:
+                    plaintext_derived_key = str(stdout).split("\\n")[1]
+                except IndexError as err:
+                    raise DecryptionError(stdout) from err
+                returncode = proc.returncode
+        else:
+            raise BadBackendError(SCBackend)
 
     if returncode != 0:
         raise DecryptionError(stdout)
@@ -148,7 +197,7 @@ def pk_decrypt_string(
     )
 
 
-def pk_sign_string(string, identity, passphrase, card_slot=None):
+def pk_sign_string(string, identity, passphrase, SCBackend="opensc", card_slot=None, PKCS11_module_path="/usr/local/lib/libykcs11.dylib"):
     ####################################################################
     """Compute the hash of string and create a digital signature"""
     ####################################################################
@@ -160,31 +209,58 @@ def pk_sign_string(string, identity, passphrase, card_slot=None):
             signature = urlsafe_b64encode(handle_python_strings(stdout))
             returncode = proc.returncode
     else:
-        # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
-        # command line (insecure) or via stdin.  So, we have to put signature text
-        # into a file for pkcs15-crypt to read.  YUCK!
-        with NamedTemporaryFile(delete=False) as fname:
-            fname.write(stringhash.encode("UTF-8"))
-        with NamedTemporaryFile(delete=False) as out:
-            command = [
-                "pkcs15-crypt",
-                "--sign",
-                "-i",
-                fname.name,
-                "-o",
-                out.name,
-                "--pkcs1",
-                "--raw",
-            ]
-            if card_slot is not None:
-                command.extend(["--reader", str(card_slot)])
-            command.extend(["--pin", "-"])
-            with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
-                stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
-            returncode = proc.returncode
+        if SCBackend == "opensc":
+            # We've got to use pkcs15-crypt for PIV cards, and it only supports pin on
+            # command line (insecure) or via stdin.  So, we have to put signature text
+            # into a file for pkcs15-crypt to read.  YUCK!
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(stringhash.encode("UTF-8"))
+            with NamedTemporaryFile(delete=False) as out:
+                command = [
+                    "pkcs15-crypt",
+                    "--sign",
+                    "-i",
+                    fname.name,
+                    "-o",
+                    out.name,
+                    "--pkcs1",
+                    "--raw",
+                ]
+                if card_slot is not None:
+                    command.extend(["--reader", str(card_slot)])
+                command.extend(["--pin", "-"])
+                with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+                    stdout, _ = proc.communicate(input=passphrase.encode("UTF-8"))
+                returncode = proc.returncode
 
-        with open(out.name, "rb") as sigfile:
-            signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
+            with open(out.name, "rb") as sigfile:
+                signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
+        elif SCBackend == "yubi":
+            # todo: this can be improved to not use temp files
+            # https://developers.yubico.com/yubico-piv-tool/YKCS11/Supported_applications/openssl_engine.html
+            with NamedTemporaryFile(delete=False) as fname:
+                fname.write(stringhash.encode("UTF-8"))
+            with NamedTemporaryFile(delete=False) as out:
+                command = [
+                    "openssl",
+                    "pkeyutl",
+                    "-sign",
+                    "-engine", "pkcs11",
+                    "-keyform", "engine",
+                    "-inkey", "pkcs11:type=private;pin-value=" + passphrase + ";serial=" + get_card_serial(card_slot),
+                    "-pkeyopt", "rsa_padding_mode:pkcs1",
+                    "-in", fname.name,
+                    "-out", out.name
+                ]
+                with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=dict(environ, PKCS11_MODULE_PATH=PKCS11_module_path)) as proc:
+                    stdout, _ = proc.communicate(
+                        input=stringhash.encode("UTF-8")
+                    )
+                returncode = proc.returncode
+            with open(out.name, "rb") as sigfile:
+                signature = urlsafe_b64encode(handle_python_strings(sigfile.read()))
+        else:
+            raise BadBackendError(SCBackend)
 
         unlink(fname.name)
         unlink(out.name)
@@ -289,13 +365,20 @@ def get_cert_element(cert, element):
         raise X509CertificateError(stdout) from err
 
 
-def get_card_element(element, card_slot=None):
+def get_card_element(element, SCBackend, card_slot=None):
     ####################################################################
     """Return an arbitrary element of a pcks15 capable device"""
     ####################################################################
-    command = ["pkcs15-tool", "--read-certificate", "1"]
-    if card_slot is not None:
-        command.extend(["--reader", str(card_slot)])
+    if SCBackend == "opensc":
+        command = ["pkcs15-tool", "--read-certificate", "1"]
+        if card_slot is not None:
+            command.extend(["--reader", str(card_slot)])
+    elif SCBackend == "yubi":
+        command = ["yubico-piv-tool", "-a", "read-certificate", "-s", "9a"]
+        if card_slot is not None and card_slot != 0:
+            command.extend(["-r", str(card_slot)])
+    else:
+        raise BadBackendError(SCBackend)
     with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
         stdout, _ = proc.communicate()
     if stdout.decode("utf-8").strip().lower() == "no smart card readers found.":
@@ -303,56 +386,74 @@ def get_card_element(element, card_slot=None):
     return get_cert_element(stdout, element)
 
 
-def get_card_fingerprint(card_slot=None):
+def get_card_fingerprint(SCBackend, card_slot=None):
     ####################################################################
     """Return the modulus of the x509 certificate of the identity"""
     ####################################################################
     # SHA1 Fingerprint=F9:9D:71:54:55:BE:99:24:6A:5E:E0:BB:48:F9:63:AE:A2:05:54:98
-    return get_card_element("fingerprint", card_slot=card_slot).split("=")[1]
+    return get_card_element("fingerprint", SCBackend, card_slot=card_slot).split("=")[1]
 
 
-def get_card_subject(card_slot=None):
+def get_card_subject(SCBackend, card_slot=None):
     ####################################################################
     """Return the subject DN of the x509 certificate of the identity"""
     ####################################################################
     # subject= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return " ".join(get_card_element("subject", card_slot=card_slot).split(" ")[1:])
+    return " ".join(get_card_element("subject", SCBackend, card_slot=card_slot).split(" ")[1:])
 
 
-def get_card_issuer(card_slot=None):
+def get_card_issuer(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
     # issuer= /C=US/O=Entrust/OU=Certification Authorities/OU=Entrust Managed Services SSP CA
-    return " ".join(get_card_element("issuer", card_slot=card_slot).split(" ")[1:])
+    return " ".join(get_card_element("issuer", SCBackend, card_slot=card_slot).split(" ")[1:])
 
 
-def get_card_startdate(card_slot=None):
+def get_card_startdate(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("startdate", card_slot=card_slot).split("=")[1]
+    return get_card_element("startdate", SCBackend, card_slot=card_slot).split("=")[1]
 
 
-def get_card_enddate(card_slot=None):
+def get_card_enddate(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("enddate", card_slot=card_slot).split("=")[1]
+    return get_card_element("enddate", SCBackend, card_slot=card_slot).split("=")[1]
 
 
-def get_card_issuerhash(card_slot=None):
+def get_card_issuerhash(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("issuer_hash", card_slot=card_slot)
+    return get_card_element("issuer_hash", SCBackend, card_slot=card_slot)
 
 
-def get_card_subjecthash(card_slot=None):
+def get_card_subjecthash(SCBackend, card_slot=None):
     ####################################################################
     """Return the issuer DN of the x509 certificate of the identity"""
     ####################################################################
-    return get_card_element("subject_hash", card_slot=card_slot)
+    return get_card_element("subject_hash", SCBackend, card_slot=card_slot)
+
+
+def get_card_serial(card_slot=None):
+    ####################################################################
+    """Return the serial element of a yubico card"""
+    ####################################################################
+    command = ["yubico-piv-tool", "-a", "status"]
+    if card_slot is not None and card_slot != 0:
+        command.extend(["-r", str(card_slot)])
+    with Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT) as proc:
+        stdout, _ = proc.communicate()
+    if stdout.decode("utf-8").strip().lower() == "no smart card readers found.":
+        raise X509CertificateError("Smartcard not detected")
+    for line in stdout.decode("utf-8").strip().lower().splitlines():
+        if "serial number:" in line:
+            return line.split(":")[1].replace(" ", "").replace("\t", "")
+    raise X509CertificateError("Smartcard not detected")
+    return None
 
 
 def sk_encrypt_string(plaintext_string, key):

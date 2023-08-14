@@ -264,4 +264,20 @@ ARGUMENTS = {
             "help": "verbose output (repeat for increased verbosity)",
         },
     },
+    "SCBackend": {
+        "args": ["--scbackend"],
+        "kwargs": {
+            "type": str,
+            "default": "opensc",
+            "help": "SC backend to use: opensc or yubi",
+        },
+    },
+    "PKCS11_module_path": {
+        "args": ["--PKCS11-module-path"],
+        "kwargs": {
+            "type": str,
+            "default": "/usr/local/lib/libykcs11.dylib",
+            "help": "Path to yubi PKCS11 module",
+        },
+    },
 }
