@@ -418,7 +418,7 @@ def create_error_message(recipient_timestamp, card_slot, SCBackend="opensc"):
     card_start = datetime.timestamp(parser.parse(card_start))
     distribute_time = float(recipient_timestamp)
     # Slots are indexed at 0 so when enumerating you add 1
-    # There is also an additional information line so add 1 again
+    # For opensc there is also an additional information line so add 1 again
     if int(card_slot) + 2 > len(get_card_info(SCBackend)[0]):
         msg = "Attempting to use card slot that is not connected"
     elif distribute_time < card_start:
