@@ -3,6 +3,8 @@
 from argparse import ArgumentParser
 from os import path
 from libpkpass.util import set_default_subparser
+import libpkpass.commands
+'''
 from libpkpass.commands import (
     card,
     clip,
@@ -21,6 +23,8 @@ from libpkpass.commands import (
     update,
     verifyinstall,
 )
+'''
+
 import libpkpass.commands.fileimport as pkimport
 import libpkpass.commands.list as pklist
 
@@ -59,6 +63,7 @@ class PkInterface:
             help="sub-commands", dest="subparser_name"
         )
 
+        '''
         card.Card(self)
         clip.Clip(self)
         create.Create(self)
@@ -77,11 +82,13 @@ class PkInterface:
         populate.Populate(self)
         update.Update(self)
         verifyinstall.VerifyInstall(self)
+        '''
 
     def register(self, command_obj, command_name, command_description):
         ####################################################################
         """Register command objects and names using an observer pattern"""
         ####################################################################
         self.actions[command_name] = command_obj
+        
         parser = self.subparsers.add_parser(command_name, help=command_description)
         command_obj.register(parser)
