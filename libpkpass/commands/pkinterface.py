@@ -89,6 +89,12 @@ class PkInterface:
         """Register command objects and names using an observer pattern"""
         ####################################################################
         self.actions[command_name] = command_obj
-        
-        parser = self.subparsers.add_parser(command_name, help=command_description)
-        command_obj.register(parser)
+
+         try:
+            parser = self.subparsers.add_parser(command_name, help=command_description)
+            print(parser)
+            command_obj.register1(parser)
+
+        except argparse.ArgumentError as e:
+            
+            print(f"Duplicate subcommand: {command_name}")
