@@ -90,7 +90,7 @@ class PkInterface:
         ####################################################################
         self.actions[command_name] = command_obj
 
-         try:
+        try:
             parser = self.subparsers.add_parser(command_name, help=command_description)
             print(parser)
             command_obj.register1(parser)
