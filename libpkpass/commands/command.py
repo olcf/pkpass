@@ -49,7 +49,7 @@ class Command:
         self.passworddb = pwdb if pwdb else PasswordDB()
         cli.register(self, self.name, self.description)
 
-    def register(self, parser):
+    def register1(self, parser):
         ##################################################################
         """Registration function for class. Register with argparse"""
         ##################################################################
