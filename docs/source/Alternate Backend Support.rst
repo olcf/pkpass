@@ -21,3 +21,8 @@ To modify PKCS11_module_path to support yubico-piv-tool with libp11, add this li
 
 ```PKCS11_module_path="/path/to/libp11/libpkcs11.dylib"```
 
+The alternate backend is also supported by the verify install command.
+
+To confirm that the alternate backend is configured correctly run:
+
+``` pkpass verifyinstall```
