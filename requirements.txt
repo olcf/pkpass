@@ -11,5 +11,5 @@ pyseltongue==1.0.1
 python-dateutil==2.8.2
 ruamel.yaml.clib==0.2.6
 ruamel.yaml==0.17.20
-setuptools==56.0.0
+setuptools==65.5.1
 tqdm==4.62.3
