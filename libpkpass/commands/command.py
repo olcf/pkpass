@@ -47,7 +47,9 @@ class Command:
         self.iddb = iddb if iddb else IdentityDB()
         self.pwdbcached = pwdb is not None
         self.passworddb = pwdb if pwdb else PasswordDB()
-        cli.register(self, self.name, self.description)
+        # https://github.com/python/cpython/issues/94331
+        if self.name not in [action.choices.keys() for action in cli.parser._actions if action.dest == "subparser_name"][0]:
+            cli.register(self, self.name, self.description)
 
     def register(self, parser):
         ##################################################################
