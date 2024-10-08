@@ -1,6 +1,6 @@
 PyYAML==6.0.2
 SQLAlchemy==1.4.30
-colored==1.4.3
+colored==1.4.4
 cryptography==36.0.1
 exrex==0.10.5
 mock==4.0.3
