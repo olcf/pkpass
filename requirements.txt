@@ -2,7 +2,7 @@ PyYAML==6.0.2
 SQLAlchemy==1.4.30
 colored==1.4.4
 cryptography==36.0.1
-exrex==0.10.5
+exrex==0.11.0
 mock==4.0.3
 pem==21.2.0
 pylibyaml==0.1.0
