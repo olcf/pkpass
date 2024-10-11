@@ -7,6 +7,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+      # https://github.com/marketplace/actions/pypi-publish
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pkpass-olcf
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python
@@ -17,10 +25,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+    #- name: Build and publish
+    #env:
+    #    TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+     #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    #  run: |
+    #    python setup.py sdist bdist_wheel
+    #    twine upload dist/* --verbose
