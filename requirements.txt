@@ -7,7 +7,7 @@ mock==5.2.0
 pem==23.1.0
 pylibyaml==0.1.0
 pyperclip==1.11.0
-pyseltongue==1.0.1
+pyseltongue==1.0.2
 python-dateutil==2.8.2
 ruamel.yaml.clib==0.2.15
 ruamel.yaml==0.17.20
