@@ -1,0 +1,23 @@
+[project]
+name = "pkpass"
+version = "0.1.0"
+description = " PKI based password manager "
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+	'PyYAML==6.0.3',
+	'SQLAlchemy==1.4.54',
+	'colored==2.3.2',
+	'cryptography==46.0.7',
+	'exrex==0.12.0',
+	'mock==5.2.0',
+	'pem==23.1.0',
+	'pylibyaml==0.1.0',
+	'pyperclip==1.11.0',
+	'pyseltongue==1.0.2',
+	'python-dateutil==2.9.0.post0',
+	'ruamel.yaml.clib==0.2.15',
+	'ruamel.yaml==0.19.1',
+	'setuptools==65.5.1',
+	'tqdm==4.67.3',
+]

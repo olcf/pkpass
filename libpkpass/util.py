@@ -13,7 +13,7 @@ from pylibyaml import monkey_patch_pyyaml # pylint: disable=unused-import
 from yaml import safe_load
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
-from colored import fg, attr
+from colored import fore, style
 from libpkpass import __version__
 from libpkpass.models import Base
 from libpkpass.models.recipient import Recipient # pylint: disable=unused-import
@@ -41,10 +41,10 @@ def color_prepare(string, color_type, colorize, theme_map=None):
         else color_defaults[color_type]
     )
     try:
-        return f"{fg(color)}{string}{attr('reset')}" if colorize else string
+        return f"{fore(color)}{string}{style('reset')}" if colorize else string
     except KeyError:
         return (
-            f"{fg(color_defaults[color_type])}{string}{attr('reset')}"
+            f"{fore(color_defaults[color_type])}{string}{style('reset')}"
             if colorize
             else string
         )
