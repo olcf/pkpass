@@ -1,5 +1,5 @@
 [project]
-name = "pkpass"
+name = "pkpass-olcf"
 version = "0.1.0"
 description = " PKI based password manager "
 readme = "README.md"
