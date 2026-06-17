@@ -8,7 +8,7 @@ dependencies = [
 	'PyYAML==6.0.3',
 	'SQLAlchemy==1.4.54',
 	'colored==2.3.2',
-	'cryptography==46.0.7',
+	'cryptography==48.0.1',
 	'exrex==0.12.0',
 	'mock==5.2.0',
 	'pem==23.1.0',
